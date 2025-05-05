@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useMobile } from "@/hooks/use-mobile";
-import { Event } from "@shared/schema";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import MobileEventCard from "@/components/MobileEventCard";
 import EventCard from "@/components/EventCard";
@@ -10,10 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Filter, Bell, Ticket } from "lucide-react";
-import { useLocation } from "wouter";
+import { Loader2, Search, Bell, Ticket } from "lucide-react";
 
-// Type pour l'utilisateur authentifié
+// Type pour l'utilisateur authentifié et l'événement
 type AuthUser = {
   username: string;
   role: string;
@@ -21,9 +18,54 @@ type AuthUser = {
   profileImage?: string;
 };
 
+// Définir le type d'événement
+type Event = {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  coverImage: string;
+  category: string;
+  venueName: string;
+  price: number;
+};
+
+// Données statiques pour les tests
+const mockEvents: Event[] = [
+  {
+    id: 1,
+    title: "Soirée Techno avec DJ Elektra",
+    description: "Une soirée techno inoubliable avec DJ Elektra",
+    date: "2023-12-15T20:00:00",
+    coverImage: "https://images.unsplash.com/photo-1571266028277-641cb7a18510?w=500&h=300&fit=crop",
+    category: "Techno",
+    venueName: "Club Oxygen",
+    price: 25,
+  },
+  {
+    id: 2,
+    title: "House Party avec MC Blaze",
+    description: "Venez vibrer sur les meilleurs morceaux house du moment",
+    date: "2023-12-22T21:00:00",
+    coverImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=300&fit=crop",
+    category: "House",
+    venueName: "Loft 21",
+    price: 20,
+  },
+  {
+    id: 3,
+    title: "Soirée Jazz Live",
+    description: "Une ambiance jazzy avec les meilleurs musiciens",
+    date: "2023-12-18T19:30:00",
+    coverImage: "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=500&h=300&fit=crop",
+    category: "Jazz",
+    venueName: "Blue Note",
+    price: 30,
+  },
+];
+
 export default function UserExplorerPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [location, navigate] = useLocation();
   
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
@@ -34,35 +76,43 @@ export default function UserExplorerPage() {
         setUser(userData);
       } catch (error) {
         console.error("Erreur lors de la lecture des données d'authentification:", error);
-        navigate('/auth');
       }
-    } else {
-      navigate('/auth');
     }
-  }, [navigate]);
+  }, []);
   const isMobile = useMobile();
   const [activeTab, setActiveTab] = useState("découvrir");
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: events, isLoading } = useQuery<Event[]>({
-    queryKey: ["/api/events", activeCategory, searchQuery],
-    queryFn: async () => {
-      const url = new URL("/api/events", window.location.origin);
+  // Utiliser les événements mockés au lieu de useQuery
+  const [isLoading, setIsLoading] = useState(true);
+  const [events, setEvents] = useState<Event[]>([]);
+  
+  // Simuler un chargement des données
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Filtrer les événements selon la catégorie et la recherche
+      let filteredEvents = [...mockEvents];
       
-      if (activeCategory && activeCategory !== "all") {
-        url.searchParams.append("category", activeCategory);
+      if (activeCategory !== "all") {
+        filteredEvents = filteredEvents.filter(e => e.category === activeCategory);
       }
       
       if (searchQuery) {
-        url.searchParams.append("search", searchQuery);
+        const query = searchQuery.toLowerCase();
+        filteredEvents = filteredEvents.filter(e => 
+          e.title.toLowerCase().includes(query) || 
+          e.description.toLowerCase().includes(query) ||
+          e.venueName.toLowerCase().includes(query)
+        );
       }
       
-      const res = await fetch(url.toString());
-      if (!res.ok) throw new Error("Erreur lors de la récupération des événements");
-      return await res.json();
-    },
-  });
+      setEvents(filteredEvents);
+      setIsLoading(false);
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [activeCategory, searchQuery]);
 
   // Dummy categories for now
   const categories = ["all", "House", "Techno", "Hip-Hop", "Jazz", "Funk", "EDM"];

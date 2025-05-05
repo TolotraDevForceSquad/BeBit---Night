@@ -1,10 +1,7 @@
 import { Switch, Route, Redirect } from "wouter";
 import NotFound from "@/pages/not-found";
-import AuthPage from "@/pages/auth-page";
-import UserExplorerPage from "@/pages/user/explorer-page";
-import ArtistDashboardPage from "@/pages/artist/dashboard-page";
-import ClubDashboardPage from "@/pages/club/dashboard-page";
-import AdminDashboardPage from "@/pages/admin/dashboard-page";
+import SimpleAuth from "@/pages/simple-auth";
+import SimplePage from "@/pages/SimplePage";
 import { Loader2 } from "lucide-react";
 import { Suspense, useState, useEffect } from "react";
 
@@ -49,39 +46,27 @@ function App() {
       </div>
     }>
       <Switch>
-        {/* Route d'authentification */}
-        <Route path="/auth">
-          {user ? <Redirect to={getUserHomePage(user.role)} /> : <AuthPage />}
-        </Route>
-        
-        {/* Routes par défaut selon le rôle */}
+        {/* Route principale qui affiche l'authentification ou la page simple */}
         <Route path="/">
-          {!user ? <Redirect to="/auth" /> : 
-            user.role === "user" ? <UserExplorerPage /> : 
-            <Redirect to={getUserHomePage(user.role)} />
-          }
+          {!user ? <SimpleAuth /> : <SimplePage />}
         </Route>
         
-        {/* Routes spécifiques aux rôles */}
+        {/* Route d'authentification simplifiée */}
+        <Route path="/auth">
+          {user ? <Redirect to="/" /> : <SimpleAuth />}
+        </Route>
+        
+        {/* Routes spécifiques aux rôles - toutes affichent la même page simple pour l'instant */}
         <Route path="/artist">
-          {!user ? <Redirect to="/auth" /> : 
-            user.role === "artist" ? <ArtistDashboardPage /> : 
-            <Redirect to={getUserHomePage(user.role)} />
-          }
+          {!user ? <SimpleAuth /> : <SimplePage />}
         </Route>
         
         <Route path="/club">
-          {!user ? <Redirect to="/auth" /> : 
-            user.role === "club" ? <ClubDashboardPage /> : 
-            <Redirect to={getUserHomePage(user.role)} />
-          }
+          {!user ? <SimpleAuth /> : <SimplePage />}
         </Route>
         
         <Route path="/admin">
-          {!user ? <Redirect to="/auth" /> : 
-            user.role === "admin" ? <AdminDashboardPage /> : 
-            <Redirect to={getUserHomePage(user.role)} />
-          }
+          {!user ? <SimpleAuth /> : <SimplePage />}
         </Route>
         
         {/* Fallback à 404 */}
@@ -89,16 +74,6 @@ function App() {
       </Switch>
     </Suspense>
   );
-}
-
-// Helper pour obtenir la page d'accueil selon le rôle
-function getUserHomePage(role: string): string {
-  switch (role) {
-    case "artist": return "/artist";
-    case "club": return "/club";
-    case "admin": return "/admin";
-    default: return "/";
-  }
 }
 
 export default App;
