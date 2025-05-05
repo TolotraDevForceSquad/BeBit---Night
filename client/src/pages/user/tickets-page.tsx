@@ -75,6 +75,38 @@ const mockTickets: UserTicket[] = [
   },
 ];
 
+// Obtenir la couleur de statut du ticket
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "valid":
+      return "bg-green-100 text-green-700";
+    case "used":
+      return "bg-blue-100 text-blue-700";
+    case "expired":
+      return "bg-amber-100 text-amber-700";
+    case "refunded":
+      return "bg-red-100 text-red-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
+// Obtenir le libellé de statut du ticket
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case "valid":
+      return "Valide";
+    case "used":
+      return "Utilisé";
+    case "expired":
+      return "Expiré";
+    case "refunded":
+      return "Remboursé";
+    default:
+      return status;
+  }
+};
+
 export default function TicketsPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [tickets, setTickets] = useState<UserTicket[]>([]);
@@ -113,38 +145,6 @@ export default function TicketsPage() {
   // Formater la date des événements
   const formatEventDate = (dateString: string) => {
     return format(new Date(dateString), "EEEE d MMMM yyyy, HH'h'mm", { locale: fr });
-  };
-  
-  // Obtenir la couleur de statut du ticket
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "valid":
-        return "bg-green-100 text-green-700";
-      case "used":
-        return "bg-blue-100 text-blue-700";
-      case "expired":
-        return "bg-amber-100 text-amber-700";
-      case "refunded":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
-  
-  // Obtenir le libellé de statut du ticket
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "valid":
-        return "Valide";
-      case "used":
-        return "Utilisé";
-      case "expired":
-        return "Expiré";
-      case "refunded":
-        return "Remboursé";
-      default:
-        return status;
-    }
   };
 
   // Header content pour la mise en page
@@ -224,6 +224,7 @@ export default function TicketsPage() {
 
 // Composant pour afficher un ticket
 function TicketCard({ ticket }: { ticket: UserTicket }) {
+  
   const statusColor = getStatusColor(ticket.status);
   const statusLabel = getStatusLabel(ticket.status);
   const eventDate = format(new Date(ticket.eventDate), "EEEE d MMMM yyyy, HH'h'mm", { locale: fr });

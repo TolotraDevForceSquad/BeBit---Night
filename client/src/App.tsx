@@ -116,7 +116,7 @@ function App() {
         </Route>
         
         <Route path="/user/tickets">
-          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+          {!user ? <SimpleAuth /> : user.role === "user" ? <TicketsPage /> : <Redirect to="/" />}
         </Route>
         
         <Route path="/user/profile">
@@ -136,7 +136,7 @@ function App() {
         </Route>
         
         <Route path="/user/notifications">
-          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+          {!user ? <SimpleAuth /> : user.role === "user" ? <NotificationsPage /> : <Redirect to="/" />}
         </Route>
         
         {/* Routes Admin */}
