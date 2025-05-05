@@ -161,16 +161,20 @@ export default function UserExplorerPage() {
       </h1>
       
       <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
-            3
-          </Badge>
-        </Button>
+        <Link href="/user/notifications">
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
+              3
+            </Badge>
+          </Button>
+        </Link>
         
-        <Button variant="ghost" size="icon">
-          <Ticket className="h-5 w-5" />
-        </Button>
+        <Link href="/user/tickets">
+          <Button variant="ghost" size="icon">
+            <Ticket className="h-5 w-5" />
+          </Button>
+        </Link>
       </div>
     </div>
   );

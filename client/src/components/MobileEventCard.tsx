@@ -30,6 +30,7 @@ interface MobileEventCardProps {
 export default function MobileEventCard({ event, onLike, onDislike }: MobileEventCardProps) {
   const [expanded, setExpanded] = useState(false);
   const controls = useAnimation();
+  const [, setLocation] = useLocation();
   
   // Formatage de la date
   const formattedDate = format(new Date(event.date), "EEEE d MMMM, HH'h'mm", { locale: fr });
@@ -73,6 +74,18 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
     setTimeout(() => {
       controls.set({ x: 0, opacity: 1 });
     }, 300);
+  };
+  
+  // Navigation vers la page de détails de l'événement
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLocation(`/event/${event.id}`);
+  };
+  
+  // Navigation vers la page d'achat de tickets
+  const handleBuyTickets = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLocation(`/event/${event.id}?buy=true`);
   };
 
   return (
@@ -140,11 +153,21 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
           </div>
           
           <div className="flex space-x-2">
-            <Button size="sm" variant="outline" className="rounded-full h-10 w-10 p-0 border-white/30 text-white">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="rounded-full h-10 w-10 p-0 border-white/30 text-white"
+              onClick={handleViewDetails}
+            >
               <Info className="h-5 w-5" />
             </Button>
             
-            <Button size="sm" variant="outline" className="rounded-full h-10 w-10 p-0 border-white/30 text-white">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="rounded-full h-10 w-10 p-0 border-white/30 text-white"
+              onClick={handleBuyTickets}
+            >
               <Ticket className="h-5 w-5" />
             </Button>
             
