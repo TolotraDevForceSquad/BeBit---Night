@@ -235,18 +235,17 @@ export default function Sidebar({ activeItem }: SidebarProps) {
               
             return (
               <li key={item.key}>
-                <Link href={item.href}>
-                  <a
-                    className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
-                      isActive
-                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                    }`}
-                  >
-                    <span className="mr-3">{item.icon}</span>
-                    {item.name}
-                  </a>
-                </Link>
+                <div
+                  className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+                    isActive
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  }`}
+                  onClick={() => navigate(item.href)}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {item.name}
+                </div>
               </li>
             );
           })}

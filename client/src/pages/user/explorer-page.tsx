@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
 import { useMobile } from "@/hooks/use-mobile";
 import { Event } from "@shared/schema";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
@@ -12,9 +11,35 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, Filter, Bell, Ticket } from "lucide-react";
+import { useLocation } from "wouter";
+
+// Type pour l'utilisateur authentifié
+type AuthUser = {
+  username: string;
+  role: string;
+  firstName?: string;
+  profileImage?: string;
+};
 
 export default function UserExplorerPage() {
-  const { user } = useAuth();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [location, navigate] = useLocation();
+  
+  // Récupérer les données utilisateur du localStorage
+  useEffect(() => {
+    const authData = localStorage.getItem('auth_user');
+    if (authData) {
+      try {
+        const userData = JSON.parse(authData);
+        setUser(userData);
+      } catch (error) {
+        console.error("Erreur lors de la lecture des données d'authentification:", error);
+        navigate('/auth');
+      }
+    } else {
+      navigate('/auth');
+    }
+  }, [navigate]);
   const isMobile = useMobile();
   const [activeTab, setActiveTab] = useState("découvrir");
   const [activeCategory, setActiveCategory] = useState("all");
@@ -46,8 +71,7 @@ export default function UserExplorerPage() {
   const headerContent = (
     <div className="w-full flex items-center justify-between">
       <h1 className="font-heading font-bold text-lg text-white">
-        <span className="text-primary">Night</span>
-        <span className="text-secondary">Connect</span>
+        <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
       </h1>
       
       <div className="flex items-center space-x-2">

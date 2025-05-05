@@ -178,16 +178,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
             (activeItem === undefined && location === item.href);
             
           return (
-            <Link href={item.href} key={item.key}>
-              <a className="flex flex-col items-center justify-center w-full h-full">
-                <span className={`mb-1 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {item.icon}
-                </span>
-                <span className={`text-xs ${isActive ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                  {item.name}
-                </span>
-              </a>
-            </Link>
+            <div 
+              key={item.key}
+              className="flex flex-col items-center justify-center w-full h-full cursor-pointer" 
+              onClick={() => navigate(item.href)}
+            >
+              <span className={`mb-1 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                {item.icon}
+              </span>
+              <span className={`text-xs ${isActive ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                {item.name}
+              </span>
+            </div>
           );
         })}
         
