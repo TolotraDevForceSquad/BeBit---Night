@@ -4,6 +4,7 @@ import { Heart, Calendar, MapPin, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { useLocation } from "wouter";
 
 // Type d'événement pour l'affichage
 interface Event {
@@ -24,6 +25,7 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event }: EventCardProps) {
+  const [, setLocation] = useLocation();
   // Formatage de la date
   const formattedDate = format(new Date(event.date), "EEEE d MMMM, HH'h'mm", { locale: fr });
   
@@ -32,6 +34,10 @@ export default function EventCard({ event }: EventCardProps) {
     e.stopPropagation();
     // Implémentation à venir (API call, etc.)
     console.log(`Like event ${event.id}`);
+  };
+  
+  const handleViewDetails = () => {
+    setLocation(`/event/${event.id}`);
   };
 
   return (
@@ -98,7 +104,12 @@ export default function EventCard({ event }: EventCardProps) {
           {event.price > 0 ? `${event.price} €` : 'Gratuit'}
         </div>
         
-        <Button size="sm" variant="default" className="gap-1">
+        <Button 
+          size="sm" 
+          variant="default" 
+          className="gap-1"
+          onClick={handleViewDetails}
+        >
           <span>Détails</span>
           <ArrowRight className="h-4 w-4" />
         </Button>

@@ -121,6 +121,22 @@ function App() {
           {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
         </Route>
         
+        <Route path="/user/invitations">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/user/gallery">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/user/favorites">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/user/notifications">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
         {/* Routes Admin */}
         <Route path="/admin/dashboard">
           {!user ? <SimpleAuth /> : user.role === "admin" ? <AdminDashboardPage /> : <Redirect to="/" />}

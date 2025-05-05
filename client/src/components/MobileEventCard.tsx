@@ -5,6 +5,7 @@ import { motion, PanInfo, useAnimation } from "framer-motion";
 import { Heart, Calendar, MapPin, Ticket, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLocation } from "wouter";
 
 // Type d'événement pour l'affichage
 interface Event {
