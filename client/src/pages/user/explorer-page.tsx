@@ -161,7 +161,7 @@ export default function UserExplorerPage() {
       </h1>
       
       <div className="flex items-center space-x-2">
-        <Link href="/user/notifications">
+        <Link to="/user/notifications">
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
             <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
@@ -170,7 +170,7 @@ export default function UserExplorerPage() {
           </Button>
         </Link>
         
-        <Link href="/user/tickets">
+        <Link to="/user/tickets">
           <Button variant="ghost" size="icon">
             <Ticket className="h-5 w-5" />
           </Button>

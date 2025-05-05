@@ -32,8 +32,29 @@ export default function EventCard({ event }: EventCardProps) {
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Implémentation à venir (API call, etc.)
+    
+    // Toggler l'état "aimé" de l'événement
+    // Dans une application réelle, cela serait une mutation API
     console.log(`Like event ${event.id}`);
+    
+    // Simuler un changement d'état visuel
+    const eventCard = e.currentTarget.closest('.card');
+    if (eventCard) {
+      const heartIcon = e.currentTarget.querySelector('svg');
+      if (heartIcon) {
+        if (event.isLiked) {
+          heartIcon.classList.remove('fill-current');
+          e.currentTarget.classList.remove('text-red-500', 'bg-white/80');
+          e.currentTarget.classList.add('text-white', 'bg-black/30', 'hover:bg-black/50');
+          event.isLiked = false;
+        } else {
+          heartIcon.classList.add('fill-current');
+          e.currentTarget.classList.remove('text-white', 'bg-black/30', 'hover:bg-black/50');
+          e.currentTarget.classList.add('text-red-500', 'bg-white/80');
+          event.isLiked = true;
+        }
+      }
+    }
   };
   
   const handleViewDetails = () => {
@@ -41,7 +62,7 @@ export default function EventCard({ event }: EventCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-md">
+    <Card className="card overflow-hidden transition-all hover:shadow-md">
       <div className="relative">
         {/* Badge "En vedette" pour les événements mis en avant */}
         {event.isFeatured && (

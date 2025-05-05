@@ -66,14 +66,29 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
   // Action de like
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Animation de swipe à droite
-    controls.start({ x: "100%", opacity: 0 });
-    onLike && onLike();
     
-    // Réinitialiser la position après animation
-    setTimeout(() => {
-      controls.set({ x: 0, opacity: 1 });
-    }, 300);
+    // Toggler l'état "aimé" de l'événement
+    console.log(`Like event ${event.id}`);
+    
+    // Animation visuelle
+    if (event.isLiked) {
+      event.isLiked = false;
+      // Animation subtile pour feedback visuel
+      controls.start({ scale: 0.95 }).then(() => {
+        controls.start({ scale: 1 });
+      });
+    } else {
+      event.isLiked = true;
+      // Animation pour un like
+      controls.start({ x: "20%", opacity: 0.8 }).then(() => {
+        setTimeout(() => {
+          controls.set({ x: 0, opacity: 1 });
+        }, 300);
+      });
+      
+      // Appeler le callback si fourni
+      onLike && onLike();
+    }
   };
   
   // Navigation vers la page de détails de l'événement
