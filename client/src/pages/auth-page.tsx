@@ -65,34 +65,67 @@ export default function AuthPage() {
     },
   });
 
+  // État pour gérer les redirections
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
+
   // Handle login submission
   const onLoginSubmit = (data: LoginFormValues) => {
     console.log("Login attempt:", data.username);
     // Simuler une connexion réussie
     if (data.username === "user1" && data.password === "password123") {
-      // Rediriger vers la page d'accueil
-      window.location.href = "/";
+      // Stocker dans localStorage pour simulation d'authentification
+      localStorage.setItem('auth_user', JSON.stringify({
+        username: data.username,
+        role: 'user'
+      }));
+      setRedirectTo("/");
     } else if (data.username === "dj_elektra" && data.password === "password123") {
-      window.location.href = "/artist";
+      localStorage.setItem('auth_user', JSON.stringify({
+        username: data.username,
+        role: 'artist'
+      }));
+      setRedirectTo("/artist");
     } else if (data.username === "club_oxygen" && data.password === "password123") {
-      window.location.href = "/club";
+      localStorage.setItem('auth_user', JSON.stringify({
+        username: data.username,
+        role: 'club'
+      }));
+      setRedirectTo("/club");
     } else if (data.username === "admin" && data.password === "adminpass123") {
-      window.location.href = "/admin";
+      localStorage.setItem('auth_user', JSON.stringify({
+        username: data.username,
+        role: 'admin'
+      }));
+      setRedirectTo("/admin");
     }
   };
 
   // Handle register submission
   const onRegisterSubmit = (data: RegisterFormValues) => {
     console.log("Register attempt:", data);
-    // Rediriger vers la page d'accueil
+    // Stocker dans localStorage pour simulation d'authentification
+    localStorage.setItem('auth_user', JSON.stringify({
+      username: data.username,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role
+    }));
+    
+    // Rediriger vers la page appropriée selon le rôle
     if (data.role === "artist") {
-      window.location.href = "/artist";
+      setRedirectTo("/artist");
     } else if (data.role === "club") {
-      window.location.href = "/club";
+      setRedirectTo("/club");
     } else {
-      window.location.href = "/";
+      setRedirectTo("/");
     }
   };
+  
+  // Si une redirection est définie, effectuer la redirection
+  if (redirectTo) {
+    return <Redirect to={redirectTo} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col animate-fade-in">
@@ -100,7 +133,7 @@ export default function AuthPage() {
       <header className="px-6 py-4 flex justify-between items-center">
         <div className="flex items-center">
           <h1 className="font-heading font-bold text-2xl text-white">
-            <span className="text-primary">Night</span><span className="text-secondary">Connect</span>
+            <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
           </h1>
         </div>
         <div className="flex gap-3">
@@ -115,9 +148,10 @@ export default function AuthPage() {
         <div className="md:w-1/2 flex flex-col justify-center items-center md:items-start space-y-8 mb-10 md:mb-0">
           <div className="text-center md:text-left max-w-md">
             <h2 className="font-heading font-extrabold text-4xl md:text-5xl mb-4">
-              <span className="text-primary">Connect</span> Artists<br/>with <span className="text-secondary">Clubs</span>
+              <span className="text-primary">Be</span> yourself.<br/>
+              <span className="text-secondary">bit.</span> connected.
             </h2>
-            <p className="text-muted-foreground text-lg">La plateforme qui révolutionne la scène nocturne en connectant artistes et clubs dans un écosystème créatif.</p>
+            <p className="text-muted-foreground text-lg">La plateforme qui révolutionne la scène nocturne en connectant artistes et clubs dans un écosystème numérique innovant.</p>
           </div>
           
           {/* Floating cards animation for desktop */}

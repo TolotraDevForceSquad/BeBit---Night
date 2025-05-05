@@ -1,5 +1,4 @@
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,20 +16,42 @@ import {
   Building2,
   ShieldAlert,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface SidebarProps {
   activeItem?: string;
 }
 
+// Type pour l'utilisateur authentifié
+type AuthUser = {
+  username: string;
+  role: string;
+  firstName?: string;
+  profileImage?: string;
+};
+
 export default function Sidebar({ activeItem }: SidebarProps) {
-  const [location] = useLocation();
-  const { user, logoutMutation } = useAuth();
+  const [location, navigate] = useLocation();
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  // Récupérer les données utilisateur du localStorage
+  useEffect(() => {
+    const authData = localStorage.getItem('auth_user');
+    if (authData) {
+      try {
+        const userData = JSON.parse(authData);
+        setUser(userData);
+      } catch (error) {
+        console.error("Erreur lors de la lecture des données d'authentification:", error);
+      }
+    }
+  }, []);
 
   // Handle logout
   const handleLogout = () => {
-    if (logoutMutation && typeof logoutMutation.mutate === 'function') {
-      logoutMutation.mutate();
-    }
+    localStorage.removeItem('auth_user');
+    setUser(null);
+    navigate('/auth');
   };
 
   // Generate navigation items based on user role
@@ -200,8 +221,7 @@ export default function Sidebar({ activeItem }: SidebarProps) {
       {/* Sidebar Header */}
       <div className="p-6">
         <h1 className="font-heading font-bold text-2xl">
-          <span className="text-primary">Night</span>
-          <span className="text-secondary">Connect</span>
+          <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
         </h1>
       </div>
 
@@ -256,7 +276,6 @@ export default function Sidebar({ activeItem }: SidebarProps) {
           size="sm"
           className="mt-3 w-full justify-start text-muted-foreground"
           onClick={handleLogout}
-          disabled={logoutMutation?.isPending}
         >
           <LogOut className="h-4 w-4 mr-2" />
           Déconnexion
