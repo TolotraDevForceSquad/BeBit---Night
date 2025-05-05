@@ -71,33 +71,41 @@ export default function AuthPage() {
   // Handle login submission
   const onLoginSubmit = (data: LoginFormValues) => {
     console.log("Login attempt:", data.username);
-    // Simuler une connexion réussie
+    // Simuler une connexion réussie avec redirection directe
     if (data.username === "user1" && data.password === "password123") {
       // Stocker dans localStorage pour simulation d'authentification
       localStorage.setItem('auth_user', JSON.stringify({
         username: data.username,
         role: 'user'
       }));
-      setRedirectTo("/");
+      // Utiliser window.location pour une redirection forcée
+      window.location.href = "/";
+      return;
     } else if (data.username === "dj_elektra" && data.password === "password123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: data.username,
         role: 'artist'
       }));
-      setRedirectTo("/artist");
+      window.location.href = "/artist";
+      return;
     } else if (data.username === "club_oxygen" && data.password === "password123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: data.username,
         role: 'club'
       }));
-      setRedirectTo("/club");
+      window.location.href = "/club";
+      return;
     } else if (data.username === "admin" && data.password === "adminpass123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: data.username,
         role: 'admin'
       }));
-      setRedirectTo("/admin");
+      window.location.href = "/admin";
+      return;
     }
+    
+    // Afficher un message d'erreur pour les identifiants incorrects
+    alert("Identifiants incorrects. Veuillez réessayer.");
   };
 
   // Handle register submission
@@ -114,11 +122,11 @@ export default function AuthPage() {
     
     // Rediriger vers la page appropriée selon le rôle
     if (data.role === "artist") {
-      setRedirectTo("/artist");
+      window.location.href = "/artist";
     } else if (data.role === "club") {
-      setRedirectTo("/club");
+      window.location.href = "/club";
     } else {
-      setRedirectTo("/");
+      window.location.href = "/";
     }
   };
   

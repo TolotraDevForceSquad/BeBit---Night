@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/use-auth";
+import { useState, useEffect } from "react";
 import { 
   Home, 
   Search, 
@@ -9,16 +9,45 @@ import {
   PlusSquare,
   Building2,
   BarChart3,
-  ShieldAlert
+  ShieldAlert,
+  LogOut
 } from "lucide-react";
 
 interface MobileNavigationProps {
   activeItem?: string;
 }
 
+// Type pour l'utilisateur authentifié
+type AuthUser = {
+  username: string;
+  role: string;
+  firstName?: string;
+  profileImage?: string;
+};
+
 export default function MobileNavigation({ activeItem }: MobileNavigationProps) {
-  const [location] = useLocation();
-  const { user } = useAuth();
+  const [location, navigate] = useLocation();
+  const [user, setUser] = useState<AuthUser | null>(null);
+
+  // Récupérer les données utilisateur du localStorage
+  useEffect(() => {
+    const authData = localStorage.getItem('auth_user');
+    if (authData) {
+      try {
+        const userData = JSON.parse(authData);
+        setUser(userData);
+      } catch (error) {
+        console.error("Erreur lors de la lecture des données d'authentification:", error);
+      }
+    }
+  }, []);
+  
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('auth_user');
+    setUser(null);
+    navigate('/auth');
+  };
 
   // Generate navigation items based on user role
   const getNavItems = () => {
@@ -135,6 +164,11 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
 
   const navItems = getNavItems();
 
+  // Si l'utilisateur n'est pas connecté, ne pas afficher la barre de navigation
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
       <div className="flex justify-around items-center h-16">
@@ -156,6 +190,19 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
             </Link>
           );
         })}
+        
+        {/* Bouton de déconnexion */}
+        <button 
+          className="flex flex-col items-center justify-center w-full h-full" 
+          onClick={handleLogout}
+        >
+          <span className="mb-1 text-muted-foreground">
+            <LogOut className="h-6 w-6" />
+          </span>
+          <span className="text-xs text-muted-foreground">
+            Déconnexion
+          </span>
+        </button>
       </div>
       
       {/* Safe area for iOS devices */}
