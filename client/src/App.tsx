@@ -103,7 +103,7 @@ function App() {
           {!user 
             ? <SimpleAuth /> 
             : user.role === "admin" 
-              ? <AdminDashboardPage /> 
+              ? <Redirect to="/admin/dashboard" /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
@@ -122,6 +122,10 @@ function App() {
         </Route>
         
         {/* Routes Admin */}
+        <Route path="/admin/dashboard">
+          {!user ? <SimpleAuth /> : user.role === "admin" ? <AdminDashboardPage /> : <Redirect to="/" />}
+        </Route>
+        
         <Route path="/admin/moderation">
           {!user ? <SimpleAuth /> : user.role === "admin" ? <ModerationPage /> : <Redirect to="/" />}
         </Route>

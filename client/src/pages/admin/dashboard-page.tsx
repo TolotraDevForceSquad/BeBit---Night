@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { BarChart, PieChart, LineChart, ChevronRight, User, Music, Building, Calendar, Ban, AlertTriangle, Shield } from "lucide-react";
+import { 
+  BarChart, PieChart, LineChart, ChevronRight, User, Music, Building, 
+  Calendar, Ban, AlertTriangle, Shield, LogOut, Settings, UserIcon
+} from "lucide-react";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -169,6 +173,12 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    localStorage.removeItem('auth_user');
+    window.location.href = '/auth';
+  };
+  
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
     const authData = localStorage.getItem('auth_user');
@@ -201,22 +211,61 @@ export default function AdminDashboardPage() {
   // Contenu d'en-tête pour le layout
   const headerContent = (
     <div className="flex items-center justify-between">
-      <h1 className="font-heading font-bold text-lg md:text-xl">
+      <h1 
+        className="font-heading font-bold text-lg md:text-xl cursor-pointer"
+        onClick={() => setLocation("/admin/dashboard")}
+      >
         <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
         <span className="ml-2 text-foreground">Admin</span>
       </h1>
       
       <div className="flex items-center gap-2">
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/25 px-3 py-1">
-          <User className="h-3 w-3 mr-1" />
-          <span>Admin</span>
-        </Badge>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="bg-primary/10 text-primary border-primary/25 px-3 py-1 h-8">
+              <User className="h-3 w-3 mr-1" />
+              <span>Admin</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem className="gap-2" onClick={() => setLocation("/admin/dashboard")}>
+              <UserIcon className="h-4 w-4" />
+              <span>Profil</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2" onClick={() => setLocation("/admin/dashboard")}>
+              <Settings className="h-4 w-4" />
+              <span>Paramètres</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="gap-2 text-red-500" onClick={handleLogout}>
+              <LogOut className="h-4 w-4" />
+              <span>Déconnexion</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         {user && (
-          <Avatar className="h-9 w-9">
-            <AvatarImage src={user.profileImage} alt={user.username} />
-            <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="h-9 w-9 cursor-pointer">
+                <AvatarImage src={user.profileImage} alt={user.username} />
+                <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem className="gap-2" onClick={() => setLocation("/admin/dashboard")}>
+                <UserIcon className="h-4 w-4" />
+                <span>Profil</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2" onClick={() => setLocation("/admin/dashboard")}>
+                <Settings className="h-4 w-4" />
+                <span>Paramètres</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2 text-red-500" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" />
+                <span>Déconnexion</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </div>
