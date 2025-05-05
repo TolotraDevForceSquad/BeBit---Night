@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 interface CategoryFilterProps {
   categories: string[];
@@ -6,33 +6,27 @@ interface CategoryFilterProps {
   onChange: (category: string) => void;
 }
 
-export default function CategoryFilter({ categories, activeCategory, onChange }: CategoryFilterProps) {
+export default function CategoryFilter({
+  categories,
+  activeCategory,
+  onChange
+}: CategoryFilterProps) {
   return (
-    <div className="flex space-x-2 overflow-x-auto pb-1 min-w-min">
+    <div className="flex space-x-2 overflow-x-auto pb-2 whitespace-nowrap scrollbar-hide">
       {categories.map((category) => (
-        <button
+        <Button
           key={category}
+          variant={activeCategory === category ? "default" : "outline"}
+          className={`
+            rounded-full px-4 py-2 text-sm font-medium
+            ${activeCategory === category 
+              ? "bg-primary text-white border-transparent" 
+              : "bg-transparent border-muted-foreground/20 text-muted-foreground hover:bg-muted"}
+          `}
           onClick={() => onChange(category)}
-          className={`relative flex-none px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-            activeCategory === category 
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground hover:bg-muted/80"
-          }`}
         >
           {category}
-          {activeCategory === category && (
-            <AnimatePresence>
-              <motion.span
-                layoutId="activePill"
-                className="absolute inset-0 bg-primary rounded-full"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{ zIndex: -1 }}
-              />
-            </AnimatePresence>
-          )}
-        </button>
+        </Button>
       ))}
     </div>
   );

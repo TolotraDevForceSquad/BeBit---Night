@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Bell, Ticket } from "lucide-react";
+import { Loader2, Search, Bell, Ticket, Calendar, Heart, Wallet, Star, Settings } from "lucide-react";
+import { Link } from "wouter";
 
 // Type pour l'utilisateur authentifié et l'événement
 type AuthUser = {
@@ -18,7 +19,7 @@ type AuthUser = {
   profileImage?: string;
 };
 
-// Définir le type d'événement
+// Définir le type d'événement pour l'interface (pas le même que celui de la base de données)
 type Event = {
   id: number;
   title: string;
@@ -28,6 +29,8 @@ type Event = {
   category: string;
   venueName: string;
   price: number;
+  isFeatured?: boolean;
+  isLiked?: boolean;
 };
 
 // Données statiques pour les tests
@@ -35,17 +38,18 @@ const mockEvents: Event[] = [
   {
     id: 1,
     title: "Soirée Techno avec DJ Elektra",
-    description: "Une soirée techno inoubliable avec DJ Elektra",
+    description: "Une soirée techno inoubliable avec DJ Elektra. Venez vibrer sur les meilleurs sons électro de la scène parisienne. Un voyage sonore à ne pas manquer !",
     date: "2023-12-15T20:00:00",
     coverImage: "https://images.unsplash.com/photo-1571266028277-641cb7a18510?w=500&h=300&fit=crop",
     category: "Techno",
     venueName: "Club Oxygen",
     price: 25,
+    isFeatured: true,
   },
   {
     id: 2,
     title: "House Party avec MC Blaze",
-    description: "Venez vibrer sur les meilleurs morceaux house du moment",
+    description: "Venez vibrer sur les meilleurs morceaux house du moment avec MC Blaze, DJ reconnu de la scène house internationale. Une soirée qui s'annonce mémorable !",
     date: "2023-12-22T21:00:00",
     coverImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=300&fit=crop",
     category: "House",
@@ -55,12 +59,44 @@ const mockEvents: Event[] = [
   {
     id: 3,
     title: "Soirée Jazz Live",
-    description: "Une ambiance jazzy avec les meilleurs musiciens",
+    description: "Une ambiance jazzy avec les meilleurs musiciens de la scène parisienne. Un moment de détente et de découverte musicale dans un cadre intimiste.",
     date: "2023-12-18T19:30:00",
     coverImage: "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=500&h=300&fit=crop",
     category: "Jazz",
     venueName: "Blue Note",
     price: 30,
+    isLiked: true,
+  },
+  {
+    id: 4,
+    title: "Hip-Hop Underground",
+    description: "Découvrez les talents émergents de la scène hip-hop locale. Des flows percutants et des beats qui décoiffent !",
+    date: "2023-12-23T22:00:00",
+    coverImage: "https://images.unsplash.com/photo-1504704911898-68304a7d2807?w=500&h=300&fit=crop",
+    category: "Hip-Hop",
+    venueName: "Le Bunker",
+    price: 15,
+  },
+  {
+    id: 5,
+    title: "Nuit Électro",
+    description: "Une nuit entière dédiée à l'électro avec des DJs internationaux. De 23h à l'aube pour les vrais passionnés.",
+    date: "2023-12-30T23:00:00",
+    coverImage: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=300&fit=crop",
+    category: "Électro",
+    venueName: "Warehouse",
+    price: 35,
+    isFeatured: true,
+  },
+  {
+    id: 6,
+    title: "Funk & Soul Party",
+    description: "Plongez dans l'univers funk et soul des années 70-80. Dress code: paillettes et couleurs vives !",
+    date: "2023-12-29T21:00:00",
+    coverImage: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=500&h=300&fit=crop",
+    category: "Funk",
+    venueName: "Studio 54",
+    price: 25,
   },
 ];
 

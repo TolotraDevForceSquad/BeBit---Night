@@ -1,92 +1,108 @@
-import { Link } from 'wouter';
-import { Heart, Calendar, MapPin, Music, Clock, Users } from 'lucide-react';
-import { Event } from '@shared/schema';
-import { Button } from '@/components/ui/button';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Heart, Calendar, MapPin, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+
+// Type d'événement pour l'affichage
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  coverImage: string;
+  category: string;
+  venueName: string;
+  price: number;
+  isFeatured?: boolean;
+  isLiked?: boolean;
+}
 
 interface EventCardProps {
   event: Event;
 }
 
 export default function EventCard({ event }: EventCardProps) {
-  // Format date
-  const eventDate = new Date(event.date);
-  const formattedDate = new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'short',
-  }).format(eventDate);
+  // Formatage de la date
+  const formattedDate = format(new Date(event.date), "EEEE d MMMM, HH'h'mm", { locale: fr });
+  
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Implémentation à venir (API call, etc.)
+    console.log(`Like event ${event.id}`);
+  };
 
   return (
-    <div className="bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-all duration-300">
-      <Link href={`/events/${event.id}`}>
-        <a className="block">
-          <AspectRatio ratio={16/9} className="bg-muted">
-            {event.coverImage ? (
-              <img 
-                src={event.coverImage} 
-                alt={event.title} 
-                className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center">
-                <Music className="h-12 w-12 text-muted-foreground/50" />
-              </div>
-            )}
-            <div className="absolute top-3 right-3 bg-black/60 rounded-full p-1.5">
-              <Heart className="h-4 w-4 text-white" />
-            </div>
-          </AspectRatio>
-        </a>
-      </Link>
-      
-      <div className="p-4">
-        <Link href={`/events/${event.id}`}>
-          <a className="block">
-            <h3 className="font-bold text-lg mb-2 line-clamp-1">{event.title}</h3>
-          </a>
-        </Link>
+    <Card className="overflow-hidden transition-all hover:shadow-md">
+      <div className="relative">
+        {/* Badge "En vedette" pour les événements mis en avant */}
+        {event.isFeatured && (
+          <Badge className="absolute top-2 left-2 z-10 bg-primary text-white">
+            En vedette
+          </Badge>
+        )}
         
-        <div className="space-y-2 mb-3">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Calendar className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-            <span>{formattedDate}</span>
-            <span className="mx-1">•</span>
-            <Clock className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-            <span>{event.startTime}</span>
-          </div>
-          
-          <div className="flex items-center text-sm text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-            <span className="line-clamp-1">{event.venueName}, {event.location}</span>
-          </div>
-          
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Users className="h-3.5 w-3.5 mr-2 flex-shrink-0" />
-            <span>{event.participantCount}/{event.capacity} participants</span>
-          </div>
+        {/* Image de couverture */}
+        <div 
+          className="h-48 w-full bg-cover bg-center" 
+          style={{ backgroundImage: `url(${event.coverImage})` }}
+        >
+          {/* Overlay pour une meilleure lisibilité du titre */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70" />
         </div>
         
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            {event.category}
-          </span>
-          
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary-foreground">
-            {event.price} €
-          </span>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <Button variant="outline" size="sm" className="rounded-full">
-            En savoir plus
-          </Button>
-          
-          <Button variant="ghost" size="sm" className="rounded-full">
-            <Heart className="h-4 w-4 mr-1" />
-            Intéressé
-          </Button>
-        </div>
+        {/* Bouton like */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className={`absolute top-2 right-2 rounded-full p-0 h-8 w-8 ${
+            event.isLiked ? "text-red-500 bg-white/80" : "text-white bg-black/30 hover:bg-black/50"
+          }`}
+          onClick={handleLike}
+        >
+          <Heart className={`h-4 w-4 ${event.isLiked ? "fill-current" : ""}`} />
+        </Button>
       </div>
-    </div>
+      
+      <CardHeader className="p-4 pb-2">
+        <div className="flex justify-between items-start">
+          <h3 className="text-lg font-semibold line-clamp-1">{event.title}</h3>
+          <Badge variant="outline" className="ml-2">
+            {event.category}
+          </Badge>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="p-4 pt-2 pb-2">
+        <div className="space-y-2">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Calendar className="h-4 w-4 mr-2" />
+            <span>{formattedDate}</span>
+          </div>
+          
+          <div className="flex items-center text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4 mr-2" />
+            <span>{event.venueName}</span>
+          </div>
+          
+          <p className="text-sm line-clamp-2 mt-2">
+            {event.description}
+          </p>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-2 flex justify-between items-center">
+        <div className="font-semibold">
+          {event.price > 0 ? `${event.price} €` : 'Gratuit'}
+        </div>
+        
+        <Button size="sm" variant="default" className="gap-1">
+          <span>Détails</span>
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }

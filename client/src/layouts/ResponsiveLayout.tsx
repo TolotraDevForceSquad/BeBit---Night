@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { useMobile } from "@/hooks/use-mobile";
-import MobileNavigation from "@/components/MobileNavigation";
 import Sidebar from "@/components/Sidebar";
+import MobileNavigation from "@/components/MobileNavigation";
 
 interface ResponsiveLayoutProps {
   children: ReactNode;
@@ -16,49 +16,57 @@ export default function ResponsiveLayout({
   activeItem,
   showNavigation = true,
   sidebarContent,
-  headerContent,
+  headerContent
 }: ResponsiveLayoutProps) {
   const isMobile = useMobile();
-
+  
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Mobile Header */}
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      {/* En-tête mobile */}
       {isMobile && headerContent && (
-        <header className="fixed top-0 left-0 right-0 bg-card z-40 border-b border-border safe-top">
-          <div className="mobile-pt px-4 py-2 flex items-center justify-between">
-            {headerContent}
-          </div>
+        <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm p-4">
+          {headerContent}
         </header>
       )}
-
-      {/* Main Content */}
+      
+      {/* Contenu principal avec sidebar pour desktop */}
       <div className="flex-1 flex">
-        {/* Desktop Sidebar */}
-        {!isMobile && <Sidebar activeItem={activeItem} />}
-
-        {/* Content Area */}
-        <main className={`flex-1 ${isMobile ? 'mobile-pb' : 'ml-64'} ${isMobile && headerContent ? 'mt-16' : ''}`}>
+        {/* Sidebar pour la version desktop */}
+        {!isMobile && showNavigation && (
+          <aside className="hidden md:block w-64 border-r p-4 shrink-0">
+            <Sidebar activeItem={activeItem} />
+            
+            {/* Contenu additionnel de la sidebar */}
+            {sidebarContent && (
+              <div className="mt-6">
+                {sidebarContent}
+              </div>
+            )}
+          </aside>
+        )}
+        
+        {/* Contenu principal */}
+        <main className="flex-1 p-4">
+          {/* En-tête desktop */}
           {!isMobile && headerContent && (
-            <header className="bg-card border-b border-border p-4 z-10 sticky top-0">
+            <header className="mb-6">
               {headerContent}
             </header>
           )}
           
-          <div className={isMobile ? 'mobile-container' : 'container py-6'}>
-            {sidebarContent && !isMobile && (
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <div className="lg:col-span-3">{children}</div>
-                <div className="lg:col-span-1">{sidebarContent}</div>
-              </div>
-            )}
-            
-            {(!sidebarContent || isMobile) && children}
+          {/* Contenu de la page */}
+          <div>
+            {children}
           </div>
         </main>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMobile && showNavigation && <MobileNavigation activeItem={activeItem} />}
+      
+      {/* Navigation mobile */}
+      {isMobile && showNavigation && (
+        <div className="sticky bottom-0 z-50 border-t bg-background/80 backdrop-blur-sm">
+          <MobileNavigation activeItem={activeItem} />
+        </div>
+      )}
     </div>
   );
 }

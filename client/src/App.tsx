@@ -1,9 +1,14 @@
 import { Switch, Route, Redirect } from "wouter";
 import NotFound from "@/pages/not-found";
 import SimpleAuth from "@/pages/simple-auth";
-import SimplePage from "@/pages/SimplePage";
+import UserExplorerPage from "@/pages/user/explorer-page";
 import { Loader2 } from "lucide-react";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, lazy } from "react";
+
+// Chargement paresseux des composants de page pour optimiser les performances
+const ArtistDashboardPage = lazy(() => import("@/pages/artist/dashboard-page"));
+const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
+const AdminDashboardPage = lazy(() => import("@/pages/admin/dashboard-page"));
 
 // Type pour l'authentification
 type AuthUser = {
@@ -46,27 +51,65 @@ function App() {
       </div>
     }>
       <Switch>
-        {/* Route principale qui affiche l'authentification ou la page simple */}
+        {/* Route principale - affiche explorer pour les utilisateurs ou redirige vers la page appropriée selon le rôle */}
         <Route path="/">
-          {!user ? <SimpleAuth /> : <SimplePage />}
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "user" 
+              ? <UserExplorerPage /> 
+              : <Redirect to={`/${user.role}`} />
+          }
         </Route>
         
-        {/* Route d'authentification simplifiée */}
+        {/* Route d'authentification */}
         <Route path="/auth">
-          {user ? <Redirect to="/" /> : <SimpleAuth />}
+          {user 
+            ? (user.role === "user" 
+                ? <Redirect to="/" /> 
+                : <Redirect to={`/${user.role}`} />)
+            : <SimpleAuth />
+          }
         </Route>
         
-        {/* Routes spécifiques aux rôles - toutes affichent la même page simple pour l'instant */}
+        {/* Routes spécifiques aux rôles */}
         <Route path="/artist">
-          {!user ? <SimpleAuth /> : <SimplePage />}
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistDashboardPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
         </Route>
         
         <Route path="/club">
-          {!user ? <SimpleAuth /> : <SimplePage />}
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <ClubDashboardPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
         </Route>
         
         <Route path="/admin">
-          {!user ? <SimpleAuth /> : <SimplePage />}
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "admin" 
+              ? <AdminDashboardPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        {/* Routes utilisateur */}
+        <Route path="/user/wallet">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/user/tickets">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/user/profile">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
         </Route>
         
         {/* Fallback à 404 */}

@@ -1,16 +1,8 @@
-import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
+import { Link } from "wouter";
 import { 
-  Home, 
-  Search, 
-  Calendar, 
-  Music, 
-  User, 
-  PlusSquare,
-  Building2,
-  BarChart3,
-  ShieldAlert,
-  LogOut
+  Home, Search, Calendar, Wallet,
+  Settings, User
 } from "lucide-react";
 
 interface MobileNavigationProps {
@@ -26,9 +18,8 @@ type AuthUser = {
 };
 
 export default function MobileNavigation({ activeItem }: MobileNavigationProps) {
-  const [location, navigate] = useLocation();
   const [user, setUser] = useState<AuthUser | null>(null);
-
+  
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
     const authData = localStorage.getItem('auth_user');
@@ -41,174 +32,84 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       }
     }
   }, []);
-  
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('auth_user');
-    setUser(null);
-    navigate('/auth');
-  };
 
-  // Generate navigation items based on user role
-  const getNavItems = () => {
-    const items = [];
-
-    // Role-specific items
-    if (user?.role === "admin") {
-      items.push(
-        {
-          name: "Dashboard",
-          icon: <Home className="h-6 w-6" />,
-          href: "/admin",
-          key: "home",
-        },
-        {
-          name: "Modérer",
-          icon: <ShieldAlert className="h-6 w-6" />,
-          href: "/admin/moderation",
-          key: "moderation",
-        },
-        {
-          name: "Stats",
-          icon: <BarChart3 className="h-6 w-6" />,
-          href: "/admin/stats",
-          key: "stats",
-        },
-        {
-          name: "Profil",
-          icon: <User className="h-6 w-6" />,
-          href: "/profile",
-          key: "profile",
-        }
-      );
-    } else if (user?.role === "artist") {
-      items.push(
-        {
-          name: "Dashboard",
-          icon: <Home className="h-6 w-6" />,
-          href: "/artist",
-          key: "home",
-        },
-        {
-          name: "Bookings",
-          icon: <Calendar className="h-6 w-6" />,
-          href: "/artist/bookings",
-          key: "bookings",
-        },
-        {
-          name: "Profil",
-          icon: <Music className="h-6 w-6" />,
-          href: "/artist/profile",
-          key: "profile",
-        }
-      );
-    } else if (user?.role === "club") {
-      items.push(
-        {
-          name: "Dashboard",
-          icon: <Home className="h-6 w-6" />,
-          href: "/club",
-          key: "home",
-        },
-        {
-          name: "Événements",
-          icon: <Calendar className="h-6 w-6" />,
-          href: "/club/events",
-          key: "events",
-        },
-        {
-          name: "Créer",
-          icon: <PlusSquare className="h-6 w-6" />,
-          href: "/club/events/new",
-          key: "create",
-        },
-        {
-          name: "Profil",
-          icon: <Building2 className="h-6 w-6" />,
-          href: "/club/profile",
-          key: "profile",
-        }
-      );
-    } else {
-      // User navigation
-      items.push(
-        {
-          name: "Accueil",
-          icon: <Home className="h-6 w-6" />,
-          href: "/",
-          key: "home",
-        },
-        {
-          name: "Découvrir",
-          icon: <Search className="h-6 w-6" />,
-          href: "/search",
-          key: "search",
-        },
-        {
-          name: "Artistes",
-          icon: <Music className="h-6 w-6" />,
-          href: "/artists",
-          key: "artists",
-        },
-        {
-          name: "Profil",
-          icon: <User className="h-6 w-6" />,
-          href: "/profile",
-          key: "profile",
-        }
-      );
+  // Définir les éléments de navigation en fonction du rôle
+  const getNavigationItems = () => {
+    // Utilisateur standard
+    if (user?.role === 'user') {
+      return [
+        { icon: <Home size={24} />, label: "Explorer", href: "/" },
+        { icon: <Search size={24} />, label: "Rechercher", href: "/user/search" },
+        { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
+        { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
+        { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
+      ];
     }
-
-    return items;
+    
+    // Artiste
+    if (user?.role === 'artist') {
+      return [
+        { icon: <Home size={24} />, label: "Events", href: "/artist" },
+        { icon: <Calendar size={24} />, label: "Agenda", href: "/artist/agenda" },
+        { icon: <Wallet size={24} />, label: "Wallet", href: "/artist/wallet" },
+        { icon: <User size={24} />, label: "Profil", href: "/artist/profile" },
+        { icon: <Settings size={24} />, label: "Réglages", href: "/artist/settings" },
+      ];
+    }
+    
+    // Club
+    if (user?.role === 'club') {
+      return [
+        { icon: <Home size={24} />, label: "Events", href: "/club" },
+        { icon: <Search size={24} />, label: "Artistes", href: "/club/artists" },
+        { icon: <Calendar size={24} />, label: "Scanner", href: "/club/scan" },
+        { icon: <Wallet size={24} />, label: "Wallet", href: "/club/wallet" },
+        { icon: <Settings size={24} />, label: "Réglages", href: "/club/settings" },
+      ];
+    }
+    
+    // Admin
+    if (user?.role === 'admin') {
+      return [
+        { icon: <Home size={24} />, label: "Dashboard", href: "/admin" },
+        { icon: <Calendar size={24} />, label: "Events", href: "/admin/events" },
+        { icon: <User size={24} />, label: "Users", href: "/admin/users" },
+        { icon: <Settings size={24} />, label: "Réglages", href: "/admin/settings" },
+      ];
+    }
+    
+    // Par défaut, retourner la navigation utilisateur
+    return [
+      { icon: <Home size={24} />, label: "Explorer", href: "/" },
+      { icon: <Search size={24} />, label: "Rechercher", href: "/user/search" },
+      { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
+      { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
+      { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
+    ];
   };
-
-  const navItems = getNavItems();
-
-  // Si l'utilisateur n'est pas connecté, ne pas afficher la barre de navigation
-  if (!user) {
-    return null;
-  }
-
+  
+  const navigationItems = getNavigationItems();
+  
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-      <div className="flex justify-around items-center h-16">
-        {navItems.map((item) => {
-          const isActive = 
-            activeItem === item.key || 
-            (activeItem === undefined && location === item.href);
-            
-          return (
-            <div 
-              key={item.key}
-              className="flex flex-col items-center justify-center w-full h-full cursor-pointer" 
-              onClick={() => navigate(item.href)}
-            >
-              <span className={`mb-1 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
-                {item.icon}
-              </span>
-              <span className={`text-xs ${isActive ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                {item.name}
-              </span>
-            </div>
-          );
-        })}
-        
-        {/* Bouton de déconnexion */}
-        <button 
-          className="flex flex-col items-center justify-center w-full h-full" 
-          onClick={handleLogout}
+    <div className="flex justify-around items-center p-2">
+      {navigationItems.map((item) => (
+        <Link 
+          key={item.href}
+          href={item.href}
+          className="text-center"
         >
-          <span className="mb-1 text-muted-foreground">
-            <LogOut className="h-6 w-6" />
-          </span>
-          <span className="text-xs text-muted-foreground">
-            Déconnexion
-          </span>
-        </button>
-      </div>
-      
-      {/* Safe area for iOS devices */}
-      <div className="h-safe-area bg-background" />
+          <div 
+            className={`flex flex-col items-center py-2 px-4 rounded-lg ${
+              activeItem === item.label.toLowerCase()
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            {item.icon}
+            <span className="text-xs mt-1">{item.label}</span>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
