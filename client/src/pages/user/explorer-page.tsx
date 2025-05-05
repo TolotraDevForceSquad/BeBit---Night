@@ -1,183 +1,207 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import DashboardLayout from "@/layouts/DashboardLayout";
+import { useAuth } from "@/hooks/use-auth";
+import { useMobile } from "@/hooks/use-mobile";
+import { Event } from "@shared/schema";
+import ResponsiveLayout from "@/layouts/ResponsiveLayout";
+import MobileEventCard from "@/components/MobileEventCard";
 import EventCard from "@/components/EventCard";
-import ArtistCard from "@/components/ArtistCard";
-import ClubCard from "@/components/ClubCard";
 import CategoryFilter from "@/components/CategoryFilter";
-import { Search, Filter } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Search, Filter, Bell, Ticket } from "lucide-react";
 
 export default function UserExplorerPage() {
-  const [activeCategory, setActiveCategory] = useState("Tous");
+  const { user } = useAuth();
+  const isMobile = useMobile();
+  const [activeTab, setActiveTab] = useState("découvrir");
+  const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Categories for filtering
-  const eventCategories = ["Tous", "House", "Techno", "Hip-Hop", "Jazz", "Live Music", "EDM", "R&B"];
-
-  // Fetch events
-  const { data: events, isLoading: eventsLoading } = useQuery({
-    queryKey: ["/api/events", activeCategory !== "Tous" ? activeCategory : null],
+  const { data: events, isLoading } = useQuery<Event[]>({
+    queryKey: ["/api/events", activeCategory, searchQuery],
+    queryFn: async () => {
+      const url = new URL("/api/events", window.location.origin);
+      
+      if (activeCategory && activeCategory !== "all") {
+        url.searchParams.append("category", activeCategory);
+      }
+      
+      if (searchQuery) {
+        url.searchParams.append("search", searchQuery);
+      }
+      
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error("Erreur lors de la récupération des événements");
+      return await res.json();
+    },
   });
 
-  // Fetch trending artists
-  const { data: artists, isLoading: artistsLoading } = useQuery({
-    queryKey: ["/api/artists/trending"],
-  });
+  // Dummy categories for now
+  const categories = ["all", "House", "Techno", "Hip-Hop", "Jazz", "Funk", "EDM"];
 
-  // Fetch popular clubs
-  const { data: clubs, isLoading: clubsLoading } = useQuery({
-    queryKey: ["/api/clubs/popular"],
-  });
+  // Header content for the layout
+  const headerContent = (
+    <div className="w-full flex items-center justify-between">
+      <h1 className="font-heading font-bold text-lg text-white">
+        <span className="text-primary">Night</span>
+        <span className="text-secondary">Connect</span>
+      </h1>
+      
+      <div className="flex items-center space-x-2">
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
+            3
+          </Badge>
+        </Button>
+        
+        <Button variant="ghost" size="icon">
+          <Ticket className="h-5 w-5" />
+        </Button>
+      </div>
+    </div>
+  );
 
-  // Handle category change
-  const handleCategoryChange = (category: string) => {
-    setActiveCategory(category);
-  };
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  return (
-    <DashboardLayout activeItem="explorer">
-      <div className="p-4 md:p-8 animate-fade-in">
-        {/* Header with search and filters */}
-        <div className="md:flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-heading font-bold mb-4 md:mb-0">Explorer les événements</h2>
-          
-          <div className="flex flex-wrap gap-2">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Rechercher..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="w-full md:w-64 bg-card border border-border rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            </div>
-            
-            <Button variant="outline" className="bg-card hover:bg-muted border border-border rounded-full px-4 py-2 text-sm flex items-center">
-              <Filter className="mr-2 h-4 w-4 text-secondary" />
-              <span>Filtres</span>
+  // Sidebar content for desktop
+  const sidebarContent = (
+    <div className="space-y-6">
+      <div className="bg-card rounded-lg p-4 border border-border">
+        <h3 className="font-medium mb-3">Catégories</h3>
+        <div className="space-y-2">
+          {categories.map((category) => (
+            <Button
+              key={category}
+              variant={activeCategory === category ? "default" : "outline"}
+              size="sm"
+              className="mr-2 mb-2"
+              onClick={() => setActiveCategory(category)}
+            >
+              {category === "all" ? "Tous" : category}
             </Button>
-          </div>
-        </div>
-        
-        {/* Category filter */}
-        <CategoryFilter 
-          categories={eventCategories} 
-          activeCategory={activeCategory} 
-          onChange={handleCategoryChange} 
-        />
-        
-        {/* Events grid */}
-        {eventsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, index) => (
-              <div key={index} className="bg-card rounded-2xl overflow-hidden border border-border">
-                <Skeleton className="w-full h-48" />
-                <div className="p-4">
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2 mb-2" />
-                  <Skeleton className="h-4 w-2/3 mb-3" />
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-12" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : events && events.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10">
-            <p className="text-muted-foreground">Aucun événement trouvé.</p>
-          </div>
-        )}
-        
-        {/* Trending Artists Section */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-heading font-bold mb-6 flex items-center">
-            <i className="fas fa-star text-secondary mr-2"></i>
-            <span>Artistes en Tendance</span>
-          </h2>
-          
-          {artistsLoading ? (
-            <div className="flex space-x-4 py-2 overflow-x-auto scrollbar-hide">
-              {[...Array(5)].map((_, index) => (
-                <div key={index} className="flex-shrink-0 w-36 text-center">
-                  <Skeleton className="w-24 h-24 mx-auto rounded-full mb-2" />
-                  <Skeleton className="h-4 w-20 mx-auto mb-1" />
-                  <Skeleton className="h-3 w-16 mx-auto" />
-                </div>
-              ))}
-            </div>
-          ) : artists && artists.length > 0 ? (
-            <ScrollArea className="w-full">
-              <div className="flex space-x-4 py-2">
-                {artists.map((artist, index) => (
-                  <ArtistCard 
-                    key={artist.id} 
-                    artist={artist} 
-                    featured={index < 2} 
-                  />
-                ))}
-              </div>
-            </ScrollArea>
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">Aucun artiste trouvé.</p>
-            </div>
-          )}
-        </div>
-        
-        {/* Popular Clubs */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-heading font-bold mb-6 flex items-center">
-            <i className="fas fa-building text-primary mr-2"></i>
-            <span>Clubs Populaires</span>
-          </h2>
-          
-          {clubsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="bg-card rounded-xl overflow-hidden p-4">
-                  <div className="flex items-center">
-                    <Skeleton className="w-16 h-16 rounded-xl mr-4" />
-                    <div>
-                      <Skeleton className="h-5 w-32 mb-2" />
-                      <Skeleton className="h-3 w-24 mb-2" />
-                      <Skeleton className="h-3 w-20" />
-                    </div>
-                    <Skeleton className="w-10 h-10 rounded-full ml-auto" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : clubs && clubs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {clubs.map((club) => (
-                <ClubCard key={club.id} club={club} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-muted-foreground">Aucun club trouvé.</p>
-            </div>
-          )}
+          ))}
         </div>
       </div>
-    </DashboardLayout>
+      
+      <div className="bg-card rounded-lg p-4 border border-border">
+        <h3 className="font-medium mb-3">Artistes Tendance</h3>
+        <div className="space-y-3">
+          {["DJ Elektra", "MC Blaze", "Luna Ray"].map((artist) => (
+            <div key={artist} className="flex items-center">
+              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                {artist.charAt(0)}
+              </div>
+              <span>{artist}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <ResponsiveLayout
+      activeItem="home"
+      headerContent={headerContent}
+      sidebarContent={sidebarContent}
+    >
+      {/* Mobile search and filters */}
+      {isMobile && (
+        <div className="mb-4 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Rechercher des événements..."
+              className="pl-9 bg-muted border-border"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+            <CategoryFilter
+              categories={categories.map(c => c === 'all' ? 'Tous' : c)}
+              activeCategory={activeCategory === 'all' ? 'Tous' : activeCategory}
+              onChange={(category) => setActiveCategory(category === 'Tous' ? 'all' : category)}
+            />
+          </div>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full">
+              <TabsTrigger value="découvrir" className="flex-1">Découvrir</TabsTrigger>
+              <TabsTrigger value="tendances" className="flex-1">Tendances</TabsTrigger>
+              <TabsTrigger value="nearby" className="flex-1">À proximité</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
+      
+      {/* Desktop search and title */}
+      {!isMobile && (
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Explorez les événements</h1>
+            <p className="text-muted-foreground">
+              Découvrez les meilleurs événements et artistes près de chez vous
+            </p>
+          </div>
+          
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Rechercher des événements..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Loading state */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+      
+      {/* Empty state */}
+      {events && events.length === 0 && (
+        <div className="text-center py-12">
+          <h3 className="text-xl font-medium mb-2">
+            Aucun événement trouvé
+          </h3>
+          <p className="text-muted-foreground">
+            Essayez de modifier vos filtres ou votre recherche
+          </p>
+        </div>
+      )}
+      
+      {/* Mobile event cards (TikTok style) */}
+      {isMobile && events && events.length > 0 && (
+        <div className="space-y-4">
+          {activeTab === "découvrir" && (
+            <MobileEventCard event={events[0]} />
+          )}
+          {activeTab === "tendances" && events.length > 1 && (
+            <MobileEventCard event={events[1]} />
+          )}
+          {activeTab === "nearby" && events.length > 2 && (
+            <MobileEventCard event={events[2]} />
+          )}
+        </div>
+      )}
+      
+      {/* Desktop event grid */}
+      {!isMobile && events && events.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      )}
+    </ResponsiveLayout>
   );
 }

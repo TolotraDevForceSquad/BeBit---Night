@@ -1,22 +1,21 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Compass,
-  Mail,
-  Image,
-  Wallet,
-  Star,
-  User,
-  LogOut,
+  Home,
+  Search,
   Calendar,
-  Users,
-  BarChart3,
-  Building2,
   Music,
+  User,
+  Bell,
+  Ticket,
+  BarChart3,
+  LogOut,
   Settings,
-  Ban,
-  PieChart,
-  LayoutDashboard
+  Users,
+  Building2,
+  ShieldAlert,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -24,231 +23,243 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeItem }: SidebarProps) {
+  const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
 
-  // Function to handle logout
+  // Handle logout
   const handleLogout = () => {
     logoutMutation.mutate();
   };
 
-  // Render navigation items based on user role
-  const renderNavigationItems = () => {
+  // Generate navigation items based on user role
+  const getNavItems = () => {
+    const items = [];
+
+    // Common items for all users
+    items.push({
+      name: "Recherche",
+      icon: <Search className="h-5 w-5" />,
+      href: "/search",
+      key: "search",
+    });
+
+    // Role-specific items
     if (user?.role === "admin") {
-      return (
-        <div className="space-y-1">
-          <Link href="/admin">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'dashboard' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <LayoutDashboard className="mr-3 h-5 w-5 text-primary" />
-              <span>Dashboard</span>
-            </a>
-          </Link>
-          <Link href="/admin/artists">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'artists' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Music className="mr-3 h-5 w-5" />
-              <span>Artistes</span>
-            </a>
-          </Link>
-          <Link href="/admin/clubs">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'clubs' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Building2 className="mr-3 h-5 w-5" />
-              <span>Clubs</span>
-            </a>
-          </Link>
-          <Link href="/admin/users">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'users' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Users className="mr-3 h-5 w-5" />
-              <span>Utilisateurs</span>
-            </a>
-          </Link>
-          <Link href="/admin/events">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'events' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Calendar className="mr-3 h-5 w-5" />
-              <span>Tous les Événements</span>
-            </a>
-          </Link>
-          <Link href="/admin/moderation">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'moderation' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Ban className="mr-3 h-5 w-5" />
-              <span>Modération</span>
-            </a>
-          </Link>
-          <Link href="/admin/settings">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'settings' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Settings className="mr-3 h-5 w-5" />
-              <span>Paramètres</span>
-            </a>
-          </Link>
-        </div>
+      items.push(
+        {
+          name: "Dashboard",
+          icon: <Home className="h-5 w-5" />,
+          href: "/admin",
+          key: "home",
+        },
+        {
+          name: "Modération",
+          icon: <ShieldAlert className="h-5 w-5" />,
+          href: "/admin/moderation",
+          key: "moderation",
+        },
+        {
+          name: "Utilisateurs",
+          icon: <Users className="h-5 w-5" />,
+          href: "/admin/users",
+          key: "users",
+        },
+        {
+          name: "Artistes",
+          icon: <Music className="h-5 w-5" />,
+          href: "/admin/artists",
+          key: "artists",
+        },
+        {
+          name: "Clubs",
+          icon: <Building2 className="h-5 w-5" />,
+          href: "/admin/clubs",
+          key: "clubs",
+        },
+        {
+          name: "Statistiques",
+          icon: <BarChart3 className="h-5 w-5" />,
+          href: "/admin/stats",
+          key: "stats",
+        }
       );
     } else if (user?.role === "artist") {
-      return (
-        <div className="space-y-1">
-          <Link href="/artist">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'dashboard' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <LayoutDashboard className="mr-3 h-5 w-5 text-primary" />
-              <span>Dashboard</span>
-            </a>
-          </Link>
-          <Link href="/artist/events">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'events' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Calendar className="mr-3 h-5 w-5" />
-              <span>Mes événements</span>
-            </a>
-          </Link>
-          <Link href="/artist/invitations">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'invitations' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Mail className="mr-3 h-5 w-5" />
-              <span>Invitations des clubs</span>
-            </a>
-          </Link>
-          <Link href="/artist/feedback">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'feedback' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Star className="mr-3 h-5 w-5" />
-              <span>Feedbacks reçus</span>
-            </a>
-          </Link>
-          <Link href="/artist/wallet">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'wallet' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Wallet className="mr-3 h-5 w-5" />
-              <span>Portefeuille & dons</span>
-            </a>
-          </Link>
-          <Link href="/artist/profile">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'profile' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <User className="mr-3 h-5 w-5" />
-              <span>Mon profil</span>
-            </a>
-          </Link>
-        </div>
+      items.push(
+        {
+          name: "Dashboard",
+          icon: <Home className="h-5 w-5" />,
+          href: "/artist",
+          key: "home",
+        },
+        {
+          name: "Bookings",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/artist/bookings",
+          key: "bookings",
+        },
+        {
+          name: "Performances",
+          icon: <Music className="h-5 w-5" />,
+          href: "/artist/performances",
+          key: "performances",
+        },
+        {
+          name: "Notifications",
+          icon: <Bell className="h-5 w-5" />,
+          href: "/artist/notifications",
+          key: "notifications",
+        }
       );
     } else if (user?.role === "club") {
-      return (
-        <div className="space-y-1">
-          <Link href="/club">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'dashboard' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <LayoutDashboard className="mr-3 h-5 w-5 text-primary" />
-              <span>Dashboard</span>
-            </a>
-          </Link>
-          <Link href="/club/events">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'events' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Calendar className="mr-3 h-5 w-5" />
-              <span>Événements organisés</span>
-            </a>
-          </Link>
-          <Link href="/club/artists">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'artists' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Music className="mr-3 h-5 w-5" />
-              <span>Appels à artistes</span>
-            </a>
-          </Link>
-          <Link href="/club/participants">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'participants' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Users className="mr-3 h-5 w-5" />
-              <span>Participants & billetterie</span>
-            </a>
-          </Link>
-          <Link href="/club/statistics">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'statistics' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <PieChart className="mr-3 h-5 w-5" />
-              <span>Statistiques club</span>
-            </a>
-          </Link>
-          <Link href="/club/wallet">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'wallet' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Wallet className="mr-3 h-5 w-5" />
-              <span>Portefeuille</span>
-            </a>
-          </Link>
-          <Link href="/club/profile">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'profile' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Building2 className="mr-3 h-5 w-5" />
-              <span>Mon club</span>
-            </a>
-          </Link>
-        </div>
+      items.push(
+        {
+          name: "Dashboard",
+          icon: <Home className="h-5 w-5" />,
+          href: "/club",
+          key: "home",
+        },
+        {
+          name: "Événements",
+          icon: <Calendar className="h-5 w-5" />,
+          href: "/club/events",
+          key: "events",
+        },
+        {
+          name: "Artistes",
+          icon: <Music className="h-5 w-5" />,
+          href: "/club/artists",
+          key: "artists",
+        },
+        {
+          name: "Invitations",
+          icon: <Bell className="h-5 w-5" />,
+          href: "/club/invitations",
+          key: "invitations",
+        },
+        {
+          name: "Statistiques",
+          icon: <BarChart3 className="h-5 w-5" />,
+          href: "/club/stats",
+          key: "stats",
+        }
       );
     } else {
-      // Regular user navigation
-      return (
-        <div className="space-y-1">
-          <Link href="/">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'explorer' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Compass className="mr-3 h-5 w-5 text-primary" />
-              <span>Explorer</span>
-            </a>
-          </Link>
-          <Link href="/invitations">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'invitations' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Mail className="mr-3 h-5 w-5" />
-              <span>Invitations</span>
-            </a>
-          </Link>
-          <Link href="/gallery">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'gallery' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Image className="mr-3 h-5 w-5" />
-              <span>Galerie</span>
-            </a>
-          </Link>
-          <Link href="/wallet">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'wallet' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Wallet className="mr-3 h-5 w-5" />
-              <span>Portefeuille</span>
-            </a>
-          </Link>
-          <Link href="/reviews">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'reviews' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <Star className="mr-3 h-5 w-5" />
-              <span>Mes avis</span>
-            </a>
-          </Link>
-          <Link href="/profile">
-            <a className={`flex items-center w-full px-4 py-3 rounded-lg ${activeItem === 'profile' ? 'bg-muted text-white' : 'text-muted-foreground hover:bg-muted hover:text-white'}`}>
-              <User className="mr-3 h-5 w-5" />
-              <span>Profil</span>
-            </a>
-          </Link>
-        </div>
+      items.push(
+        {
+          name: "Accueil",
+          icon: <Home className="h-5 w-5" />,
+          href: "/",
+          key: "home",
+        },
+        {
+          name: "Artistes",
+          icon: <Music className="h-5 w-5" />,
+          href: "/artists",
+          key: "artists",
+        },
+        {
+          name: "Clubs",
+          icon: <Building2 className="h-5 w-5" />,
+          href: "/clubs",
+          key: "clubs",
+        },
+        {
+          name: "Tickets",
+          icon: <Ticket className="h-5 w-5" />,
+          href: "/tickets",
+          key: "tickets",
+        }
       );
     }
+
+    // Common settings and profile items
+    items.push(
+      {
+        name: "Profil",
+        icon: <User className="h-5 w-5" />,
+        href: "/profile",
+        key: "profile",
+      },
+      {
+        name: "Paramètres",
+        icon: <Settings className="h-5 w-5" />,
+        href: "/settings",
+        key: "settings",
+      }
+    );
+
+    return items;
   };
 
+  const navItems = getNavItems();
+
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-card border-r border-border fixed h-full">
-      <div className="p-4">
-        <h1 className="font-heading font-bold text-2xl mb-6">
+    <div className="fixed inset-y-0 left-0 bg-sidebar-background text-sidebar-foreground w-64 border-r border-sidebar-border flex flex-col h-screen z-40">
+      {/* Sidebar Header */}
+      <div className="p-6">
+        <h1 className="font-heading font-bold text-2xl">
           <span className="text-primary">Night</span>
           <span className="text-secondary">Connect</span>
         </h1>
-        
-        {renderNavigationItems()}
       </div>
-      
-      <div className="mt-auto p-4 border-t border-border">
+
+      {/* Navigation Links */}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto scrollbar-hide">
+        <ul className="space-y-1">
+          {navItems.map((item) => {
+            const isActive =
+              activeItem === item.key || 
+              (activeItem === undefined && location === item.href);
+              
+            return (
+              <li key={item.key}>
+                <Link href={item.href}>
+                  <a
+                    className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors ${
+                      isActive
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    }`}
+                  >
+                    <span className="mr-3">{item.icon}</span>
+                    {item.name}
+                  </a>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* User Profile Section */}
+      <div className="p-4 border-t border-sidebar-border">
         <div className="flex items-center">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white overflow-hidden">
+          <Avatar className="h-10 w-10">
             {user?.profileImage ? (
-              <img 
-                src={user.profileImage} 
-                alt={user.username} 
-                className="w-full h-full object-cover"
-              />
+              <AvatarImage src={user.profileImage} alt={user.username} />
             ) : (
-              <span className="text-lg font-bold">{user?.username.charAt(0).toUpperCase()}</span>
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {user?.firstName?.charAt(0) || user?.username?.charAt(0) || "U"}
+              </AvatarFallback>
             )}
-          </div>
+          </Avatar>
           <div className="ml-3">
-            <div className="font-medium">{user?.username}</div>
-            <div className="text-xs text-muted-foreground capitalize">{user?.role}</div>
+            <p className="text-sm font-medium">{user?.username}</p>
+            <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
           </div>
-          <button 
-            className="ml-auto text-muted-foreground hover:text-white"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-5 w-5" />
-          </button>
         </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-3 w-full justify-start text-muted-foreground"
+          onClick={handleLogout}
+          disabled={logoutMutation.isPending}
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Déconnexion
+        </Button>
       </div>
-    </aside>
+    </div>
   );
 }

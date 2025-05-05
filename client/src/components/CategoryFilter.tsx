@@ -1,5 +1,4 @@
-import { useState, useRef, useEffect } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface CategoryFilterProps {
   categories: string[];
@@ -8,48 +7,33 @@ interface CategoryFilterProps {
 }
 
 export default function CategoryFilter({ categories, activeCategory, onChange }: CategoryFilterProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isScrollable, setIsScrollable] = useState(false);
-
-  // Check if the container is scrollable
-  useEffect(() => {
-    const checkScrollable = () => {
-      if (scrollContainerRef.current) {
-        const { scrollWidth, clientWidth } = scrollContainerRef.current;
-        setIsScrollable(scrollWidth > clientWidth);
-      }
-    };
-
-    checkScrollable();
-    window.addEventListener('resize', checkScrollable);
-
-    return () => {
-      window.removeEventListener('resize', checkScrollable);
-    };
-  }, [categories]);
-
   return (
-    <div className="mb-6">
-      <ScrollArea className={isScrollable ? "w-full" : ""}>
-        <div 
-          ref={scrollContainerRef}
-          className="flex space-x-2 py-2"
+    <div className="flex space-x-2 overflow-x-auto pb-1 min-w-min">
+      {categories.map((category) => (
+        <button
+          key={category}
+          onClick={() => onChange(category)}
+          className={`relative flex-none px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            activeCategory === category 
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
+          }`}
         >
-          {categories.map((category, index) => (
-            <button
-              key={index}
-              className={`whitespace-nowrap ${
-                activeCategory === category
-                  ? "bg-primary text-white"
-                  : "bg-card hover:bg-muted text-gray-300"
-              } rounded-full px-4 py-2 text-sm font-medium transition-colors`}
-              onClick={() => onChange(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </ScrollArea>
+          {category}
+          {activeCategory === category && (
+            <AnimatePresence>
+              <motion.span
+                layoutId="activePill"
+                className="absolute inset-0 bg-primary rounded-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{ zIndex: -1 }}
+              />
+            </AnimatePresence>
+          )}
+        </button>
+      ))}
     </div>
   );
 }
