@@ -1,68 +1,82 @@
-# NightConnect - Plateforme Événementielle pour la Vie Nocturne
+# NightConnect - Application d'événements nocturnes
 
-NightConnect est une application inspirée de TikTok qui connecte les artistes, les clubs et les utilisateurs dans un écosystème créatif pour la scène nocturne.
+NightConnect est une plateforme inspirée de TikTok qui connecte les artistes, les clubs et les utilisateurs dans l'écosystème de la vie nocturne. L'application permet:
 
-## Fonctionnalités principales
+- Aux artistes de trouver des engagements
+- Aux clubs de découvrir des talents
+- Aux utilisateurs de découvrir des événements
+- Aux administrateurs de gérer la plateforme
 
-### Pour les utilisateurs
-- Découvrir des événements à venir
-- Acheter des billets pour des événements
-- Scanner des QR codes pour valider les billets
-- Consulter les profils des artistes et des clubs
-- Laisser des avis
+## Fonctionnalités clés
 
-### Pour les artistes
-- Gérer leur profil et portfolio
-- Recevoir des invitations pour jouer dans des clubs
-- Planifier leur calendrier de performances
-- Consulter les avis et statistiques
-- Gérer leur portefeuille virtuel
-
-### Pour les clubs
-- Créer et gérer des événements
-- Inviter des artistes à se produire
-- Gérer la billetterie via QR codes
-- Consulter les statistiques et analyses
-- Publier des offres spéciales
-
-### Pour les administrateurs
-- Modérer les événements et utilisateurs
-- Approuver les nouveaux clubs et artistes
-- Accéder aux statistiques globales
-- Gérer le système dans son ensemble
+- **Interface adaptative**: design responsive pour mobile et web
+- **Expérience TikTok**: navigation par swipe sur mobile pour découvrir les événements
+- **Système multi-profils**: quatre types d'utilisateurs (standard, artiste, club, admin)
+- **Tableau de bord personnalisé**: chaque type d'utilisateur a son propre tableau de bord
+- **Intégration QR Code**: validation des billets et entrées avec QR code
+- **Système de paiement**: achat de billets et paiement d'artistes
 
 ## Identifiants de test
 
-### Utilisateur standard
-- Nom d'utilisateur: user1
-- Mot de passe: password123
+Utilisez les identifiants suivants pour tester l'application:
 
-### Artiste
-- Nom d'utilisateur: dj_elektra
-- Mot de passe: password123
+| Type       | Nom d'utilisateur | Mot de passe   |
+|------------|-------------------|----------------|
+| Utilisateur| user1             | password123    |
+| Artiste    | dj_elektra        | password123    |
+| Club       | club_oxygen       | password123    |
+| Admin      | admin             | adminpass123   |
 
-### Club
-- Nom d'utilisateur: club_oxygen
-- Mot de passe: password123
+## Structure de l'application
 
-### Administrateur
-- Nom d'utilisateur: admin
-- Mot de passe: adminpass123
+```
+├── client/            # Frontend React
+│   ├── src/
+│   │   ├── components/ # Composants réutilisables
+│   │   ├── hooks/      # Hooks personnalisés
+│   │   ├── layouts/    # Layouts de page
+│   │   ├── lib/        # Utilitaires et fonctions
+│   │   ├── pages/      # Pages de l'application
+│   │   └── ...
+├── db/                # Configuration de la base de données
+├── server/            # Backend Express
+├── shared/            # Code partagé (schémas, types)
+```
 
 ## Technologies utilisées
-- Frontend: React avec TypeScript
-- Backend: Express.js
-- Base de données: PostgreSQL avec Drizzle ORM
-- Authentication: Passport.js
-- QR Code: qrcode
-- UI: Tailwind CSS et Shadcn
 
-## Architecture de l'application
-L'application utilise une architecture moderne avec des composants réutilisables et des hooks React personnalisés. Conçue avec une approche "mobile-first", elle s'adapte parfaitement aux appareils mobiles et aux ordinateurs de bureau.
+- **Frontend**: React avec TypeScript, TailwindCSS, Framer Motion pour les animations
+- **Backend**: Express.js
+- **Base de données**: PostgreSQL avec Drizzle ORM
+- **Authentification**: Passport.js avec sessions
+- **Requêtes API**: TanStack Query (React Query)
+- **Styles**: shadcn/ui avec Tailwind
+- **Navigation**: wouter pour le routage
 
-## Comment lancer l'application
-1. Assurez-vous que Node.js et npm sont installés
-2. Clonez le dépôt
-3. Installez les dépendances: `npm install`
-4. Configurez la base de données PostgreSQL et mettez à jour les variables d'environnement
-5. Lancez l'application: `npm run dev`
+## Modes d'affichage
+
+L'application propose deux modes d'affichage distincts:
+
+1. **Mode Mobile**: Interface optimisée pour les appareils mobiles avec:
+   - Navigation en bas de l'écran
+   - Cartes d'événements en plein écran avec swipe
+   - Boutons agrandis pour faciliter les interactions tactiles
+
+2. **Mode Desktop**: Interface optimisée pour les écrans plus grands avec:
+   - Barre de navigation latérale
+   - Affichage en grille pour les événements
+   - Menus déroulants et filtres avancés
+
+## Personnalisation
+
+L'application applique automatiquement un thème sombre par défaut, avec des couleurs primaires et secondaires personnalisables dans le fichier `index.css`.
+
+## Démarrage
+
+Pour lancer l'application:
+
+```bash
+npm run dev
+```
+
+Cela démarrera à la fois le serveur backend et le frontend.

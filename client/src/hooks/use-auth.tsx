@@ -1,13 +1,26 @@
-import { createContext, ReactNode, useContext, useState, useEffect } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import {
   useQuery,
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { User as SelectUser, InsertUser, UserRole } from "@shared/schema";
+import { User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+
+type LoginData = {
+  username: string;
+  password: string;
+};
+
+type RegisterData = {
+  username: string;
+  password: string;
+  confirmPassword: string;
+  email: string;
+  role: string;
+};
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -18,23 +31,7 @@ type AuthContextType = {
   registerMutation: UseMutationResult<SelectUser, Error, RegisterData>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
-
-type RegisterData = InsertUser & {
-  confirmPassword: string;
-};
-
-// Create a default context value to avoid the null check
-const defaultAuthContext: AuthContextType = {
-  user: null,
-  isLoading: false,
-  error: null,
-  loginMutation: {} as UseMutationResult<SelectUser, Error, LoginData>,
-  logoutMutation: {} as UseMutationResult<void, Error, void>,
-  registerMutation: {} as UseMutationResult<SelectUser, Error, RegisterData>,
-};
-
-export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
@@ -144,22 +141,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const authContextValue: AuthContextType = {
-    user: user ?? null,
-    isLoading,
-    error,
-    loginMutation,
-    logoutMutation,
-    registerMutation,
-  };
-
   return (
-    <AuthContext.Provider value={authContextValue}>
+    <AuthContext.Provider value={{
+      user: user ?? null,
+      isLoading,
+      error,
+      loginMutation,
+      logoutMutation,
+      registerMutation,
+    }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }

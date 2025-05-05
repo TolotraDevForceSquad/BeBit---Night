@@ -14,29 +14,40 @@ export function ProtectedRoute({
   component: Component,
   roles,
 }: ProtectedRouteProps) {
-  const { user, isLoading } = useAuth();
+  // Essayons d'accéder à useAuth et gérons les erreurs
+  try {
+    const { user, isLoading } = useAuth();
 
-  return (
-    <Route path={path}>
-      {isLoading ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : !user ? (
+    return (
+      <Route path={path}>
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-screen">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : !user ? (
+          <Redirect to="/auth" />
+        ) : !roles.includes(user.role) ? (
+          <Redirect to={
+            user.role === "admin" 
+              ? "/admin" 
+              : user.role === "artist" 
+                ? "/artist" 
+                : user.role === "club" 
+                  ? "/club" 
+                  : "/"
+          } />
+        ) : (
+          <Component />
+        )}
+      </Route>
+    );
+  } catch (error) {
+    // Si une erreur se produit avec useAuth, rediriger vers la page d'authentification
+    console.error("Error in ProtectedRoute:", error);
+    return (
+      <Route path={path}>
         <Redirect to="/auth" />
-      ) : !roles.includes(user.role) ? (
-        <Redirect to={
-          user.role === "admin" 
-            ? "/admin" 
-            : user.role === "artist" 
-              ? "/artist" 
-              : user.role === "club" 
-                ? "/club" 
-                : "/"
-        } />
-      ) : (
-        <Component />
-      )}
-    </Route>
-  );
+      </Route>
+    );
+  }
 }

@@ -1,9 +1,11 @@
-import { useState } from 'react';
-import { Link } from 'wouter';
-import { Heart, Calendar, MapPin, Music, Clock, Users, X, Check } from 'lucide-react';
-import { Event } from '@shared/schema';
-import { Button } from '@/components/ui/button';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useState, useRef } from "react";
+import { Link } from "wouter";
+import { motion, PanInfo, useAnimation } from "framer-motion";
+import { Event } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { Heart, Share, Calendar, MapPin, Clock, User, Music, Ticket } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface MobileEventCardProps {
   event: Event;
@@ -12,10 +14,10 @@ interface MobileEventCardProps {
 }
 
 export default function MobileEventCard({ event, onLike, onDislike }: MobileEventCardProps) {
-  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const controls = useAnimation();
+  const constraintsRef = useRef(null);
+  const { toast } = useToast();
 
   // Format date
   const eventDate = new Date(event.date);
@@ -24,153 +26,166 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
     month: 'short',
   }).format(eventDate);
 
-  // Handle touch events for swiping
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    setStartPos({ x: touch.clientX, y: touch.clientY });
-    setIsDragging(true);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - startPos.x;
-    const deltaY = touch.clientY - startPos.y;
-    
-    // Limit vertical movement
-    if (Math.abs(deltaY) > Math.abs(deltaX) * 0.8) {
-      return;
-    }
-    
-    setPosition({ x: deltaX, y: 0 });
-    
-    // Determine swipe direction
-    if (deltaX > 50) {
-      setDirection('right');
-    } else if (deltaX < -50) {
-      setDirection('left');
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: event.title,
+        text: `Découvre l'événement ${event.title} sur NightConnect`,
+        url: `/events/${event.id}`,
+      })
+      .catch(() => {
+        toast({
+          title: "Erreur",
+          description: "Impossible de partager le contenu",
+          variant: "destructive",
+        });
+      });
     } else {
-      setDirection(null);
+      // Fallback
+      toast({
+        title: "Partage indisponible",
+        description: "Le partage n'est pas supporté sur ce navigateur",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
+  const handleLike = () => {
+    setIsLiked(true);
+    onLike && onLike();
     
-    if (direction === 'right' && onLike) {
-      onLike();
-    } else if (direction === 'left' && onDislike) {
-      onDislike();
-    }
-    
-    // Reset position with animation
-    setPosition({ x: 0, y: 0 });
-    setDirection(null);
+    toast({
+      title: "Événement ajouté aux favoris",
+      description: `Vous avez ajouté ${event.title} à vos favoris`,
+    });
   };
 
-  // Calculate rotation and opacity based on position
-  const rotate = position.x * 0.1;
-  const opacity = Math.min(1, Math.max(0, Math.abs(position.x) / 100));
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 100;
+    
+    if (info.offset.x > threshold) {
+      // Swiped right (like)
+      controls.start({ x: "100%", opacity: 0 });
+      handleLike();
+      setTimeout(() => {
+        controls.set({ x: 0, opacity: 1 });
+      }, 300);
+    } else if (info.offset.x < -threshold) {
+      // Swiped left (dislike)
+      controls.start({ x: "-100%", opacity: 0 });
+      onDislike && onDislike();
+      setTimeout(() => {
+        controls.set({ x: 0, opacity: 1 });
+      }, 300);
+    } else {
+      // Return to center
+      controls.start({ x: 0, opacity: 1 });
+    }
+  };
 
   return (
-    <AnimatePresence>
+    <div ref={constraintsRef} className="relative h-[calc(100vh-200px)] overflow-hidden">
       <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 50 }}
-        transition={{ duration: 0.3 }}
-        className="w-full h-[80vh] md:h-[500px] relative overflow-hidden rounded-xl shadow-xl"
-        style={{
-          transform: `translateX(${position.x}px) rotate(${rotate}deg)`,
-          transition: isDragging ? 'none' : 'all 0.5s ease',
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className="absolute inset-0"
+        drag="x"
+        dragConstraints={constraintsRef}
+        onDragEnd={handleDragEnd}
+        animate={controls}
+        initial={{ opacity: 1, x: 0 }}
+        whileTap={{ scale: 0.98 }}
       >
-        {/* Background Image */}
-        <div className="absolute inset-0 bg-muted/80 overflow-hidden">
-          {event.coverImage ? (
-            <img 
-              src={event.coverImage} 
-              alt={event.title} 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-b from-primary/20 to-card"></div>
-          )}
-          
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-        </div>
-        
-        {/* Swipe indicators */}
-        <div 
-          className="absolute top-1/3 left-4 bg-destructive rounded-full p-3 transform -translate-y-1/2"
-          style={{ opacity: direction === 'left' ? opacity : 0 }}
-        >
-          <X className="h-6 w-6 text-white" />
-        </div>
-        
-        <div 
-          className="absolute top-1/3 right-4 bg-green-500 rounded-full p-3 transform -translate-y-1/2"
-          style={{ opacity: direction === 'right' ? opacity : 0 }}
-        >
-          <Check className="h-6 w-6 text-white" />
-        </div>
-        
-        {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-          <Link href={`/events/${event.id}`}>
-            <a className="block">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{event.title}</h2>
-            </a>
-          </Link>
-          
-          <div className="flex items-center space-x-2 text-white/80 mb-2">
-            <Calendar className="h-4 w-4" />
-            <span className="text-sm">{formattedDate}</span>
-            <span className="mx-1">•</span>
-            <Clock className="h-4 w-4" />
-            <span className="text-sm">{event.startTime} - {event.endTime}</span>
-          </div>
-          
-          <div className="flex items-center space-x-2 text-white/80 mb-3">
-            <MapPin className="h-4 w-4" />
-            <span className="text-sm">{event.venueName}, {event.location}</span>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/20 text-primary-foreground">
-              <Music className="h-3 w-3 mr-1" />
-              {event.category}
-            </span>
+        <div className="bg-card rounded-xl overflow-hidden h-full shadow-lg border border-border flex flex-col">
+          {/* Event Cover Image */}
+          <div className="relative flex-grow">
+            <AspectRatio ratio={9/16} className="h-full">
+              {event.coverImage ? (
+                <img 
+                  src={event.coverImage} 
+                  alt={event.title} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center">
+                  <Music className="h-16 w-16 text-muted-foreground/50" />
+                </div>
+              )}
+            </AspectRatio>
             
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/20 text-secondary-foreground">
-              <Users className="h-3 w-3 mr-1" />
-              {event.participantCount}/{event.capacity}
-            </span>
+            {/* Overlays */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
             
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-              {event.price} €
-            </span>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <Button variant="secondary" size="sm" className="rounded-full px-4">
-              <Heart className="h-4 w-4 mr-1" />
-              Intéressé
-            </Button>
-            
-            <Link href={`/events/${event.id}`}>
-              <Button variant="default" size="sm" className="rounded-full px-4">
-                Détails
-              </Button>
-            </Link>
+            {/* Content */}
+            <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+              <Link href={`/events/${event.id}`}>
+                <a className="block">
+                  <h2 className="text-2xl font-bold mb-2">{event.title}</h2>
+                </a>
+              </Link>
+              
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>{formattedDate}</span>
+                  <span className="mx-1">•</span>
+                  <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>{event.startTime}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span className="line-clamp-1">{event.venueName}, {event.location}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <User className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <span>{event.participantCount}/{event.capacity} participants</span>
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-white">
+                  {event.category}
+                </span>
+                
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                  {event.price} €
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Button variant="default" size="sm" className="rounded-full">
+                  <Ticket className="h-4 w-4 mr-1" />
+                  Réserver
+                </Button>
+                
+                <div className="flex items-center space-x-4">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className={`rounded-full ${isLiked ? 'text-red-500' : 'text-white'}`}
+                    onClick={() => setIsLiked(!isLiked)}
+                  >
+                    <Heart className="h-6 w-6" fill={isLiked ? "currentColor" : "none"} />
+                  </Button>
+                  
+                  <Button variant="ghost" size="icon" className="rounded-full text-white" onClick={handleShare}>
+                    <Share className="h-6 w-6" />
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
-    </AnimatePresence>
+      
+      {/* Swipe instructions */}
+      <div className="absolute top-1/2 left-4 transform -translate-y-1/2 text-muted-foreground opacity-20 text-lg font-light">
+        ← Ignorer
+      </div>
+      <div className="absolute top-1/2 right-4 transform -translate-y-1/2 text-muted-foreground opacity-20 text-lg font-light">
+        Intéressé →
+      </div>
+    </div>
   );
 }
