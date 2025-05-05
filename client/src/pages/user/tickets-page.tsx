@@ -75,37 +75,7 @@ const mockTickets: UserTicket[] = [
   },
 ];
 
-// Obtenir la couleur de statut du ticket
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "valid":
-      return "bg-green-100 text-green-700";
-    case "used":
-      return "bg-blue-100 text-blue-700";
-    case "expired":
-      return "bg-amber-100 text-amber-700";
-    case "refunded":
-      return "bg-red-100 text-red-700";
-    default:
-      return "bg-gray-100 text-gray-700";
-  }
-};
 
-// Obtenir le libellé de statut du ticket
-const getStatusLabel = (status: string) => {
-  switch (status) {
-    case "valid":
-      return "Valide";
-    case "used":
-      return "Utilisé";
-    case "expired":
-      return "Expiré";
-    case "refunded":
-      return "Remboursé";
-    default:
-      return status;
-  }
-};
 
 export default function TicketsPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -224,9 +194,32 @@ export default function TicketsPage() {
 
 // Composant pour afficher un ticket
 function TicketCard({ ticket }: { ticket: UserTicket }) {
+  // Déterminer la couleur et le libellé selon le statut
+  let statusColor = "";
+  let statusLabel = "";
   
-  const statusColor = getStatusColor(ticket.status);
-  const statusLabel = getStatusLabel(ticket.status);
+  switch (ticket.status) {
+    case "valid":
+      statusColor = "bg-green-100 text-green-700";
+      statusLabel = "Valide";
+      break;
+    case "used":
+      statusColor = "bg-blue-100 text-blue-700";
+      statusLabel = "Utilisé";
+      break;
+    case "expired":
+      statusColor = "bg-amber-100 text-amber-700";
+      statusLabel = "Expiré";
+      break;
+    case "refunded":
+      statusColor = "bg-red-100 text-red-700";
+      statusLabel = "Remboursé";
+      break;
+    default:
+      statusColor = "bg-gray-100 text-gray-700";
+      statusLabel = ticket.status;
+  }
+  
   const eventDate = format(new Date(ticket.eventDate), "EEEE d MMMM yyyy, HH'h'mm", { locale: fr });
   
   return (
