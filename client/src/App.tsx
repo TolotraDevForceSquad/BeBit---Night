@@ -20,6 +20,8 @@ const EventsManagementPage = lazy(() => import("@/pages/admin/events-management-
 const EventDetailsPage = lazy(() => import("@/pages/event-details-page"));
 const NotificationsPage = lazy(() => import("@/pages/user/notifications-page"));
 const TicketsPage = lazy(() => import("@/pages/user/tickets-page"));
+const InvitationsPage = lazy(() => import("@/pages/user/invitations-page"));
+const GalleryPage = lazy(() => import("@/pages/user/gallery-page"));
 
 // Type pour l'authentification
 type AuthUser = {
@@ -124,11 +126,11 @@ function App() {
         </Route>
         
         <Route path="/user/invitations">
-          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+          {!user ? <SimpleAuth /> : user.role === "user" ? <InvitationsPage /> : <Redirect to="/" />}
         </Route>
         
         <Route path="/user/gallery">
-          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+          {!user ? <SimpleAuth /> : user.role === "user" ? <GalleryPage /> : <Redirect to="/" />}
         </Route>
         
         <Route path="/user/favorites">
