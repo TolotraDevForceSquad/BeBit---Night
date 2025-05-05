@@ -7,8 +7,14 @@ import { Suspense, useState, useEffect, lazy } from "react";
 
 // Chargement paresseux des composants de page pour optimiser les performances
 const ArtistDashboardPage = lazy(() => import("@/pages/artist/dashboard-page"));
+const ArtistProfilePage = lazy(() => import("@/pages/artist/artist-profile-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
+const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
 const AdminDashboardPage = lazy(() => import("@/pages/admin/dashboard-page"));
+const ModerationPage = lazy(() => import("@/pages/admin/moderation-page"));
+const ArtistsManagementPage = lazy(() => import("@/pages/admin/artists-management-page"));
+const ArtistFormPage = lazy(() => import("@/pages/admin/artist-form-page"));
+const EventDetailsPage = lazy(() => import("@/pages/event-details-page"));
 
 // Type pour l'authentification
 type AuthUser = {
@@ -110,6 +116,36 @@ function App() {
         
         <Route path="/user/profile">
           {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
+        {/* Routes Admin */}
+        <Route path="/admin/moderation">
+          {!user ? <SimpleAuth /> : user.role === "admin" ? <ModerationPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/admin/artists">
+          {!user ? <SimpleAuth /> : user.role === "admin" ? <ArtistsManagementPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/admin/artists/new">
+          {!user ? <SimpleAuth /> : user.role === "admin" ? <ArtistFormPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/admin/artists/edit">
+          {!user ? <SimpleAuth /> : user.role === "admin" ? <ArtistFormPage /> : <Redirect to="/" />}
+        </Route>
+        
+        {/* Routes Profils & Événements */}
+        <Route path="/artist/:id">
+          <ArtistProfilePage />
+        </Route>
+        
+        <Route path="/club/:id">
+          <ClubProfilePage />
+        </Route>
+        
+        <Route path="/event/:id">
+          <EventDetailsPage />
         </Route>
         
         {/* Fallback à 404 */}
