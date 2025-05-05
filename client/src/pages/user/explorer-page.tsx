@@ -32,6 +32,10 @@ type Event = {
   category: string;
   venueName: string;
   price: number;
+  city?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
   isFeatured?: boolean;
   isLiked?: boolean;
 };
@@ -46,6 +50,10 @@ const mockEvents: Event[] = [
     coverImage: "https://images.unsplash.com/photo-1571266028277-641cb7a18510?w=500&h=300&fit=crop",
     category: "Techno",
     venueName: "Club Oxygen",
+    city: "Paris",
+    country: "France",
+    latitude: 48.8566,
+    longitude: 2.3522,
     price: 25,
     isFeatured: true,
   },
@@ -57,6 +65,10 @@ const mockEvents: Event[] = [
     coverImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&h=300&fit=crop",
     category: "House",
     venueName: "Loft 21",
+    city: "Lyon",
+    country: "France",
+    latitude: 45.7640,
+    longitude: 4.8357,
     price: 20,
   },
   {
@@ -67,6 +79,10 @@ const mockEvents: Event[] = [
     coverImage: "https://images.unsplash.com/photo-1495147466023-ac5c588e2e94?w=500&h=300&fit=crop",
     category: "Jazz",
     venueName: "Blue Note",
+    city: "Paris",
+    country: "France",
+    latitude: 48.8584,
+    longitude: 2.3488,
     price: 30,
     isLiked: true,
   },
@@ -78,6 +94,10 @@ const mockEvents: Event[] = [
     coverImage: "https://images.unsplash.com/photo-1504704911898-68304a7d2807?w=500&h=300&fit=crop",
     category: "Hip-Hop",
     venueName: "Le Bunker",
+    city: "Marseille",
+    country: "France",
+    latitude: 43.2965,
+    longitude: 5.3698,
     price: 15,
   },
   {
@@ -88,6 +108,10 @@ const mockEvents: Event[] = [
     coverImage: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&h=300&fit=crop",
     category: "Électro",
     venueName: "Warehouse",
+    city: "Bordeaux",
+    country: "France",
+    latitude: 44.8378,
+    longitude: -0.5792,
     price: 35,
     isFeatured: true,
   },
@@ -99,6 +123,10 @@ const mockEvents: Event[] = [
     coverImage: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=500&h=300&fit=crop",
     category: "Funk",
     venueName: "Studio 54",
+    city: "Lille",
+    country: "France",
+    latitude: 50.6329,
+    longitude: 3.0581,
     price: 25,
   },
 ];
@@ -118,16 +146,33 @@ export default function UserExplorerPage() {
       }
     }
   }, []);
+
   const isMobile = useMobile();
   const [activeTab, setActiveTab] = useState("découvrir");
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+
+  // Utiliser la géolocalisation
+  const { latitude, longitude, city, country, loading: geoLoading } = useGeolocation();
 
   // Utiliser les événements mockés au lieu de useQuery
   const [isLoading, setIsLoading] = useState(true);
   const [events, setEvents] = useState<Event[]>([]);
+
+  // Mettre à jour la ville sélectionnée quand la géolocalisation est disponible
+  useEffect(() => {
+    if (city && !selectedCity) {
+      setSelectedCity(city);
+    }
+  }, [city, selectedCity]);
+
+  // Fonction pour changer la ville
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city);
+  };
   
-  // Simuler un chargement des données
+  // Simuler un chargement des données avec tri par localisation
   useEffect(() => {
     const timer = setTimeout(() => {
       // Filtrer les événements selon la catégorie et la recherche
@@ -146,12 +191,22 @@ export default function UserExplorerPage() {
         );
       }
       
+      // Trier les événements par proximité si l'onglet "nearby" est actif
+      if (activeTab === "nearby" && isMobile) {
+        filteredEvents = filteredEvents.filter(event => event.city && event.latitude && event.longitude);
+      }
+
+      // Prioriser les événements dans la ville sélectionnée
+      if (selectedCity) {
+        filteredEvents = prioritizeEventsByCity(filteredEvents, selectedCity);
+      }
+      
       setEvents(filteredEvents);
       setIsLoading(false);
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, activeTab, selectedCity, latitude, longitude]);
 
   // Dummy categories for now
   const categories = ["all", "House", "Techno", "Hip-Hop", "Jazz", "Funk", "EDM"];
@@ -227,6 +282,14 @@ export default function UserExplorerPage() {
       {/* Mobile search and filters */}
       {isMobile && (
         <div className="mb-4 space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold">Explorer</h2>
+            <LocationDisplay 
+              displayMode="badge" 
+              onCitySelect={handleCityChange}
+            />
+          </div>
+          
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
@@ -260,9 +323,16 @@ export default function UserExplorerPage() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold mb-2">Explorez les événements</h1>
-            <p className="text-muted-foreground">
-              Découvrez les meilleurs événements et artistes près de chez vous
-            </p>
+            <div className="flex items-center space-x-2">
+              <p className="text-muted-foreground">
+                Découvrez les meilleurs événements et artistes près de chez vous
+              </p>
+              <LocationDisplay 
+                displayMode="badge" 
+                onCitySelect={handleCityChange}
+                showSelector={true}
+              />
+            </div>
           </div>
           
           <div className="relative w-72">
@@ -300,13 +370,39 @@ export default function UserExplorerPage() {
       {isMobile && events && events.length > 0 && (
         <div className="space-y-4">
           {activeTab === "découvrir" && (
-            <MobileEventCard event={events[0]} />
+            <MobileEventCard 
+              event={events[0]} 
+              onLike={() => console.log("Liked event", events[0].id)}
+              onDislike={() => console.log("Disliked event", events[0].id)}
+            />
           )}
-          {activeTab === "tendances" && events.length > 1 && (
-            <MobileEventCard event={events[1]} />
+          {activeTab === "tendances" && events.filter(e => e.isFeatured).length > 0 && (
+            <MobileEventCard 
+              event={events.find(e => e.isFeatured) || events[0]} 
+              onLike={() => console.log("Liked event")}
+              onDislike={() => console.log("Disliked event")}
+            />
           )}
-          {activeTab === "nearby" && events.length > 2 && (
-            <MobileEventCard event={events[2]} />
+          {activeTab === "nearby" && (
+            <>
+              {events.filter(e => e.city === selectedCity).length > 0 ? (
+                <MobileEventCard 
+                  event={events.find(e => e.city === selectedCity) || events[0]} 
+                  onLike={() => console.log("Liked event")}
+                  onDislike={() => console.log("Disliked event")}
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-medium mb-2">
+                    Aucun événement à proximité
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Il n'y a pas d'événements disponibles dans votre ville pour le moment
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
