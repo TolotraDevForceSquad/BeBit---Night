@@ -16,6 +16,7 @@ const ArtistsManagementPage = lazy(() => import("@/pages/admin/artists-managemen
 const ArtistFormPage = lazy(() => import("@/pages/admin/artist-form-page"));
 const ClubsManagementPage = lazy(() => import("@/pages/admin/clubs-management-page"));
 const ClubFormPage = lazy(() => import("@/pages/admin/club-form-page"));
+const EventsManagementPage = lazy(() => import("@/pages/admin/events-management-page"));
 const EventDetailsPage = lazy(() => import("@/pages/event-details-page"));
 
 // Type pour l'authentification
@@ -147,6 +148,10 @@ function App() {
         
         <Route path="/admin/clubs/edit">
           {!user ? <SimpleAuth /> : user.role === "admin" ? <ClubFormPage /> : <Redirect to="/" />}
+        </Route>
+
+        <Route path="/admin/events">
+          {!user ? <SimpleAuth /> : user.role === "admin" ? <EventsManagementPage /> : <Redirect to="/" />}
         </Route>
         
         {/* Routes Profils & Événements */}
