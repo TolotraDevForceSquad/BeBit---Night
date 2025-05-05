@@ -22,6 +22,9 @@ const NotificationsPage = lazy(() => import("@/pages/user/notifications-page"));
 const TicketsPage = lazy(() => import("@/pages/user/tickets-page"));
 const InvitationsPage = lazy(() => import("@/pages/user/invitations-page"));
 const GalleryPage = lazy(() => import("@/pages/user/gallery-page"));
+const WalletPage = lazy(() => import("@/pages/user/wallet-page"));
+const FavoritesPage = lazy(() => import("@/pages/user/favorites-page"));
+const ReviewsPage = lazy(() => import("@/pages/user/reviews-page"));
 
 // Type pour l'authentification
 type AuthUser = {
@@ -114,7 +117,7 @@ function App() {
         
         {/* Routes utilisateur */}
         <Route path="/user/wallet">
-          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+          {!user ? <SimpleAuth /> : user.role === "user" ? <WalletPage /> : <Redirect to="/" />}
         </Route>
         
         <Route path="/user/tickets">
@@ -134,7 +137,11 @@ function App() {
         </Route>
         
         <Route path="/user/favorites">
-          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+          {!user ? <SimpleAuth /> : user.role === "user" ? <FavoritesPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/user/reviews">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <ReviewsPage /> : <Redirect to="/" />}
         </Route>
         
         <Route path="/user/notifications">
