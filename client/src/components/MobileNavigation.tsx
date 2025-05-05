@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Wallet,
-  Settings, User
+  Settings, User, PartyPopper
 } from "lucide-react";
 
 interface MobileNavigationProps {
@@ -39,7 +39,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'user') {
       return [
         { icon: <Home size={24} />, label: "Explorer", href: "/" },
-        { icon: <Search size={24} />, label: "Rechercher", href: "/user/search" },
+        { icon: <PartyPopper size={24} />, label: "Sorties", href: "/user/events" },
         { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
         { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
@@ -81,7 +81,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     // Par défaut, retourner la navigation utilisateur
     return [
       { icon: <Home size={24} />, label: "Explorer", href: "/" },
-      { icon: <Search size={24} />, label: "Rechercher", href: "/user/search" },
+      { icon: <PartyPopper size={24} />, label: "Sorties", href: "/user/events" },
       { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
       { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
