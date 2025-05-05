@@ -28,7 +28,9 @@ export default function Sidebar({ activeItem }: SidebarProps) {
 
   // Handle logout
   const handleLogout = () => {
-    logoutMutation.mutate();
+    if (logoutMutation && typeof logoutMutation.mutate === 'function') {
+      logoutMutation.mutate();
+    }
   };
 
   // Generate navigation items based on user role
@@ -254,7 +256,7 @@ export default function Sidebar({ activeItem }: SidebarProps) {
           size="sm"
           className="mt-3 w-full justify-start text-muted-foreground"
           onClick={handleLogout}
-          disabled={logoutMutation.isPending}
+          disabled={logoutMutation?.isPending}
         >
           <LogOut className="h-4 w-4 mr-2" />
           Déconnexion
