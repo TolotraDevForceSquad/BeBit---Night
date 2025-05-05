@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { BarChart, PieChart, LineChart, ChevronRight, User, Music, Building, Calendar, Ban, AlertTriangle } from "lucide-react";
+import { useLocation } from "wouter";
+import { BarChart, PieChart, LineChart, ChevronRight, User, Music, Building, Calendar, Ban, AlertTriangle, Shield } from "lucide-react";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -160,6 +161,7 @@ const userTypeData = [
 ];
 
 export default function AdminDashboardPage() {
+  const [, setLocation] = useLocation();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [usersForModeration, setUsersForModeration] = useState<UserForModeration[]>([]);
@@ -233,6 +235,42 @@ export default function AdminDashboardPage() {
         <div className="space-y-6">
           <h1 className="text-2xl font-bold">Tableau de bord</h1>
           
+          {/* Actions rapides */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            <Button 
+              variant="outline" 
+              className="gap-1.5"
+              onClick={() => setLocation("/admin/moderation")}
+            >
+              <Shield className="h-4 w-4" />
+              Modération
+            </Button>
+            <Button 
+              variant="outline" 
+              className="gap-1.5"
+              onClick={() => setLocation("/admin/artists")}
+            >
+              <Music className="h-4 w-4" />
+              Gestion Artistes
+            </Button>
+            <Button 
+              variant="outline" 
+              className="gap-1.5"
+              onClick={() => setLocation("/admin/clubs")}
+            >
+              <Building className="h-4 w-4" />
+              Gestion Clubs
+            </Button>
+            <Button 
+              variant="outline" 
+              className="gap-1.5"
+              onClick={() => setLocation("/admin/events")}
+            >
+              <Calendar className="h-4 w-4" />
+              Gestion Événements
+            </Button>
+          </div>
+          
           {/* Statistiques principales */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
@@ -271,7 +309,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="mt-3 flex items-center text-xs text-muted-foreground">
                   <span className="font-medium">Ratio:</span>
-                  <span className="mx-1">{Math.round(stats?.totalArtists / stats?.totalUsers * 100)}% des utilisateurs</span>
+                  <span className="mx-1">{stats ? Math.round((stats.totalArtists / stats.totalUsers) * 100) : 0}% des utilisateurs</span>
                 </div>
               </CardContent>
             </Card>
@@ -291,7 +329,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="mt-3 flex items-center text-xs text-muted-foreground">
                   <span className="font-medium">Ratio:</span>
-                  <span className="mx-1">{Math.round(stats?.totalClubs / stats?.totalUsers * 100)}% des utilisateurs</span>
+                  <span className="mx-1">{stats ? Math.round((stats.totalClubs / stats.totalUsers) * 100) : 0}% des utilisateurs</span>
                 </div>
               </CardContent>
             </Card>
@@ -399,10 +437,21 @@ export default function AdminDashboardPage() {
             {/* Tab: Utilisateurs */}
             <TabsContent value="users" className="space-y-6 mt-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">
-                    Gestion des Utilisateurs
-                  </CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <div>
+                    <CardTitle className="text-xl">
+                      Gestion des Utilisateurs
+                    </CardTitle>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setLocation("/admin/moderation")}
+                  >
+                    Voir tout
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -462,7 +511,21 @@ export default function AdminDashboardPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex gap-2 justify-end">
-                              <Button variant="outline" size="sm">Voir</Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  if (user.role === "artist") {
+                                    setLocation("/admin/artists");
+                                  } else if (user.role === "club") {
+                                    setLocation("/admin/clubs");
+                                  } else {
+                                    setLocation("/admin/moderation");
+                                  }
+                                }}
+                              >
+                                Voir
+                              </Button>
                               {user.status === "pending" && (
                                 <Button variant="default" size="sm">Approuver</Button>
                               )}
@@ -482,14 +545,25 @@ export default function AdminDashboardPage() {
             {/* Tab: Modération */}
             <TabsContent value="moderation" className="space-y-6 mt-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center">
-                    <AlertTriangle className="h-5 w-5 mr-2" /> 
-                    Événements à Modérer
-                  </CardTitle>
-                  <CardDescription>
-                    Événements en attente d'approbation ou signalés
-                  </CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <div>
+                    <CardTitle className="text-xl flex items-center">
+                      <AlertTriangle className="h-5 w-5 mr-2" /> 
+                      Événements à Modérer
+                    </CardTitle>
+                    <CardDescription>
+                      Événements en attente d'approbation ou signalés
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setLocation("/admin/moderation")}
+                  >
+                    Voir tout
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -526,7 +600,13 @@ export default function AdminDashboardPage() {
                           </div>
                         </div>
                         <div className="flex gap-2 mt-4 justify-end">
-                          <Button variant="outline" size="sm">Voir détails</Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setLocation(`/admin/events`)}
+                          >
+                            Voir détails
+                          </Button>
                           {event.status === "pending" && (
                             <>
                               <Button variant="default" size="sm">Approuver</Button>
@@ -544,14 +624,25 @@ export default function AdminDashboardPage() {
               </Card>
               
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl flex items-center">
-                    <Ban className="h-5 w-5 mr-2" /> 
-                    Utilisateurs Signalés
-                  </CardTitle>
-                  <CardDescription>
-                    Utilisateurs ayant reçu des signalements
-                  </CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <div>
+                    <CardTitle className="text-xl flex items-center">
+                      <Ban className="h-5 w-5 mr-2" /> 
+                      Utilisateurs Signalés
+                    </CardTitle>
+                    <CardDescription>
+                      Utilisateurs ayant reçu des signalements
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => setLocation("/admin/moderation")}
+                  >
+                    Voir tout
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </CardHeader>
                 <CardContent>
                   <Table>
