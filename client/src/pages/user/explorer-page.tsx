@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { useMobile } from "@/hooks/use-mobile";
+import { useGeolocation } from "@/hooks/use-geolocation";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import MobileEventCard from "@/components/MobileEventCard";
 import EventCard from "@/components/EventCard";
 import CategoryFilter from "@/components/CategoryFilter";
+import LocationDisplay from "@/components/LocationDisplay";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Bell, Ticket, Calendar, Heart, Wallet, Star, Settings } from "lucide-react";
+import { Loader2, Search, Bell, Ticket, Calendar, Heart, Wallet, Star, Settings, MapPin } from "lucide-react";
 import { Link } from "wouter";
+import { prioritizeEventsByCity } from "@/lib/geo-utils";
 
 // Type pour l'utilisateur authentifié et l'événement
 type AuthUser = {
