@@ -2,9 +2,11 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { motion, PanInfo, useAnimation } from "framer-motion";
-import { Heart, Calendar, MapPin, Ticket, Info } from "lucide-react";
+import { Heart, Calendar, MapPin, Ticket, Info, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { getDistanceFromLatLonInKm, formatDistance } from "@/lib/geo-utils";
 import { useLocation } from "wouter";
 
 // Type d'événement pour l'affichage
@@ -17,6 +19,10 @@ interface Event {
   category: string;
   venueName: string;
   price: number;
+  city?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
   isFeatured?: boolean;
   isLiked?: boolean;
 }
@@ -32,8 +38,16 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
   const controls = useAnimation();
   const [, setLocation] = useLocation();
   
+  // Récupérer la géolocalisation de l'utilisateur
+  const { latitude, longitude } = useGeolocation();
+  
   // Formatage de la date
   const formattedDate = format(new Date(event.date), "EEEE d MMMM, HH'h'mm", { locale: fr });
+  
+  // Calculer la distance entre l'utilisateur et l'événement si les coordonnées sont disponibles
+  const distance = (latitude && longitude && event.latitude && event.longitude) 
+    ? getDistanceFromLatLonInKm(latitude, longitude, event.latitude, event.longitude)
+    : null;
   
   // Gestionnaire de glissement (swipe)
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -140,7 +154,19 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
           <div className="flex items-center text-white/80">
             <MapPin className="h-4 w-4 mr-2" />
             <span className="text-sm">{event.venueName}</span>
+            {distance && (
+              <Badge variant="secondary" className="ml-2 text-xs font-normal bg-white/20 text-white border-none">
+                {formatDistance(distance)}
+              </Badge>
+            )}
           </div>
+          
+          {event.city && (
+            <div className="flex items-center text-white/80">
+              <Building className="h-4 w-4 mr-2" />
+              <span className="text-sm">{event.city}{event.country ? `, ${event.country}` : ''}</span>
+            </div>
+          )}
         </div>
         
         {/* Description (expandable) */}

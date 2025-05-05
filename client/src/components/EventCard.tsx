@@ -1,9 +1,11 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Heart, Calendar, MapPin, ArrowRight } from "lucide-react";
+import { Heart, Calendar, MapPin, ArrowRight, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { getDistanceFromLatLonInKm, formatDistance } from "@/lib/geo-utils";
 import { useLocation } from "wouter";
 
 // Type d'événement pour l'affichage
@@ -16,6 +18,10 @@ interface Event {
   category: string;
   venueName: string;
   price: number;
+  city?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
   isFeatured?: boolean;
   isLiked?: boolean;
 }
@@ -26,8 +32,16 @@ interface EventCardProps {
 
 export default function EventCard({ event }: EventCardProps) {
   const [, setLocation] = useLocation();
+  // Récupérer la géolocalisation de l'utilisateur
+  const { latitude, longitude } = useGeolocation();
+  
   // Formatage de la date
   const formattedDate = format(new Date(event.date), "EEEE d MMMM, HH'h'mm", { locale: fr });
+  
+  // Calculer la distance entre l'utilisateur et l'événement si les coordonnées sont disponibles
+  const distance = (latitude && longitude && event.latitude && event.longitude) 
+    ? getDistanceFromLatLonInKm(latitude, longitude, event.latitude, event.longitude)
+    : null;
   
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -112,7 +126,19 @@ export default function EventCard({ event }: EventCardProps) {
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2" />
             <span>{event.venueName}</span>
+            {distance && (
+              <Badge variant="secondary" className="ml-2 text-xs font-normal">
+                {formatDistance(distance)}
+              </Badge>
+            )}
           </div>
+          
+          {event.city && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Building className="h-4 w-4 mr-2" />
+              <span>{event.city}, {event.country}</span>
+            </div>
+          )}
           
           <p className="text-sm line-clamp-2 mt-2">
             {event.description}
