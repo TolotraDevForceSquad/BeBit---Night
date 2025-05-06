@@ -10,6 +10,7 @@ const ArtistDashboardPage = lazy(() => import("@/pages/artist/dashboard-page"));
 const ArtistProfilePage = lazy(() => import("@/pages/artist/artist-profile-page"));
 const ArtistAgendaPage = lazy(() => import("@/pages/artist/agenda-page"));
 const ArtistInvitationsPage = lazy(() => import("@/pages/artist/invitations-page"));
+const ArtistFeedbackPage = lazy(() => import("@/pages/artist/feedback-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
 const FindArtistsPage = lazy(() => import("@/pages/club/find-artists-page"));
@@ -119,6 +120,15 @@ function App() {
             ? <SimpleAuth /> 
             : user.role === "artist" 
               ? <ArtistInvitationsPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+
+        <Route path="/artist/feedback">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistFeedbackPage /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
