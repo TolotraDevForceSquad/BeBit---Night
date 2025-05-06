@@ -385,9 +385,10 @@ export default function ClubDashboardPage({ activeTab = "overview" }: ClubDashbo
           
           {/* Tabs de contenu */}
           <Tabs defaultValue={activeTab} className="w-full">
-            <TabsList className="grid grid-cols-5 lg:w-[600px]">
+            <TabsList className="grid grid-cols-6 lg:w-[700px]">
               <TabsTrigger value="overview">Vue générale</TabsTrigger>
               <TabsTrigger value="events">Événements</TabsTrigger>
+              <TabsTrigger value="attendees">Participants</TabsTrigger>
               <TabsTrigger value="reservations">Réservations</TabsTrigger>
               <TabsTrigger value="outings">Sorties</TabsTrigger>
               <TabsTrigger value="artists">Artistes</TabsTrigger>
@@ -500,7 +501,7 @@ export default function ClubDashboardPage({ activeTab = "overview" }: ClubDashbo
                     <p className="text-sm text-muted-foreground my-2">
                       Gérez vos revenus et paiements
                     </p>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => window.location.href = '/club/wallet'}>
                       Consulter
                     </Button>
                   </CardContent>
@@ -574,6 +575,88 @@ export default function ClubDashboardPage({ activeTab = "overview" }: ClubDashbo
                         </div>
                       </div>
                     ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            {/* Tab: Participants */}
+            <TabsContent value="attendees" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl flex items-center">
+                      <Users className="h-5 w-5 mr-2" /> 
+                      Participants aux événements
+                    </CardTitle>
+                    <CardDescription>
+                      Gérez les participants qui assistent à vos événements
+                    </CardDescription>
+                  </div>
+                  <Button variant="default" size="sm" className="gap-2" onClick={() => window.location.href = '/club/attendees'}>
+                    Voir tous les participants
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {events
+                      .filter(event => event.status === "upcoming")
+                      .slice(0, 1)
+                      .map(event => (
+                        <div key={event.id} className="border-b pb-4">
+                          <h3 className="font-medium">{event.title}</h3>
+                          <div className="text-sm text-muted-foreground">
+                            {format(new Date(event.date), "EEEE d MMMM, HH'h'mm", { locale: fr })}
+                          </div>
+                          
+                          <div className="mt-3 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <div className="flex -space-x-2 mr-3">
+                                {[1, 2, 3].map((i) => (
+                                  <Avatar key={i} className="h-8 w-8 border-2 border-background">
+                                    <AvatarImage src={`https://images.unsplash.com/photo-${1507003211169 + i * 100}-0a1dd7228f2d?w=32&h=32&fit=crop`} />
+                                    <AvatarFallback>P{i}</AvatarFallback>
+                                  </Avatar>
+                                ))}
+                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                                  +{event.ticketsSold - 3}
+                                </div>
+                              </div>
+                              <div className="text-sm">
+                                {event.ticketsSold} participants confirmés
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <Button variant="outline" size="sm" onClick={() => window.location.href = '/club/attendees'}>
+                                Gérer
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    
+                    <div className="pt-2 flex justify-between items-center">
+                      <div>
+                        <h4 className="font-medium">Statistiques de participation</h4>
+                        <p className="text-sm text-muted-foreground">Sur les derniers événements</p>
+                      </div>
+                      
+                      <div className="flex gap-4 text-center">
+                        <div>
+                          <div className="text-xl font-bold">85%</div>
+                          <div className="text-xs text-muted-foreground">Taux de présence</div>
+                        </div>
+                        <div>
+                          <div className="text-xl font-bold">12%</div>
+                          <div className="text-xs text-muted-foreground">Taux VIP</div>
+                        </div>
+                        <div>
+                          <div className="text-xl font-bold">93%</div>
+                          <div className="text-xs text-muted-foreground">Satisfaction</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

@@ -183,6 +183,15 @@ function App() {
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
+
+        <Route path="/club/attendees">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <AttendeesPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
         
         <Route path="/admin">
           {!user 

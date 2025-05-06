@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Wallet,
-  Settings, User, PartyPopper
+  Settings, User, PartyPopper, Users
 } from "lucide-react";
 
 interface MobileNavigationProps {
@@ -62,9 +62,9 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       return [
         { icon: <Home size={24} />, label: "Events", href: "/club" },
         { icon: <Search size={24} />, label: "Artistes", href: "/club/find-artists" },
-        { icon: <Calendar size={24} />, label: "Scanner", href: "/club/scan" },
+        { icon: <Users size={24} />, label: "Participants", href: "/club/attendees" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/club/wallet" },
-        { icon: <Settings size={24} />, label: "Réglages", href: "/club/settings" },
+        { icon: <Settings size={24} />, label: "Réglages", href: "/settings" },
       ];
     }
     
