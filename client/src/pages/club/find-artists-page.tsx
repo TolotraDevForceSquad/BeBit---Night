@@ -5,6 +5,7 @@ import {
   Search, Users, Music, Star, Filter, UserCheck, 
   Check, MapPin, Disc3, BadgeCheck, ArrowRight, BadgePlus
 } from "lucide-react";
+import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
