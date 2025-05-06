@@ -226,6 +226,14 @@ export default function ArtistProfilePage() {
     alert(`Demande de réservation pour ${artist.name}`);
   };
   
+  const handleEditProfile = () => {
+    setLocation("/artist/settings");
+  };
+  
+  const handleManageMedia = () => {
+    setLocation("/artist/media");
+  };
+  
   // Contenu de l'en-tête
   const headerContent = (
     <div className="flex items-center justify-between">
@@ -531,6 +539,18 @@ export default function ArtistProfilePage() {
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Boutons de gestion du profil */}
+      <div className="fixed bottom-20 md:bottom-10 right-4 md:right-10 flex flex-col gap-2">
+        <Button onClick={handleEditProfile} className="gap-2">
+          <Users className="h-4 w-4" />
+          Modifier le profil
+        </Button>
+        <Button onClick={handleManageMedia} variant="outline" className="gap-2">
+          <PlayCircle className="h-4 w-4" />
+          Gérer les médias
+        </Button>
+      </div>
     </ResponsiveLayout>
   );
 }
