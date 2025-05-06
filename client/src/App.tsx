@@ -9,6 +9,7 @@ import { Suspense, useState, useEffect, lazy } from "react";
 const ArtistDashboardPage = lazy(() => import("@/pages/artist/dashboard-page"));
 const ArtistProfilePage = lazy(() => import("@/pages/artist/artist-profile-page"));
 const ArtistAgendaPage = lazy(() => import("@/pages/artist/agenda-page"));
+const ArtistInvitationsPage = lazy(() => import("@/pages/artist/invitations-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
 const FindArtistsPage = lazy(() => import("@/pages/club/find-artists-page"));
@@ -109,6 +110,15 @@ function App() {
             ? <SimpleAuth /> 
             : user.role === "artist" 
               ? <ArtistAgendaPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+
+        <Route path="/artist/invitations">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistInvitationsPage /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
