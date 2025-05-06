@@ -69,7 +69,7 @@ export default function Sidebar({ activeItem }: SidebarProps) {
     if (user?.role === 'club') {
       return [
         { icon: <Calendar className="h-5 w-5" />, label: "Événements", href: "/club" },
-        { icon: <Search className="h-5 w-5" />, label: "Trouver Artistes", href: "/club/artists" },
+        { icon: <Search className="h-5 w-5" />, label: "Trouver Artistes", href: "/club/find-artists" },
         { icon: <Mail className="h-5 w-5" />, label: "Invitations", href: "/club/invitations" },
         { icon: <Image className="h-5 w-5" />, label: "Participants", href: "/club/attendees" },
         { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/club/wallet" },

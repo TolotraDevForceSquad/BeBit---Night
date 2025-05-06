@@ -61,7 +61,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'club') {
       return [
         { icon: <Home size={24} />, label: "Events", href: "/club" },
-        { icon: <Search size={24} />, label: "Artistes", href: "/club/artists" },
+        { icon: <Search size={24} />, label: "Artistes", href: "/club/find-artists" },
         { icon: <Calendar size={24} />, label: "Scanner", href: "/club/scan" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/club/wallet" },
         { icon: <Settings size={24} />, label: "Réglages", href: "/club/settings" },
