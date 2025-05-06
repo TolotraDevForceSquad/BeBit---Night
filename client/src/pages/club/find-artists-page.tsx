@@ -1024,8 +1024,23 @@ export default function FindArtistsPage() {
     handleInviteArtist(artist);
   };
 
+  // Contenu de l'en-tête pour la version mobile
+  const headerContent = (
+    <div className="flex justify-between items-center">
+      <h1 className="text-xl font-bold">Trouver des Artistes</h1>
+      <div className="flex gap-2">
+        <Button variant="outline" size="icon">
+          <Search className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="container px-4 py-6 mx-auto max-w-7xl">
+    <ResponsiveLayout
+      activeItem="artistes"
+      headerContent={headerContent}
+    >
       <div className="space-y-6">
         {/* En-tête de page */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -1209,6 +1224,6 @@ export default function FindArtistsPage() {
         isOpen={showInvitationForm}
         onClose={() => setShowInvitationForm(false)}
       />
-    </div>
+    </ResponsiveLayout>
   );
 }
