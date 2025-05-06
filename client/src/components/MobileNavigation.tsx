@@ -130,16 +130,17 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       ))}
       
       {/* Bouton de déconnexion */}
-      <Button
-        variant="ghost"
-        className="flex flex-col items-center p-0 h-auto bg-destructive/10 rounded-lg"
-        onClick={handleLogout}
-      >
-        <div className="py-2 px-4">
-          <LogOut size={24} className="text-destructive" />
-          <span className="text-xs mt-1 text-destructive font-medium">Déconnexion</span>
-        </div>
-      </Button>
+      <Link href="/logout" className="text-center">
+        <Button
+          variant="ghost"
+          className="flex flex-col items-center p-0 h-auto bg-destructive/10 rounded-lg"
+        >
+          <div className="py-2 px-4">
+            <LogOut size={24} className="text-destructive" />
+            <span className="text-xs mt-1 text-destructive font-medium">Déconnexion</span>
+          </div>
+        </Button>
+      </Link>
     </div>
   );
 }

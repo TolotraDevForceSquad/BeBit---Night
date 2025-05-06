@@ -163,14 +163,15 @@ export default function Sidebar({ activeItem }: SidebarProps) {
           </Button>
         </Link>
         
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5 mr-3" />
-          <span>Déconnexion</span>
-        </Button>
+        <Link href="/logout" className="block">
+          <Button
+            variant="destructive"
+            className="w-full justify-start"
+          >
+            <LogOut className="h-5 w-5 mr-3" />
+            <span>Déconnexion</span>
+          </Button>
+        </Link>
       </div>
     </div>
   );

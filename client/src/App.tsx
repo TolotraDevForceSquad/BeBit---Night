@@ -13,6 +13,7 @@ const ArtistInvitationsPage = lazy(() => import("@/pages/artist/invitations-page
 const ArtistFeedbackPage = lazy(() => import("@/pages/artist/feedback-page"));
 const ArtistCreateEventPage = lazy(() => import("@/pages/artist/create-event-page"));
 const ArtistCollaborationsPage = lazy(() => import("@/pages/artist/collaborations-page"));
+const LogoutPage = lazy(() => import("@/pages/logout-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
 const FindArtistsPage = lazy(() => import("@/pages/club/find-artists-page"));
@@ -351,6 +352,11 @@ function App() {
         {/* Route Paramètres - accessible pour tous les utilisateurs connectés */}
         <Route path="/settings">
           {!user ? <SimpleAuth /> : <SettingsPage />}
+        </Route>
+        
+        {/* Route de déconnexion spéciale - accessible directement */}
+        <Route path="/logout">
+          <LogoutPage />
         </Route>
         
         {/* Fallback à 404 */}
