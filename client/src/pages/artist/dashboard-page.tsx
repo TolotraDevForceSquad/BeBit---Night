@@ -107,13 +107,10 @@ export default function ArtistDashboardPage() {
 
   // Simuler un chargement des données
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setEvents(mockEvents);
-      setInvitations(mockInvitations);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    // Chargement immédiat sans délai artificiel
+    setEvents(mockEvents);
+    setInvitations(mockInvitations);
+    setIsLoading(false);
   }, []);
 
   // Contenu d'en-tête pour le layout

@@ -150,13 +150,10 @@ export default function ArtistFeedbackPage() {
 
   // Chargement des feedbacks
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setFeedbacks(mockFeedbacks);
-      setFilteredFeedbacks(mockFeedbacks);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    // Chargement immédiat sans délai artificiel
+    setFeedbacks(mockFeedbacks);
+    setFilteredFeedbacks(mockFeedbacks);
+    setIsLoading(false);
   }, []);
   
   // Filtrer les feedbacks
