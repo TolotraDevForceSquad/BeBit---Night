@@ -1,7 +1,9 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
 import Sidebar from "@/components/Sidebar";
 import MobileNavigation from "@/components/MobileNavigation";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 interface ResponsiveLayoutProps {
   children: ReactNode;
@@ -19,12 +21,51 @@ export default function ResponsiveLayout({
   headerContent
 }: ResponsiveLayoutProps) {
   const isMobile = useMobile();
+  const [user, setUser] = useState<any>(null);
+  
+  // Récupérer les données utilisateur du localStorage
+  useEffect(() => {
+    const authData = localStorage.getItem('auth_user');
+    if (authData) {
+      try {
+        const userData = JSON.parse(authData);
+        setUser(userData);
+      } catch (error) {
+        console.error("Erreur lors de la lecture des données d'authentification:", error);
+      }
+    }
+  }, []);
+
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    localStorage.removeItem('auth_user');
+    window.location.href = "/auth";
+  };
   
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* En-tête mobile */}
-      {isMobile && headerContent && (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm p-4">
+      {isMobile && (
+        <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm p-2 flex justify-between items-center">
+          <div className="flex items-center">
+            <h1 className="font-heading font-bold text-lg">
+              <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
+            </h1>
+          </div>
+          
+          {/* Bouton de déconnexion toujours visible */}
+          {user && (
+            <Button 
+              variant="destructive"
+              size="sm"
+              onClick={handleLogout}
+              className="flex items-center"
+            >
+              <LogOut className="h-4 w-4 mr-1" />
+              <span>Déconnexion</span>
+            </Button>
+          )}
+          
           {headerContent}
         </header>
       )}
