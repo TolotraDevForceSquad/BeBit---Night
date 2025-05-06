@@ -172,8 +172,8 @@ export default function ArtistDashboardPage() {
                   <h3 className="text-lg font-semibold">{user?.username}</h3>
                   <p className="text-muted-foreground">DJ & Producteur</p>
                   <div className="mt-4 flex gap-2">
-                    <Button size="sm" variant="outline">Éditer le profil</Button>
-                    <Button size="sm" variant="default">Gérer les médias</Button>
+                    <Button size="sm" variant="outline" onClick={() => window.location.href = "/settings"}>Éditer le profil</Button>
+                    <Button size="sm" variant="default" onClick={() => window.location.href = "/settings"}>Gérer les médias</Button>
                   </div>
                 </div>
                 
