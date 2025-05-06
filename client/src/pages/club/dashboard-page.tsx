@@ -230,13 +230,17 @@ const mockUserEvents: UserEvent[] = [
   }
 ];
 
-export default function ClubDashboardPage() {
+interface ClubDashboardPageProps {
+  activeTab?: string;
+}
+
+export default function ClubDashboardPage({ activeTab = "overview" }: ClubDashboardPageProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [events, setEvents] = useState<ClubEvent[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [tableReservations, setTableReservations] = useState<TableReservation[]>([]);
   const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [currentTab, setCurrentTab] = useState(activeTab);
   const [isLoading, setIsLoading] = useState(true);
   
   // Récupérer les données utilisateur du localStorage
@@ -380,7 +384,7 @@ export default function ClubDashboardPage() {
           </div>
           
           {/* Tabs de contenu */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs defaultValue={activeTab} className="w-full">
             <TabsList className="grid grid-cols-5 lg:w-[600px]">
               <TabsTrigger value="overview">Vue générale</TabsTrigger>
               <TabsTrigger value="events">Événements</TabsTrigger>

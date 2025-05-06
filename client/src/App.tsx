@@ -110,6 +110,51 @@ function App() {
           }
         </Route>
         
+        <Route path="/club/dashboard">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <ClubDashboardPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/club/events">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <ClubDashboardPage activeTab="events" /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/club/reservations">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <ClubDashboardPage activeTab="reservations" /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/club/outings">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <ClubDashboardPage activeTab="outings" /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/club/artists">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <ClubDashboardPage activeTab="artists" /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
         <Route path="/admin">
           {!user 
             ? <SimpleAuth /> 
