@@ -224,12 +224,9 @@ export default function ArtistCreateEventPage() {
 
   // Chargement des clubs
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setClubs(mockClubs);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    // Chargement immédiat sans délai artificiel
+    setClubs(mockClubs);
+    setIsLoading(false);
   }, []);
 
   // Mettre à jour le club sélectionné lorsque l'ID du club change
@@ -257,10 +254,7 @@ export default function ArtistCreateEventPage() {
       // Ici, vous effectueriez un appel API pour créer l'événement
       console.log("Données de l'événement à créer:", data);
       
-      // Simuler un délai d'API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Marquer comme soumis avec succès
+      // Marquer comme soumis avec succès - sans délai artificiel
       setIsSubmitted(true);
     } catch (error) {
       console.error("Erreur lors de la création de l'événement:", error);

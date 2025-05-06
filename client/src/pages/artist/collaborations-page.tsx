@@ -778,13 +778,10 @@ export default function ArtistCollaborationsPage() {
 
   // Chargement des collaborations
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCollaborations(mockCollaborations);
-      setFilteredCollaborations(mockCollaborations);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    // Chargement immédiat sans délai artificiel
+    setCollaborations(mockCollaborations);
+    setFilteredCollaborations(mockCollaborations);
+    setIsLoading(false);
   }, []);
   
   // Filtrer les collaborations
