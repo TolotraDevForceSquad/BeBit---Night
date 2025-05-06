@@ -448,7 +448,7 @@ export default function UserExplorerPage() {
           {activeTab === "découvrir" && (
             <>
               {/* Catégories et artistes tendance en haut */}
-              <div className="mb-6 space-y-4">
+              <div className="mb-6 space-y-4 top-section">
                 <div className="bg-card rounded-lg p-3 border border-border">
                   <h3 className="font-medium text-sm mb-2">Catégories populaires</h3>
                   <div className="flex flex-wrap gap-2">
@@ -491,7 +491,7 @@ export default function UserExplorerPage() {
           {activeTab === "tendances" && events.filter(e => e.isFeatured).length > 0 && (
             <>
               {/* Featured artists section pour l'onglet tendances - Maintenant en haut */}
-              <div className="mb-6 bg-card rounded-lg p-3 border border-border">
+              <div className="mb-6 bg-card rounded-lg p-3 border border-border top-section">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium text-sm">Artistes en vedette</h3>
                   <Button variant="ghost" size="sm" className="text-xs h-7 px-2">
@@ -526,7 +526,7 @@ export default function UserExplorerPage() {
                 <>
                   {/* Prochains événements à proximité - Maintenant en haut */}
                   {events.length > 1 && (
-                    <div className="mb-6 bg-card rounded-lg p-3 border border-border">
+                    <div className="mb-6 bg-card rounded-lg p-3 border border-border top-section">
                       <h3 className="font-medium text-sm mb-2">Événements à proximité</h3>
                       <div className="space-y-2">
                         {events.filter((_, i) => i !== currentEventIndex).slice(0, 2).map((event) => (
