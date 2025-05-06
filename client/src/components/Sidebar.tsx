@@ -61,7 +61,8 @@ export default function Sidebar({ activeItem }: SidebarProps) {
     // Éléments pour le rôle artiste
     if (user?.role === 'artist') {
       return [
-        { icon: <Calendar className="h-5 w-5" />, label: "Événements", href: "/artist" },
+        { icon: <Home className="h-5 w-5" />, label: "Dashboard", href: "/artist" },
+        { icon: <Calendar className="h-5 w-5" />, label: "Agenda", href: "/artist/agenda" },
         { icon: <Mail className="h-5 w-5" />, label: "Invitations", href: "/artist/invitations" },
         { icon: <Star className="h-5 w-5" />, label: "Feedbacks", href: "/artist/feedback" },
         { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/artist/wallet" },

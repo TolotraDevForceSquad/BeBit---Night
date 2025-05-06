@@ -8,6 +8,7 @@ import { Suspense, useState, useEffect, lazy } from "react";
 // Chargement paresseux des composants de page pour optimiser les performances
 const ArtistDashboardPage = lazy(() => import("@/pages/artist/dashboard-page"));
 const ArtistProfilePage = lazy(() => import("@/pages/artist/artist-profile-page"));
+const ArtistAgendaPage = lazy(() => import("@/pages/artist/agenda-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
 const FindArtistsPage = lazy(() => import("@/pages/club/find-artists-page"));
@@ -99,6 +100,15 @@ function App() {
             ? <SimpleAuth /> 
             : user.role === "artist" 
               ? <ArtistDashboardPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+
+        <Route path="/artist/agenda">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistAgendaPage /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
