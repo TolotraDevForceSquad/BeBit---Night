@@ -1047,11 +1047,6 @@ export default function FindArtistsPage() {
         
         {/* Contenu principal */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Panneau de filtres */}
-          <div className="lg:col-span-1">
-            <FilterPanel filters={filters} setFilters={setFilters} />
-          </div>
-          
           {/* Liste des artistes */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="grid" className="w-full">
@@ -1191,6 +1186,11 @@ export default function FindArtistsPage() {
                 </>
               )}
             </Tabs>
+          </div>
+          
+          {/* Panneau de filtres (à droite) */}
+          <div className="lg:col-span-1">
+            <FilterPanel filters={filters} setFilters={setFilters} />
           </div>
         </div>
       </div>
