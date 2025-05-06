@@ -23,8 +23,7 @@ import {
   DialogDescription, 
   DialogFooter, 
   DialogHeader, 
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from "@/components/ui/dialog";
 
 // Type pour l'authentification
@@ -598,6 +597,144 @@ function ArtistDetailDialog({ artist, isOpen, onClose, onInvite }: {
   );
 }
 
+// Modèle d'invitation
+type InvitationFormData = {
+  artistId: number;
+  eventId: string;
+  date: string;
+  message: string;
+  offerAmount: number;
+};
+
+// Composant de dialogue d'invitation
+function InvitationDialog({ artist, isOpen, onClose }: {
+  artist: Artist | null,
+  isOpen: boolean,
+  onClose: () => void
+}) {
+  const [formData, setFormData] = useState<InvitationFormData>({
+    artistId: artist?.id || 0,
+    eventId: "",
+    date: "",
+    message: "",
+    offerAmount: artist?.price?.min || 0
+  });
+  
+  // Événements fictifs du club
+  const clubEvents = [
+    { id: "evt1", title: "Soirée Techno Vibrations", date: "2023-06-15" },
+    { id: "evt2", title: "House Music Festival", date: "2023-06-28" },
+    { id: "evt3", title: "Summer Beats Party", date: "2023-07-10" },
+    { id: "evt4", title: "Electronic Night", date: "2023-07-22" }
+  ];
+  
+  const handleSubmit = () => {
+    console.log("Invitation envoyée:", formData);
+    onClose();
+  };
+  
+  useEffect(() => {
+    if (artist) {
+      setFormData({
+        artistId: artist.id,
+        eventId: "",
+        date: "",
+        message: `Bonjour ${artist.name},\n\nNous serions ravis de vous avoir comme artiste dans notre club pour un événement prochain. Votre style ${artist.genre} correspond parfaitement à l'ambiance que nous recherchons.\n\nPourriez-vous nous faire part de vos disponibilités ?\n\nCordialement,\nClub Oxygen`,
+        offerAmount: artist.price?.min || 0
+      });
+    }
+  }, [artist]);
+  
+  if (!artist) return null;
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="text-xl flex items-center gap-2">
+            <UserCheck className="h-5 w-5" />
+            Inviter {artist.name} à un événement
+          </DialogTitle>
+          <DialogDescription>
+            Envoyez une invitation à cet artiste pour l'un de vos événements
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-4 mt-4">
+          <div>
+            <Label htmlFor="event-select">Événement</Label>
+            <Select
+              value={formData.eventId}
+              onValueChange={(value) => setFormData({ ...formData, eventId: value })}
+            >
+              <SelectTrigger id="event-select" className="mt-1.5">
+                <SelectValue placeholder="Sélectionner un événement" />
+              </SelectTrigger>
+              <SelectContent>
+                {clubEvents.map(event => (
+                  <SelectItem key={event.id} value={event.id}>
+                    {event.title} ({event.date})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="date-input">Date proposée</Label>
+            <Input
+              id="date-input"
+              type="date"
+              className="mt-1.5"
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="amount-input" className="flex justify-between">
+              <span>Montant proposé (€)</span>
+              <span className="text-sm text-muted-foreground">
+                Fourchette: {artist.price?.min} - {artist.price?.max}€
+              </span>
+            </Label>
+            <Input
+              id="amount-input"
+              type="number"
+              className="mt-1.5"
+              value={formData.offerAmount}
+              onChange={(e) => setFormData({ ...formData, offerAmount: Number(e.target.value) })}
+              min={artist.price?.min}
+              max={artist.price?.max}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="message-input">Message</Label>
+            <textarea
+              id="message-input"
+              className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1.5"
+              placeholder="Votre message à l'artiste..."
+              value={formData.message}
+              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+            />
+          </div>
+        </div>
+        
+        <DialogFooter className="flex justify-between items-center gap-4 mt-6">
+          <Button variant="outline" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button onClick={handleSubmit} className="gap-2">
+            <BadgePlus className="h-4 w-4" />
+            <span>Envoyer l'invitation</span>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // Système de filtrage
 function FilterPanel({ filters, setFilters }: { 
   filters: Filters, 
@@ -792,144 +929,6 @@ function FilterPanel({ filters, setFilters }: {
   );
 }
 
-// Modèle d'invitation
-type InvitationFormData = {
-  artistId: number;
-  eventId: string;
-  date: string;
-  message: string;
-  offerAmount: number;
-};
-
-// Composant de dialogue d'invitation
-function InvitationDialog({ artist, isOpen, onClose }: {
-  artist: Artist | null,
-  isOpen: boolean,
-  onClose: () => void
-}) {
-  const [formData, setFormData] = useState<InvitationFormData>({
-    artistId: artist?.id || 0,
-    eventId: "",
-    date: "",
-    message: "",
-    offerAmount: artist?.price?.min || 0
-  });
-  
-  // Événements fictifs du club
-  const clubEvents = [
-    { id: "evt1", title: "Soirée Techno Vibrations", date: "2023-06-15" },
-    { id: "evt2", title: "House Music Festival", date: "2023-06-28" },
-    { id: "evt3", title: "Summer Beats Party", date: "2023-07-10" },
-    { id: "evt4", title: "Electronic Night", date: "2023-07-22" }
-  ];
-  
-  const handleSubmit = () => {
-    console.log("Invitation envoyée:", formData);
-    onClose();
-  };
-  
-  useEffect(() => {
-    if (artist) {
-      setFormData({
-        artistId: artist.id,
-        eventId: "",
-        date: "",
-        message: `Bonjour ${artist.name},\n\nNous serions ravis de vous avoir comme artiste dans notre club pour un événement prochain. Votre style ${artist.genre} correspond parfaitement à l'ambiance que nous recherchons.\n\nPourriez-vous nous faire part de vos disponibilités ?\n\nCordialement,\nClub Oxygen`,
-        offerAmount: artist.price?.min || 0
-      });
-    }
-  }, [artist]);
-  
-  if (!artist) return null;
-  
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="text-xl flex items-center gap-2">
-            <UserCheck className="h-5 w-5" />
-            Inviter {artist.name} à un événement
-          </DialogTitle>
-          <DialogDescription>
-            Envoyez une invitation à cet artiste pour l'un de vos événements
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4 mt-4">
-          <div>
-            <Label htmlFor="event-select">Événement</Label>
-            <Select
-              value={formData.eventId}
-              onValueChange={(value) => setFormData({ ...formData, eventId: value })}
-            >
-              <SelectTrigger id="event-select" className="mt-1.5">
-                <SelectValue placeholder="Sélectionner un événement" />
-              </SelectTrigger>
-              <SelectContent>
-                {clubEvents.map(event => (
-                  <SelectItem key={event.id} value={event.id}>
-                    {event.title} ({event.date})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="date-input">Date proposée</Label>
-            <Input
-              id="date-input"
-              type="date"
-              className="mt-1.5"
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="amount-input" className="flex justify-between">
-              <span>Montant proposé (€)</span>
-              <span className="text-sm text-muted-foreground">
-                Fourchette: {artist.price?.min} - {artist.price?.max}€
-              </span>
-            </Label>
-            <Input
-              id="amount-input"
-              type="number"
-              className="mt-1.5"
-              value={formData.offerAmount}
-              onChange={(e) => setFormData({ ...formData, offerAmount: Number(e.target.value) })}
-              min={artist.price?.min}
-              max={artist.price?.max}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="message-input">Message</Label>
-            <textarea
-              id="message-input"
-              className="flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mt-1.5"
-              placeholder="Votre message à l'artiste..."
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            />
-          </div>
-        </div>
-        
-        <DialogFooter className="flex justify-between items-center gap-4 mt-6">
-          <Button variant="outline" onClick={onClose}>
-            Annuler
-          </Button>
-          <Button onClick={handleSubmit} className="gap-2">
-            <BadgePlus className="h-4 w-4" />
-            <span>Envoyer l'invitation</span>
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // Composant principal
 export default function FindArtistsPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -1086,10 +1085,7 @@ export default function FindArtistsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredArtists.map(artist => (
                           <div key={artist.id} onClick={() => handleViewArtistDetail(artist)} className="cursor-pointer">
-                            <ArtistCard artist={artist} onInvite={(e) => {
-                              e.stopPropagation();
-                              handleInviteArtist(artist);
-                            }} />
+                            <ArtistCard artist={artist} onInvite={handleCardInviteClick} />
                           </div>
                         ))}
                       </div>
@@ -1212,6 +1208,6 @@ export default function FindArtistsPage() {
         isOpen={showInvitationForm}
         onClose={() => setShowInvitationForm(false)}
       />
-    </ResponsiveLayout>
+    </div>
   );
 }
