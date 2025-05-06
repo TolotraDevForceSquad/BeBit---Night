@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calendar, Search, Users, Wallet, QrCode, Plus, Settings, ChevronRight } from "lucide-react";
+import { Calendar, Search, Users, Wallet, QrCode, Plus, Settings, ChevronRight, CalendarDays, Map, Clock, Phone, UserPlus, Check, X } from "lucide-react";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -36,6 +36,31 @@ type Artist = {
   rating: number;
   image?: string;
   popularity: number;
+};
+
+// Type pour une réservation de table
+type TableReservation = {
+  id: number;
+  customerName: string;
+  date: string;
+  time: string;
+  guestCount: number;
+  status: "confirmed" | "pending" | "cancelled";
+  phone: string;
+  specialRequests?: string;
+  tableNumber?: string;
+};
+
+// Type pour une sortie (événement informel créé par un utilisateur)
+type UserEvent = {
+  id: number;
+  title: string;
+  organizer: string;
+  date: string;
+  participantCount: number;
+  maxParticipants: number;
+  status: "upcoming" | "live" | "past";
+  image?: string;
 };
 
 // Données fictives pour les événements
@@ -108,10 +133,109 @@ const popularArtists: Artist[] = [
   }
 ];
 
+// Données fictives pour les réservations de tables
+const mockTableReservations: TableReservation[] = [
+  {
+    id: 1,
+    customerName: "Thomas Martin",
+    date: "2023-12-16",
+    time: "21:00",
+    guestCount: 5,
+    status: "confirmed",
+    phone: "+33 6 12 34 56 78",
+    tableNumber: "VIP-3"
+  },
+  {
+    id: 2,
+    customerName: "Sophie Dubois",
+    date: "2023-12-16",
+    time: "22:30",
+    guestCount: 8,
+    status: "confirmed",
+    phone: "+33 6 23 45 67 89",
+    tableNumber: "VIP-1",
+    specialRequests: "Anniversaire, prévoir bouteille de champagne"
+  },
+  {
+    id: 3,
+    customerName: "Jean Durand",
+    date: "2023-12-15",
+    time: "20:00",
+    guestCount: 4,
+    status: "pending",
+    phone: "+33 6 34 56 78 90"
+  },
+  {
+    id: 4,
+    customerName: "Emma Petit",
+    date: "2023-12-22",
+    time: "22:00",
+    guestCount: 6,
+    status: "confirmed",
+    phone: "+33 6 45 67 89 01",
+    tableNumber: "A-12"
+  },
+  {
+    id: 5,
+    customerName: "Lucas Bernard",
+    date: "2023-12-17",
+    time: "23:00",
+    guestCount: 3,
+    status: "cancelled",
+    phone: "+33 6 56 78 90 12"
+  }
+];
+
+// Données fictives pour les sorties liées au club
+const mockUserEvents: UserEvent[] = [
+  {
+    id: 1,
+    title: "Soirée d'anniversaire de Marie",
+    organizer: "Marie L.",
+    date: "2023-12-18T21:00:00",
+    participantCount: 12,
+    maxParticipants: 15,
+    status: "upcoming",
+    image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=120&h=120&fit=crop"
+  },
+  {
+    id: 2,
+    title: "After-work du vendredi",
+    organizer: "Marc D.",
+    date: "2023-12-15T19:00:00",
+    participantCount: 8,
+    maxParticipants: 10,
+    status: "upcoming",
+    image: "https://images.unsplash.com/photo-1576678927484-cc907957088c?w=120&h=120&fit=crop"
+  },
+  {
+    id: 3,
+    title: "Retrouvailles promo 2020",
+    organizer: "Julie M.",
+    date: "2023-12-22T20:30:00",
+    participantCount: 18,
+    maxParticipants: 25,
+    status: "upcoming",
+    image: "https://images.unsplash.com/photo-1528495612343-9ca9f4a4de28?w=120&h=120&fit=crop"
+  },
+  {
+    id: 4,
+    title: "Pot de départ de Laurent",
+    organizer: "Équipe Marketing",
+    date: "2023-11-30T18:00:00",
+    participantCount: 15,
+    maxParticipants: 15,
+    status: "past",
+    image: "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=120&h=120&fit=crop"
+  }
+];
+
 export default function ClubDashboardPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [events, setEvents] = useState<ClubEvent[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
+  const [tableReservations, setTableReservations] = useState<TableReservation[]>([]);
+  const [userEvents, setUserEvents] = useState<UserEvent[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   
@@ -133,6 +257,8 @@ export default function ClubDashboardPage() {
     const timer = setTimeout(() => {
       setEvents(mockEvents);
       setArtists(popularArtists);
+      setTableReservations(mockTableReservations);
+      setUserEvents(mockUserEvents);
       setIsLoading(false);
     }, 1000);
     
