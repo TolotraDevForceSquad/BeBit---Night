@@ -12,6 +12,7 @@ const ArtistAgendaPage = lazy(() => import("@/pages/artist/agenda-page"));
 const ArtistInvitationsPage = lazy(() => import("@/pages/artist/invitations-page"));
 const ArtistFeedbackPage = lazy(() => import("@/pages/artist/feedback-page"));
 const ArtistCreateEventPage = lazy(() => import("@/pages/artist/create-event-page"));
+const ArtistCollaborationsPage = lazy(() => import("@/pages/artist/collaborations-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
 const FindArtistsPage = lazy(() => import("@/pages/club/find-artists-page"));
@@ -139,6 +140,15 @@ function App() {
             ? <SimpleAuth /> 
             : user.role === "artist" 
               ? <ArtistCreateEventPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+
+        <Route path="/artist/collaborations">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistCollaborationsPage /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
