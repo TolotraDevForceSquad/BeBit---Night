@@ -74,7 +74,7 @@ export function AddFundsModal({ open, onOpenChange, onAddFunds }: AddFundsModalP
           {step === 1 && (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="amount">Montant (€)</Label>
+                <Label htmlFor="amount">Montant (Ar)</Label>
                 <Input
                   id="amount"
                   placeholder="Entrez un montant"
@@ -102,7 +102,7 @@ export function AddFundsModal({ open, onOpenChange, onAddFunds }: AddFundsModalP
                     }`}
                     onClick={() => setAmount(preset.toString())}
                   >
-                    {preset}€
+                    {preset} Ar
                   </motion.button>
                 ))}
               </div>
@@ -130,7 +130,7 @@ export function AddFundsModal({ open, onOpenChange, onAddFunds }: AddFundsModalP
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-sm text-muted-foreground">Vous allez ajouter</p>
-                    <p className="text-2xl font-bold">{parseFloat(amount).toFixed(2)} €</p>
+                    <p className="text-2xl font-bold">{parseFloat(amount).toFixed(2)} Ar</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                     <Plus className="h-6 w-6 text-primary" />
@@ -147,11 +147,11 @@ export function AddFundsModal({ open, onOpenChange, onAddFunds }: AddFundsModalP
                   </div>
                   <div className="flex justify-between text-sm mt-2">
                     <span>Frais</span>
-                    <span className="font-medium">0.00 €</span>
+                    <span className="font-medium">0.00 Ar</span>
                   </div>
                   <div className="flex justify-between font-medium mt-4">
                     <span>Total</span>
-                    <span>{parseFloat(amount).toFixed(2)} €</span>
+                    <span>{parseFloat(amount).toFixed(2)} Ar</span>
                   </div>
                 </div>
               </div>
@@ -179,7 +179,7 @@ export function AddFundsModal({ open, onOpenChange, onAddFunds }: AddFundsModalP
               >
                 <h3 className="text-xl font-semibold mb-2">Transaction réussie!</h3>
                 <p className="text-muted-foreground mb-4">
-                  {parseFloat(amount).toFixed(2)} € ont été ajoutés à votre portefeuille.
+                  {parseFloat(amount).toFixed(2)} Ar ont été ajoutés à votre portefeuille.
                 </p>
               </motion.div>
             </div>

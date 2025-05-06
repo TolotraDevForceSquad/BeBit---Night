@@ -86,14 +86,14 @@ export function AnimatedBalanceCard({
               variants={statsVariants}
             >
               <p className="text-xs opacity-80">Total déposé</p>
-              <p className="text-lg font-medium">{totalDeposited.toFixed(2)} €</p>
+              <p className="text-lg font-medium">{totalDeposited.toFixed(2)} Ar</p>
             </motion.div>
             <motion.div 
               custom={1}
               variants={statsVariants}
             >
               <p className="text-xs opacity-80">Total dépensé</p>
-              <p className="text-lg font-medium">{totalSpent.toFixed(2)} €</p>
+              <p className="text-lg font-medium">{totalSpent.toFixed(2)} Ar</p>
             </motion.div>
           </div>
           

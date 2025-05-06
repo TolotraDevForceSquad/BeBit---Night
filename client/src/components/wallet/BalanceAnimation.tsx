@@ -51,7 +51,7 @@ export function BalanceAnimation({ balance, previousBalance }: BalanceAnimationP
     <div className="relative">
       {/* Affichage du montant */}
       <div className="text-3xl font-bold mt-1">
-        {displayBalance.toFixed(2)} €
+        {displayBalance.toFixed(2)} Ar
       </div>
       
       {/* Animation de particules pour indiquer l'ajout/retrait de fonds */}
@@ -81,7 +81,7 @@ export function BalanceAnimation({ balance, previousBalance }: BalanceAnimationP
                 transition={{ duration: 1 }}
               >
                 <span className="text-sm font-medium whitespace-nowrap">
-                  {direction === "up" ? "-" : "+"}{Math.abs(balance - (previousBalance || 0)).toFixed(2)}€
+                  {direction === "up" ? "-" : "+"}{Math.abs(balance - (previousBalance || 0)).toFixed(2)} Ar
                 </span>
               </motion.div>
             </div>
