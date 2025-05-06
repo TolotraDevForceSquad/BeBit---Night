@@ -151,7 +151,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
             
             {/* Lien vers les paramètres */}
             <Link 
-              href={`/${user?.role}/settings`}
+              href="/settings"
               className="w-full"
             >
               <Button

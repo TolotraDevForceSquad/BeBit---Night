@@ -153,17 +153,13 @@ export default function Sidebar({ activeItem }: SidebarProps) {
       
       {/* Actions en bas */}
       <div className="pt-6 space-y-1 border-t">
-        <Link href={`/${user?.role || 'user'}/settings`} className="block">
-          <Button
-            variant={activeItem === "settings" ? "default" : "ghost"}
-            className={`w-full justify-start ${
-              activeItem === "settings"
-              ? "bg-primary text-white"
-              : "text-foreground"
-            }`}
+        <Link href="/settings" className="block">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start"
           >
-            <Settings className="h-5 w-5" />
-            <span className="ml-3">Paramètres</span>
+            <Settings className="h-5 w-5 mr-3" />
+            <span>Paramètres</span>
           </Button>
         </Link>
         
@@ -172,8 +168,8 @@ export default function Sidebar({ activeItem }: SidebarProps) {
           className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={handleLogout}
         >
-          <LogOut className="h-5 w-5" />
-          <span className="ml-3">Déconnexion</span>
+          <LogOut className="h-5 w-5 mr-3" />
+          <span>Déconnexion</span>
         </Button>
       </div>
     </div>
