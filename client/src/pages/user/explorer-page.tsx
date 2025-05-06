@@ -446,10 +446,10 @@ export default function UserExplorerPage() {
       {isMobile && events && events.length > 0 && (
         <div className="space-y-4">
           {activeTab === "découvrir" && (
-            <>
-              {/* Catégories et artistes tendance en haut */}
-              <div className="mb-6 space-y-4 top-section">
-                <div className="bg-card rounded-lg p-3 border border-border">
+            <div className="flex flex-col">
+              {/* PARTIE 1: Catégories en haut */}
+              <div className="order-1 mb-3">
+                <div className="bg-card rounded-lg p-3 border border-border mb-3">
                   <h3 className="font-medium text-sm mb-2">Catégories populaires</h3>
                   <div className="flex flex-wrap gap-2">
                     {categories.slice(0, 5).map((category) => (
@@ -481,122 +481,137 @@ export default function UserExplorerPage() {
                 </div>
               </div>
               
-              <MobileEventCard 
-                event={events[0]} 
-                onLike={() => console.log("Liked event", events[0].id)}
-                onDislike={() => console.log("Disliked event", events[0].id)}
-              />
-            </>
+              {/* PARTIE 2: Event Card en dessous */}
+              <div className="order-2 mt-4">
+                <MobileEventCard 
+                  event={events[0]} 
+                  onLike={() => console.log("Liked event", events[0].id)}
+                  onDislike={() => console.log("Disliked event", events[0].id)}
+                />
+              </div>
+            </div>
           )}
+          
           {activeTab === "tendances" && events.filter(e => e.isFeatured).length > 0 && (
-            <>
-              {/* Featured artists section pour l'onglet tendances - Maintenant en haut */}
-              <div className="mb-6 bg-card rounded-lg p-3 border border-border top-section">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-sm">Artistes en vedette</h3>
-                  <Button variant="ghost" size="sm" className="text-xs h-7 px-2">
-                    Voir tous
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {["DJ Elektra", "MC Blaze"].map((artist) => (
-                    <div key={artist} className="flex items-center p-2 bg-muted rounded-lg">
-                      <div className="h-10 w-10 rounded-full bg-primary/30 flex items-center justify-center mr-2">
-                        {artist.charAt(0)}
+            <div className="flex flex-col">
+              {/* PARTIE 1: Featured artists en haut */}
+              <div className="order-1 mb-3">
+                <div className="bg-card rounded-lg p-3 border border-border mb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium text-sm">Artistes en vedette</h3>
+                    <Button variant="ghost" size="sm" className="text-xs h-7 px-2">
+                      Voir tous
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {["DJ Elektra", "MC Blaze"].map((artist) => (
+                      <div key={artist} className="flex items-center p-2 bg-muted rounded-lg">
+                        <div className="h-10 w-10 rounded-full bg-primary/30 flex items-center justify-center mr-2">
+                          {artist.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm">{artist}</div>
+                          <div className="text-xs text-muted-foreground">3 événements</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-medium text-sm">{artist}</div>
-                        <div className="text-xs text-muted-foreground">3 événements</div>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
               
-              <MobileEventCard 
-                event={events.find(e => e.isFeatured) || events[0]} 
-                onLike={() => console.log("Liked event")}
-                onDislike={() => console.log("Disliked event")}
-              />
-            </>
+              {/* PARTIE 2: Event Card en dessous */}
+              <div className="order-2 mt-4">
+                <MobileEventCard 
+                  event={events.find(e => e.isFeatured) || events[0]} 
+                  onLike={() => console.log("Liked event")}
+                  onDislike={() => console.log("Disliked event")}
+                />
+              </div>
+            </div>
           )}
+          
           {activeTab === "nearby" && (
             <>
               {events.length > 0 ? (
-                <>
-                  {/* Prochains événements à proximité - Maintenant en haut */}
-                  {events.length > 1 && (
-                    <div className="mb-6 bg-card rounded-lg p-3 border border-border top-section">
-                      <h3 className="font-medium text-sm mb-2">Événements à proximité</h3>
-                      <div className="space-y-2">
-                        {events.filter((_, i) => i !== currentEventIndex).slice(0, 2).map((event) => (
-                          <div key={event.id} className="flex items-center p-2 bg-muted rounded-lg">
-                            <div 
-                              className="h-12 w-12 rounded bg-cover bg-center mr-3"
-                              style={{ backgroundImage: `url(${event.coverImage})` }}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm truncate">{event.title}</div>
-                              <div className="text-xs text-muted-foreground flex items-center">
-                                <MapPin className="h-3 w-3 mr-1" />
-                                {event.city && event.calculatedDistance && (
-                                  <span>{event.city} • {formatDistance(event.calculatedDistance)}</span>
-                                )}
+                <div className="flex flex-col">
+                  {/* PARTIE 1: Événements à proximité en haut */}
+                  <div className="order-1 mb-3">
+                    {events.length > 1 && (
+                      <div className="bg-card rounded-lg p-3 border border-border mb-3">
+                        <h3 className="font-medium text-sm mb-2">Événements à proximité</h3>
+                        <div className="space-y-2">
+                          {events.filter((_, i) => i !== currentEventIndex).slice(0, 2).map((event) => (
+                            <div key={event.id} className="flex items-center p-2 bg-muted rounded-lg">
+                              <div 
+                                className="h-12 w-12 rounded bg-cover bg-center mr-3"
+                                style={{ backgroundImage: `url(${event.coverImage})` }}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-sm truncate">{event.title}</div>
+                                <div className="text-xs text-muted-foreground flex items-center">
+                                  <MapPin className="h-3 w-3 mr-1" />
+                                  {event.city && event.calculatedDistance && (
+                                    <span>{event.city} • {formatDistance(event.calculatedDistance)}</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  
-                  <MobileEventCard 
-                    event={events[currentEventIndex]} 
-                    onLike={() => {
-                      console.log("Liked event", events[currentEventIndex].id);
-                      // Passer à l'événement suivant s'il en reste
-                      if (currentEventIndex < events.length - 1) {
-                        setCurrentEventIndex(currentEventIndex + 1);
-                      }
-                    }}
-                    onDislike={() => {
-                      console.log("Disliked event", events[currentEventIndex].id);
-                      // Passer à l'événement suivant s'il en reste
-                      if (currentEventIndex < events.length - 1) {
-                        setCurrentEventIndex(currentEventIndex + 1);
-                      }
-                    }}
-                  />
-                  
-                  {/* Information sur le nombre d'événements restants */}
-                  <div className="flex justify-center mt-3">
-                    <Badge variant="outline" className="text-xs font-normal">
-                      {currentEventIndex + 1} / {events.length} événements dans un rayon de {maxDistance} km
-                    </Badge>
+                    )}
                   </div>
                   
-                  {/* Navigation entre les événements (uniquement si plus d'un événement) */}
-                  {events.length > 1 && (
-                    <div className="flex justify-center mt-4 space-x-2">
-                      <Button 
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setCurrentEventIndex(Math.max(0, currentEventIndex - 1))}
-                        disabled={currentEventIndex === 0}
-                      >
-                        Précédent
-                      </Button>
-                      <Button 
-                        size="sm"
-                        variant="default"
-                        onClick={() => setCurrentEventIndex(Math.min(events.length - 1, currentEventIndex + 1))}
-                        disabled={currentEventIndex === events.length - 1}
-                      >
-                        Suivant
-                      </Button>
+                  {/* PARTIE 2: Event Card et navigation en dessous */}
+                  <div className="order-2 mt-2">
+                    <MobileEventCard 
+                      event={events[currentEventIndex]} 
+                      onLike={() => {
+                        console.log("Liked event", events[currentEventIndex].id);
+                        // Passer à l'événement suivant s'il en reste
+                        if (currentEventIndex < events.length - 1) {
+                          setCurrentEventIndex(currentEventIndex + 1);
+                        }
+                      }}
+                      onDislike={() => {
+                        console.log("Disliked event", events[currentEventIndex].id);
+                        // Passer à l'événement suivant s'il en reste
+                        if (currentEventIndex < events.length - 1) {
+                          setCurrentEventIndex(currentEventIndex + 1);
+                        }
+                      }}
+                    />
+                  
+                    {/* Information sur le nombre d'événements restants */}
+                    <div className="flex justify-center mt-3">
+                      <Badge variant="outline" className="text-xs font-normal">
+                        {currentEventIndex + 1} / {events.length} événements dans un rayon de {maxDistance} km
+                      </Badge>
                     </div>
-                  )}
-                </>
+                    
+                    {/* Navigation entre les événements (uniquement si plus d'un événement) */}
+                    {events.length > 1 && (
+                      <div className="flex justify-center mt-4 space-x-2">
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setCurrentEventIndex(Math.max(0, currentEventIndex - 1))}
+                          disabled={currentEventIndex === 0}
+                        >
+                          Précédent
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="default"
+                          onClick={() => setCurrentEventIndex(Math.min(events.length - 1, currentEventIndex + 1))}
+                          disabled={currentEventIndex === events.length - 1}
+                        >
+                          Suivant
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <div className="text-center py-12">
                   <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
