@@ -446,18 +446,79 @@ export default function UserExplorerPage() {
       {isMobile && events && events.length > 0 && (
         <div className="space-y-4">
           {activeTab === "découvrir" && (
-            <MobileEventCard 
-              event={events[0]} 
-              onLike={() => console.log("Liked event", events[0].id)}
-              onDislike={() => console.log("Disliked event", events[0].id)}
-            />
+            <>
+              <MobileEventCard 
+                event={events[0]} 
+                onLike={() => console.log("Liked event", events[0].id)}
+                onDislike={() => console.log("Disliked event", events[0].id)}
+              />
+              
+              {/* Catégories et artistes tendance en bas */}
+              <div className="mt-4 space-y-4">
+                <div className="bg-card rounded-lg p-3 border border-border">
+                  <h3 className="font-medium text-sm mb-2">Catégories populaires</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.slice(0, 5).map((category) => (
+                      <Button
+                        key={category}
+                        variant={activeCategory === category ? "default" : "outline"}
+                        size="sm"
+                        className="text-xs h-7 px-3"
+                        onClick={() => setActiveCategory(category)}
+                      >
+                        {category === "all" ? "Tous" : category}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="bg-card rounded-lg p-3 border border-border">
+                  <h3 className="font-medium text-sm mb-2">Artistes Tendance</h3>
+                  <div className="flex overflow-x-auto gap-3 pb-2 -mx-1 px-1 scrollbar-hide">
+                    {["DJ Elektra", "MC Blaze", "Luna Ray", "Tech Master", "Groove Queen"].map((artist) => (
+                      <div key={artist} className="flex flex-col items-center space-y-1 min-w-[80px]">
+                        <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center">
+                          {artist.charAt(0)}
+                        </div>
+                        <span className="text-xs text-center font-medium">{artist}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
           )}
           {activeTab === "tendances" && events.filter(e => e.isFeatured).length > 0 && (
-            <MobileEventCard 
-              event={events.find(e => e.isFeatured) || events[0]} 
-              onLike={() => console.log("Liked event")}
-              onDislike={() => console.log("Disliked event")}
-            />
+            <>
+              <MobileEventCard 
+                event={events.find(e => e.isFeatured) || events[0]} 
+                onLike={() => console.log("Liked event")}
+                onDislike={() => console.log("Disliked event")}
+              />
+              
+              {/* Featured artists section pour l'onglet tendances */}
+              <div className="mt-4 bg-card rounded-lg p-3 border border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium text-sm">Artistes en vedette</h3>
+                  <Button variant="ghost" size="sm" className="text-xs h-7 px-2">
+                    Voir tous
+                  </Button>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {["DJ Elektra", "MC Blaze"].map((artist) => (
+                    <div key={artist} className="flex items-center p-2 bg-muted rounded-lg">
+                      <div className="h-10 w-10 rounded-full bg-primary/30 flex items-center justify-center mr-2">
+                        {artist.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">{artist}</div>
+                        <div className="text-xs text-muted-foreground">3 événements</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
           {activeTab === "nearby" && (
             <>
@@ -507,6 +568,32 @@ export default function UserExplorerPage() {
                       >
                         Suivant
                       </Button>
+                    </div>
+                  )}
+                  
+                  {/* Prochains événements à proximité */}
+                  {events.length > 1 && (
+                    <div className="mt-6 bg-card rounded-lg p-3 border border-border">
+                      <h3 className="font-medium text-sm mb-2">Également à proximité</h3>
+                      <div className="space-y-2">
+                        {events.filter((_, i) => i !== currentEventIndex).slice(0, 2).map((event) => (
+                          <div key={event.id} className="flex items-center p-2 bg-muted rounded-lg">
+                            <div 
+                              className="h-12 w-12 rounded bg-cover bg-center mr-3"
+                              style={{ backgroundImage: `url(${event.coverImage})` }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm truncate">{event.title}</div>
+                              <div className="text-xs text-muted-foreground flex items-center">
+                                <MapPin className="h-3 w-3 mr-1" />
+                                {event.city && event.calculatedDistance && (
+                                  <span>{event.city} • {formatDistance(event.calculatedDistance)}</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </>
