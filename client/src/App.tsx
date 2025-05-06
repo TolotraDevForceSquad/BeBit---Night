@@ -24,7 +24,7 @@ const NotificationsPage = lazy(() => import("@/pages/user/notifications-page"));
 const TicketsPage = lazy(() => import("@/pages/user/tickets-page"));
 const InvitationsPage = lazy(() => import("@/pages/user/invitations-page"));
 const GalleryPage = lazy(() => import("@/pages/user/gallery-page"));
-const WalletPage = lazy(() => import("@/pages/user/wallet-page"));
+const WalletPage = lazy(() => import("@/pages/user/wallet-page-animated"));
 const FavoritesPage = lazy(() => import("@/pages/user/favorites-page"));
 const ReviewsPage = lazy(() => import("@/pages/user/reviews-page"));
 const UserEventsPage = lazy(() => import("@/pages/user/events-page"));

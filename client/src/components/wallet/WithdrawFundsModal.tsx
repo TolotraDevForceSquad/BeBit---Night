@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowDown, Bank, CheckCircle2 } from "lucide-react";
+import { ArrowDown, Building2, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -164,7 +164,7 @@ export function WithdrawFundsModal({
                   <div className="flex justify-between text-sm">
                     <span>Méthode de retrait</span>
                     <span className="font-medium flex items-center">
-                      <Bank className="h-3.5 w-3.5 mr-1.5" />
+                      <Building2 className="h-3.5 w-3.5 mr-1.5" />
                       {withdrawMethod === "bank" ? "Compte bancaire" : "Carte Visa ****4242"}
                     </span>
                   </div>
