@@ -13,6 +13,8 @@ const ArtistInvitationsPage = lazy(() => import("@/pages/artist/invitations-page
 const ArtistFeedbackPage = lazy(() => import("@/pages/artist/feedback-page"));
 const ArtistCreateEventPage = lazy(() => import("@/pages/artist/create-event-page"));
 const ArtistCollaborationsPage = lazy(() => import("@/pages/artist/collaborations-page"));
+const ArtistSettingsPage = lazy(() => import("@/pages/artist/settings-page"));
+const ArtistMediaPage = lazy(() => import("@/pages/artist/media-page"));
 const LogoutPage = lazy(() => import("@/pages/logout-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
@@ -150,6 +152,24 @@ function App() {
             ? <SimpleAuth /> 
             : user.role === "artist" 
               ? <ArtistCollaborationsPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/artist/settings">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistSettingsPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/artist/media">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistMediaPage /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
