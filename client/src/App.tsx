@@ -101,6 +101,15 @@ function App() {
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
+
+        <Route path="/artist/wallet">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <WalletPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
         
         <Route path="/club">
           {!user 
@@ -161,6 +170,15 @@ function App() {
             ? <SimpleAuth /> 
             : user.role === "club" 
               ? <FindArtistsPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+
+        <Route path="/club/wallet">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <WalletPage /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
