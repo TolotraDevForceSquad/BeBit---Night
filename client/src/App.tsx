@@ -11,6 +11,7 @@ const ArtistProfilePage = lazy(() => import("@/pages/artist/artist-profile-page"
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
 const FindArtistsPage = lazy(() => import("@/pages/club/find-artists-page"));
+const AttendeesPage = lazy(() => import("@/pages/club/attendees-page"));
 const AdminDashboardPage = lazy(() => import("@/pages/admin/dashboard-page"));
 const ModerationPage = lazy(() => import("@/pages/admin/moderation-page"));
 const ArtistsManagementPage = lazy(() => import("@/pages/admin/artists-management-page"));
