@@ -146,7 +146,7 @@ export default function Sidebar({ activeItem }: SidebarProps) {
       
       {/* Actions en bas */}
       <div className="pt-6 space-y-1 border-t">
-        <Link href="/settings" className="block">
+        <Link href={`/${user?.role || 'user'}/settings`} className="block">
           <Button
             variant={activeItem === "settings" ? "default" : "ghost"}
             className={`w-full justify-start ${
