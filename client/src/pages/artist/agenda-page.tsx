@@ -144,14 +144,11 @@ export default function ArtistAgendaPage() {
 
   // Chargement des événements
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const mockEvents = generateMockEvents();
-      setEvents(mockEvents);
-      setFilteredEvents(mockEvents);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    // Chargement immédiat sans délai artificiel
+    const mockEvents = generateMockEvents();
+    setEvents(mockEvents);
+    setFilteredEvents(mockEvents);
+    setIsLoading(false);
   }, []);
   
   // Filtrer les événements

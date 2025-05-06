@@ -147,13 +147,10 @@ export default function ArtistInvitationsPage() {
 
   // Chargement des invitations
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setInvitations(mockInvitations);
-      setFilteredInvitations(mockInvitations);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
+    // Chargement immédiat sans délai artificiel
+    setInvitations(mockInvitations);
+    setFilteredInvitations(mockInvitations);
+    setIsLoading(false);
   }, []);
   
   // Filtrer les invitations
