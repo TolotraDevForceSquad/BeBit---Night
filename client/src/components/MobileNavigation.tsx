@@ -95,9 +95,15 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
   };
   
   // Fonction de déconnexion
-  const handleLogout = () => {
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Mobile - Déconnexion en cours...");
     localStorage.removeItem('auth_user');
-    window.location.href = "/auth";
+    console.log("Mobile - Local storage effacé, redirection...");
+    setTimeout(() => {
+      window.location.href = "/auth";
+    }, 100);
   };
 
   const navigationItems = getNavigationItems();

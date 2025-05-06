@@ -36,8 +36,11 @@ export default function Sidebar({ activeItem }: SidebarProps) {
   }, []);
 
   // Fonction de déconnexion
-  const handleLogout = () => {
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("Déconnexion en cours...");
     localStorage.removeItem('auth_user');
+    console.log("Local storage effacé, redirection...");
     window.location.href = "/auth";
   };
 
