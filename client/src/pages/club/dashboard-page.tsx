@@ -381,9 +381,11 @@ export default function ClubDashboardPage() {
           
           {/* Tabs de contenu */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-3 lg:w-[400px]">
+            <TabsList className="grid grid-cols-5 lg:w-[600px]">
               <TabsTrigger value="overview">Vue générale</TabsTrigger>
               <TabsTrigger value="events">Événements</TabsTrigger>
+              <TabsTrigger value="reservations">Réservations</TabsTrigger>
+              <TabsTrigger value="outings">Sorties</TabsTrigger>
               <TabsTrigger value="artists">Artistes</TabsTrigger>
             </TabsList>
             
@@ -573,6 +575,160 @@ export default function ClubDashboardPage() {
               </Card>
             </TabsContent>
             
+            {/* Tab: Réservations */}
+            <TabsContent value="reservations" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl flex items-center">
+                      <CalendarDays className="h-5 w-5 mr-2" /> 
+                      Réservations de tables
+                    </CardTitle>
+                    <CardDescription>
+                      Gérez les réservations de tables de votre établissement
+                    </CardDescription>
+                  </div>
+                  <Button size="sm" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Nouvelle réservation
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {tableReservations.map(reservation => (
+                      <div key={reservation.id} className="flex flex-col md:flex-row gap-4 border-b pb-4">
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <h3 className="font-medium">{reservation.customerName}</h3>
+                            <Badge className={
+                              reservation.status === "confirmed" ? "bg-green-500/10 text-green-500" :
+                              reservation.status === "pending" ? "bg-yellow-500/10 text-yellow-500" :
+                              "bg-red-500/10 text-red-500"
+                            }>
+                              {reservation.status === "confirmed" ? "Confirmée" :
+                               reservation.status === "pending" ? "En attente" : "Annulée"}
+                            </Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <CalendarDays className="h-4 w-4 mr-1" /> 
+                              {reservation.date}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4 mr-1" /> 
+                              {reservation.time}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Users className="h-4 w-4 mr-1" /> 
+                              {reservation.guestCount} {reservation.guestCount > 1 ? 'personnes' : 'personne'}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Phone className="h-4 w-4 mr-1" /> 
+                              {reservation.phone}
+                            </div>
+                          </div>
+                          
+                          {reservation.tableNumber && (
+                            <div className="mt-2">
+                              <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                Table: {reservation.tableNumber}
+                              </span>
+                            </div>
+                          )}
+
+                          {reservation.specialRequests && (
+                            <div className="mt-2 text-sm italic">
+                              "{reservation.specialRequests}"
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex flex-row md:flex-col justify-end gap-2 mt-2 md:mt-0">
+                          {reservation.status === "pending" ? (
+                            <>
+                              <Button size="sm" className="gap-1 w-full md:w-auto">
+                                <Check className="h-4 w-4" />
+                                Confirmer
+                              </Button>
+                              <Button variant="outline" size="sm" className="gap-1 w-full md:w-auto">
+                                <X className="h-4 w-4" />
+                                Refuser
+                              </Button>
+                            </>
+                          ) : (
+                            <Button variant="outline" size="sm" className="w-full md:w-auto">
+                              Détails
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            {/* Tab: Sorties */}
+            <TabsContent value="outings" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center">
+                    <Map className="h-5 w-5 mr-2" /> 
+                    Sorties liées à votre club
+                  </CardTitle>
+                  <CardDescription>
+                    Les sorties organisées par vos clients dans votre établissement
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {userEvents.map(event => (
+                      <div key={event.id} className="border rounded-lg overflow-hidden">
+                        <div 
+                          className="w-full h-32 bg-cover bg-center" 
+                          style={{ backgroundImage: `url(${event.image})` }}
+                        />
+                        <div className="p-4">
+                          <div className="flex justify-between">
+                            <h3 className="font-medium">{event.title}</h3>
+                            <Badge className={
+                              event.status === "upcoming" ? "bg-blue-500/10 text-blue-500" :
+                              event.status === "live" ? "bg-green-500/10 text-green-500" :
+                              "bg-muted text-muted-foreground"
+                            }>
+                              {event.status === "upcoming" ? "À venir" :
+                               event.status === "live" ? "En cours" : "Passé"}
+                            </Badge>
+                          </div>
+                          
+                          <div className="text-sm text-muted-foreground mt-1">
+                            Organisé par {event.organizer}
+                          </div>
+                          
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {format(new Date(event.date), "EEEE d MMMM, HH'h'mm", { locale: fr })}
+                          </div>
+                          
+                          <div className="mt-3 flex justify-between items-center">
+                            <div className="text-sm">
+                              <span className="font-medium">{event.participantCount}/{event.maxParticipants}</span>
+                              <span className="text-muted-foreground ml-1">participants</span>
+                            </div>
+                            
+                            <Button variant="outline" size="sm" className="gap-1">
+                              <UserPlus className="h-4 w-4" />
+                              Contacter
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             {/* Tab: Artistes */}
             <TabsContent value="artists" className="space-y-6 mt-6">
               <Card>
