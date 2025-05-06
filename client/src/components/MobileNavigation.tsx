@@ -129,52 +129,17 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         </Link>
       ))}
       
-      {/* Menu contextuel pour les options supplémentaires */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <div className="text-center">
-            <div
-              className={`flex flex-col items-center py-2 px-4 rounded-lg ${
-                activeItem === "réglages"
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            >
-              <Settings size={24} />
-              <span className="text-xs mt-1">Plus</span>
-            </div>
-          </div>
-        </SheetTrigger>
-        <SheetContent side="right" className="w-[250px] sm:w-[300px]">
-          <div className="py-4 flex flex-col gap-2">
-            <h3 className="font-semibold text-lg mb-4">Menu</h3>
-            
-            {/* Lien vers les paramètres */}
-            <Link 
-              href="/settings"
-              className="w-full"
-            >
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-              >
-                <Settings className="h-5 w-5 mr-2" />
-                <span>Paramètres</span>
-              </Button>
-            </Link>
-            
-            {/* Bouton de déconnexion */}
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5 mr-2" />
-              <span>Déconnexion</span>
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* Bouton de déconnexion */}
+      <Button
+        variant="ghost"
+        className="flex flex-col items-center p-0 h-auto bg-destructive/10 rounded-lg"
+        onClick={handleLogout}
+      >
+        <div className="py-2 px-4">
+          <LogOut size={24} className="text-destructive" />
+          <span className="text-xs mt-1 text-destructive font-medium">Déconnexion</span>
+        </div>
+      </Button>
     </div>
   );
 }
