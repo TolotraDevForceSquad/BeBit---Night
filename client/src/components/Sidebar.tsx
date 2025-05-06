@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Mail, Image, Users,
-  Wallet, Star, Settings, LogOut, PartyPopper
+  Wallet, Star, Settings, LogOut, PartyPopper,
+  CalendarPlus, MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -64,7 +65,8 @@ export default function Sidebar({ activeItem }: SidebarProps) {
         { icon: <Home className="h-5 w-5" />, label: "Dashboard", href: "/artist" },
         { icon: <Calendar className="h-5 w-5" />, label: "Agenda", href: "/artist/agenda" },
         { icon: <Mail className="h-5 w-5" />, label: "Invitations", href: "/artist/invitations" },
-        { icon: <Star className="h-5 w-5" />, label: "Feedbacks", href: "/artist/feedback" },
+        { icon: <MessageSquare className="h-5 w-5" />, label: "Feedbacks", href: "/artist/feedback" },
+        { icon: <CalendarPlus className="h-5 w-5" />, label: "Créer événement", href: "/artist/create-event" },
         { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/artist/wallet" },
       ];
     }
