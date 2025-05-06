@@ -189,6 +189,8 @@ export default function AttendeesPage({ selectedEventId }: AttendeesPageProps) {
   const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
   const [isAttendeeModalOpen, setIsAttendeeModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
+  const [scanResult, setScanResult] = useState("");
 
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
@@ -337,7 +339,13 @@ export default function AttendeesPage({ selectedEventId }: AttendeesPageProps) {
               </p>
             </div>
             
-            <DropdownMenu>
+            <div className="flex gap-2">
+              <Button variant="default" onClick={() => setIsQrScannerOpen(true)} className="gap-2">
+                <QrCode className="h-4 w-4" />
+                Scanner QR Code
+              </Button>
+              
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <Calendar className="h-4 w-4" />
@@ -638,6 +646,78 @@ export default function AttendeesPage({ selectedEventId }: AttendeesPageProps) {
               </DialogContent>
             </Dialog>
           )}
+          {/* Statistiques */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <Card>
+              <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-32">
+                <div className="text-3xl font-bold text-primary">
+                  {attendees.filter(a => a.checkInStatus === "checked_in").length}
+                </div>
+                <p className="text-muted-foreground mt-1">Participants présents</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-32">
+                <div className="text-3xl font-bold text-yellow-500">
+                  {attendees.filter(a => a.checkInStatus === "pending").length}
+                </div>
+                <p className="text-muted-foreground mt-1">En attente</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-32">
+                <div className="text-3xl font-bold">
+                  {attendees.filter(a => a.ticketType === "vip").length}
+                </div>
+                <p className="text-muted-foreground mt-1">Billets VIP</p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* QR Scanner Dialog */}
+          <Dialog open={isQrScannerOpen} onOpenChange={setIsQrScannerOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Scanner de QR Code</DialogTitle>
+                <DialogDescription>
+                  Scannez le QR code d'un billet pour enregistrer le participant
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="flex flex-col items-center py-4">
+                <div className="border-4 border-dashed border-muted rounded-lg h-64 w-full flex items-center justify-center mb-4">
+                  <QrCode className="h-16 w-16 text-muted-foreground opacity-50" />
+                </div>
+                
+                <p className="text-sm text-muted-foreground mb-4">
+                  Placez le QR code devant votre caméra pour le scanner automatiquement.
+                </p>
+                
+                <Input 
+                  placeholder="Ou entrez le code manuellement" 
+                  value={scanResult}
+                  onChange={(e) => setScanResult(e.target.value)}
+                  className="mb-4"
+                />
+                
+                <Button disabled={!scanResult} className="w-full" onClick={() => {
+                  // Simulation d'un check-in par QR code
+                  if (scanResult) {
+                    const attendee = attendees.find(a => a.ticketId === scanResult);
+                    if (attendee) {
+                      handleCheckIn(attendee.id);
+                      setIsQrScannerOpen(false);
+                      setScanResult("");
+                    }
+                  }
+                }}>
+                  Valider le billet
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
     </ResponsiveLayout>
