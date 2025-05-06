@@ -7,12 +7,30 @@ import EventCard from "@/components/EventCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import LocationDisplay from "@/components/LocationDisplay";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, Bell, Ticket, Calendar, Heart, Wallet, Star, Settings, MapPin } from "lucide-react";
+import { 
+  Loader2, 
+  Search, 
+  Bell, 
+  Ticket, 
+  Calendar, 
+  Heart, 
+  Wallet, 
+  Star, 
+  Settings, 
+  MapPin, 
+  Navigation
+} from "lucide-react";
 import { Link } from "wouter";
-import { prioritizeEventsByCity } from "@/lib/geo-utils";
+import { 
+  prioritizeEventsByCity, 
+  getDistanceFromLatLonInKm,
+  formatDistance,
+  sortEventsByDistance
+} from "@/lib/geo-utils";
 
 // Type pour l'utilisateur authentifié et l'événement
 type AuthUser = {
@@ -38,6 +56,7 @@ type Event = {
   longitude?: number;
   isFeatured?: boolean;
   isLiked?: boolean;
+  calculatedDistance?: number; // Distance calculée par rapport à la position de l'utilisateur
 };
 
 // Données statiques pour les tests
@@ -152,6 +171,8 @@ export default function UserExplorerPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [maxDistance, setMaxDistance] = useState<number>(50); // Distance maximale en km
+  const [currentEventIndex, setCurrentEventIndex] = useState<number>(0);
 
   // Utiliser la géolocalisation
   const { latitude, longitude, city, country, loading: geoLoading } = useGeolocation();
@@ -191,22 +212,49 @@ export default function UserExplorerPage() {
         );
       }
       
-      // Trier les événements par proximité si l'onglet "nearby" est actif
-      if (activeTab === "nearby" && isMobile) {
-        filteredEvents = filteredEvents.filter(event => event.city && event.latitude && event.longitude);
-      }
-
-      // Prioriser les événements dans la ville sélectionnée
-      if (selectedCity) {
+      // Filtrer par distance si la géolocalisation est active
+      if (activeTab === "nearby" && isMobile && latitude && longitude) {
+        // Filtrer les événements qui ont des coordonnées
+        filteredEvents = filteredEvents.filter(event => 
+          event.latitude && event.longitude
+        );
+        
+        // Calculer la distance pour chaque événement et filtrer ceux dans le rayon souhaité
+        filteredEvents = filteredEvents.filter(event => {
+          if (!event.latitude || !event.longitude) return false;
+          
+          const distance = getDistanceFromLatLonInKm(
+            latitude, 
+            longitude, 
+            event.latitude, 
+            event.longitude
+          );
+          
+          // Ajouter la distance calculée à l'événement pour l'affichage
+          event.calculatedDistance = distance;
+          
+          // Filtrer par rayon
+          return distance <= maxDistance;
+        });
+        
+        // Trier par distance croissante
+        filteredEvents.sort((a, b) => {
+          if (!a.calculatedDistance || !b.calculatedDistance) return 0;
+          return a.calculatedDistance - b.calculatedDistance;
+        });
+      } else if (selectedCity) {
+        // Dans les autres onglets, prioriser les événements dans la ville sélectionnée
         filteredEvents = prioritizeEventsByCity(filteredEvents, selectedCity);
       }
       
+      // Réinitialiser l'index courant
+      setCurrentEventIndex(0);
       setEvents(filteredEvents);
       setIsLoading(false);
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [activeCategory, searchQuery, activeTab, selectedCity, latitude, longitude]);
+  }, [activeCategory, searchQuery, activeTab, selectedCity, latitude, longitude, maxDistance]);
 
   // Dummy categories for now
   const categories = ["all", "House", "Techno", "Hip-Hop", "Jazz", "Funk", "EDM"];
@@ -315,6 +363,34 @@ export default function UserExplorerPage() {
               <TabsTrigger value="nearby" className="flex-1">À proximité</TabsTrigger>
             </TabsList>
           </Tabs>
+          
+          {/* Contrôle du rayon de distance (visible uniquement dans l'onglet "À proximité") */}
+          {activeTab === "nearby" && (
+            <div className="pt-2 pb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm flex items-center">
+                  <Navigation className="h-4 w-4 mr-1" /> 
+                  Rayon: <span className="font-medium ml-1">{maxDistance} km</span>
+                </span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-7 text-xs"
+                  onClick={() => setMaxDistance(50)}  // Réinitialiser à 50km
+                >
+                  Réinitialiser
+                </Button>
+              </div>
+              <Slider
+                value={[maxDistance]}
+                min={5}
+                max={200}
+                step={5}
+                onValueChange={(values) => setMaxDistance(values[0])}
+                className="py-4"
+              />
+            </div>
+          )}
         </div>
       )}
       
@@ -385,12 +461,55 @@ export default function UserExplorerPage() {
           )}
           {activeTab === "nearby" && (
             <>
-              {events.filter(e => e.city === selectedCity).length > 0 ? (
-                <MobileEventCard 
-                  event={events.find(e => e.city === selectedCity) || events[0]} 
-                  onLike={() => console.log("Liked event")}
-                  onDislike={() => console.log("Disliked event")}
-                />
+              {events.length > 0 ? (
+                <>
+                  <MobileEventCard 
+                    event={events[currentEventIndex]} 
+                    onLike={() => {
+                      console.log("Liked event", events[currentEventIndex].id);
+                      // Passer à l'événement suivant s'il en reste
+                      if (currentEventIndex < events.length - 1) {
+                        setCurrentEventIndex(currentEventIndex + 1);
+                      }
+                    }}
+                    onDislike={() => {
+                      console.log("Disliked event", events[currentEventIndex].id);
+                      // Passer à l'événement suivant s'il en reste
+                      if (currentEventIndex < events.length - 1) {
+                        setCurrentEventIndex(currentEventIndex + 1);
+                      }
+                    }}
+                  />
+                  
+                  {/* Information sur le nombre d'événements restants */}
+                  <div className="flex justify-center mt-3">
+                    <Badge variant="outline" className="text-xs font-normal">
+                      {currentEventIndex + 1} / {events.length} événements dans un rayon de {maxDistance} km
+                    </Badge>
+                  </div>
+                  
+                  {/* Navigation entre les événements (uniquement si plus d'un événement) */}
+                  {events.length > 1 && (
+                    <div className="flex justify-center mt-4 space-x-2">
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setCurrentEventIndex(Math.max(0, currentEventIndex - 1))}
+                        disabled={currentEventIndex === 0}
+                      >
+                        Précédent
+                      </Button>
+                      <Button 
+                        size="sm"
+                        variant="default"
+                        onClick={() => setCurrentEventIndex(Math.min(events.length - 1, currentEventIndex + 1))}
+                        disabled={currentEventIndex === events.length - 1}
+                      >
+                        Suivant
+                      </Button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12">
                   <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -398,7 +517,7 @@ export default function UserExplorerPage() {
                     Aucun événement à proximité
                   </h3>
                   <p className="text-muted-foreground">
-                    Il n'y a pas d'événements disponibles dans votre ville pour le moment
+                    Essayez d'augmenter le rayon de recherche ou de changer de localisation
                   </p>
                 </div>
               )}
