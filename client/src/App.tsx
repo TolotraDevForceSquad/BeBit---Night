@@ -18,6 +18,7 @@ const ClubsManagementPage = lazy(() => import("@/pages/admin/clubs-management-pa
 const ClubFormPage = lazy(() => import("@/pages/admin/club-form-page"));
 const EventsManagementPage = lazy(() => import("@/pages/admin/events-management-page"));
 const EventDetailsPage = lazy(() => import("@/pages/event-details-page"));
+const SettingsPage = lazy(() => import("@/pages/settings-page"));
 const NotificationsPage = lazy(() => import("@/pages/user/notifications-page"));
 const TicketsPage = lazy(() => import("@/pages/user/tickets-page"));
 const InvitationsPage = lazy(() => import("@/pages/user/invitations-page"));
@@ -212,6 +213,11 @@ function App() {
         
         <Route path="/event/:id">
           <EventDetailsPage />
+        </Route>
+        
+        {/* Route Paramètres - accessible pour tous les utilisateurs connectés */}
+        <Route path="/settings">
+          {!user ? <SimpleAuth /> : <SettingsPage />}
         </Route>
         
         {/* Fallback à 404 */}
