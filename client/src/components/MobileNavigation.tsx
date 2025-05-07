@@ -60,12 +60,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/user/events" 
         },
         { 
-          icon: (
-            <div className="relative flex space-x-0 -mx-1.5">
-              <Mic size={24} className="text-primary" />
-              <Mic size={24} className="text-secondary" />
-            </div>
-          ), 
+          icon: <Music size={24} className="text-pink-500" />, 
           label: "Artistes", 
           href: "/user/search-artists" 
         },
@@ -169,12 +164,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         href: "/user/events" 
       },
       { 
-        icon: (
-          <div className="relative flex space-x-0 -mx-1.5">
-            <Mic size={24} className="text-primary" />
-            <Mic size={24} className="text-secondary" />
-          </div>
-        ), 
+        icon: <Music size={24} className="text-pink-500" />, 
         label: "Artistes", 
         href: "/user/search-artists" 
       },
