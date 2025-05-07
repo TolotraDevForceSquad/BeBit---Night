@@ -4,7 +4,7 @@ import {
   Home, Search, Calendar, Wallet,
   Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus,
   GlassWater, UtensilsCrossed, Music, Mic, Guitar, BellRing,
-  Ticket, Headphones, Radio, Megaphone
+  Ticket, Headphones, Radio, Megaphone, Headset, HeadphonesIcon
 } from "lucide-react";
 import {
   Sheet,
@@ -60,7 +60,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/user/events" 
         },
         { 
-          icon: <Music size={24} className="text-pink-500" />, 
+          icon: <Headphones size={24} className="text-pink-500" />, 
           label: "Artistes", 
           href: "/user/search-artists" 
         },
@@ -164,7 +164,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         href: "/user/events" 
       },
       { 
-        icon: <Music size={24} className="text-pink-500" />, 
+        icon: <Headphones size={24} className="text-pink-500" />, 
         label: "Artistes", 
         href: "/user/search-artists" 
       },
