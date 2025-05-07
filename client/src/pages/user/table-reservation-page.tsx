@@ -534,6 +534,11 @@ export default function TableReservationPage() {
 
   return (
     <UserLayout>
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 flex items-center justify-center mb-4">
+        <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+          Be bit.
+        </h1>
+      </div>
       <div className="container mx-auto p-4">
         <div className="mb-8">
           <h1 className="text-2xl font-bold">Réservation de Table</h1>
