@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Wallet,
-  Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus
+  Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus,
+  GlassWater, UtensilsCrossed
 } from "lucide-react";
 import {
   Sheet,
@@ -44,8 +45,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     // Utilisateur standard
     if (user?.role === 'user') {
       return [
-        { icon: <Home size={24} />, label: "Explorer", href: "/swipe" },
-        { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
+        { icon: <Home size={24} />, label: "Explorer", href: "/user/explorer" },
+        { icon: <PartyPopper size={24} />, label: "Sorties", href: "/user/events" },
         { 
           icon: (
             <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
@@ -56,9 +57,9 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
             </div>
           ), 
           label: "Créer", 
-          href: "/user/events/create" 
+          href: "/user/create-event" 
         },
-        { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
+        { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
         { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
         { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
@@ -133,8 +134,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     
     // Par défaut, retourner la navigation utilisateur
     return [
-      { icon: <Home size={24} />, label: "Explorer", href: "/" },
-      { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
+      { icon: <Home size={24} />, label: "Explorer", href: "/user/explorer" },
+      { icon: <PartyPopper size={24} />, label: "Sorties", href: "/user/events" },
       { 
         icon: (
           <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
@@ -145,12 +146,10 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           </div>
         ), 
         label: "Créer", 
-        href: "/user/events/create" 
+        href: "/user/create-event" 
       },
-      { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
-      { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
+      { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
-      { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
     ];
   };
   
