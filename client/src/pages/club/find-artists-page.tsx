@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Filter, Star, Music, Clock, Map, MapPin, Dollar } from "lucide-react";
+import { Search, Filter, Star, Music, Clock, Map, MapPin, Coins } from "lucide-react";
 import ClubLayout from "@/layouts/club-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -302,7 +302,7 @@ export default function FindArtistsPage() {
                   </div>
                   <p className="text-sm line-clamp-2 mb-2">{artist.bio}</p>
                   <p className="text-lg font-semibold mb-2 flex items-center">
-                    <Dollar className="h-4 w-4 mr-1 text-green-600" />
+                    <Coins className="h-4 w-4 mr-1 text-green-600" />
                     {artist.fee.toLocaleString()} Ar
                   </p>
                 </CardContent>
@@ -431,7 +431,7 @@ export default function FindArtistsPage() {
                     <div>
                       <h3 className="font-medium">Tarif</h3>
                       <p className="text-sm text-muted-foreground flex items-center">
-                        <Dollar className="h-4 w-4 mr-1 text-green-600" />
+                        <Coins className="h-4 w-4 mr-1 text-green-600" />
                         {selectedArtist.fee.toLocaleString()} Ar
                       </p>
                     </div>

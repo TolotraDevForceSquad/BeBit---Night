@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Search, Filter, Star, Music, Clock, Map, MapPin } from "lucide-react";
-import UserLayout from "@/layouts/user-layout";
+import UserLayout from "../../layouts/user-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";

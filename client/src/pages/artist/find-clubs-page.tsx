@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Filter, Star, Music, Calendar, MapPin, Mail, Phone, Globe } from "lucide-react";
+import { Search, Filter, Star, Music, Calendar, MapPin, Mail, Phone, Globe, Users } from "lucide-react";
 import ArtistLayout from "@/layouts/artist-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
