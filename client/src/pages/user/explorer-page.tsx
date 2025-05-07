@@ -3,6 +3,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import MobileEventCard from "@/components/MobileEventCard";
+import MoodEventCard from "@/components/MoodEventCard";
 import EventCard from "@/components/EventCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import LocationDisplay from "@/components/LocationDisplay";
@@ -33,6 +34,7 @@ import {
   formatDistance,
   sortEventsByDistance
 } from "@/lib/geo-utils";
+import { EventMood } from "@/lib/mood-utils";
 
 // Type pour l'utilisateur authentifié et l'événement
 type AuthUser = {
@@ -59,6 +61,7 @@ type Event = {
   isFeatured?: boolean;
   isLiked?: boolean;
   calculatedDistance?: number; // Distance calculée par rapport à la position de l'utilisateur
+  mood?: EventMood; // Ambiance de l'événement
 };
 
 // Données statiques pour les tests
@@ -77,6 +80,7 @@ const mockEvents: Event[] = [
     longitude: 2.3522,
     price: 25,
     isFeatured: true,
+    mood: "energetic",
   },
   {
     id: 2,
@@ -91,6 +95,7 @@ const mockEvents: Event[] = [
     latitude: 45.7640,
     longitude: 4.8357,
     price: 20,
+    mood: "festive",
   },
   {
     id: 3,
@@ -106,6 +111,7 @@ const mockEvents: Event[] = [
     longitude: 2.3488,
     price: 30,
     isLiked: true,
+    mood: "chill",
   },
   {
     id: 4,
@@ -120,6 +126,7 @@ const mockEvents: Event[] = [
     latitude: 43.2965,
     longitude: 5.3698,
     price: 15,
+    mood: "dark",
   },
   {
     id: 5,
@@ -135,6 +142,7 @@ const mockEvents: Event[] = [
     longitude: -0.5792,
     price: 35,
     isFeatured: true,
+    mood: "energetic",
   },
   {
     id: 6,
@@ -149,6 +157,7 @@ const mockEvents: Event[] = [
     latitude: 50.6329,
     longitude: 3.0581,
     price: 25,
+    mood: "romantic",
   },
 ];
 
@@ -466,9 +475,9 @@ export default function UserExplorerPage() {
                     ))}
                   </div>
               
-                  {/* Carte principale en plein écran */}
+                  {/* Carte principale en plein écran avec fond dynamique basé sur l'ambiance */}
                   <div className="relative h-[calc(100vh-180px)] mb-2">
-                    <MobileEventCard 
+                    <MoodEventCard 
                       event={events[currentEventIndex]} 
                       onLike={() => {
                         // Animation puis passage à l'événement suivant
@@ -485,6 +494,14 @@ export default function UserExplorerPage() {
                           setCurrentEventIndex(currentEventIndex + 1);
                         } else {
                           // Plus d'événements, afficher un message
+                          alert("Vous avez parcouru tous les événements disponibles!");
+                        }
+                      }}
+                      onSuperLike={() => {
+                        // Animation spéciale puis passage à l'événement suivant
+                        if (currentEventIndex < events.length - 1) {
+                          setCurrentEventIndex(currentEventIndex + 1);
+                        } else {
                           alert("Vous avez parcouru tous les événements disponibles!");
                         }
                       }}
@@ -632,10 +649,11 @@ export default function UserExplorerPage() {
               
               {/* PARTIE 2: Event Card en dessous */}
               <div className="order-2 mt-4">
-                <MobileEventCard 
+                <MoodEventCard 
                   event={events.find(e => e.isFeatured) || events[0]} 
                   onLike={() => console.log("Liked event")}
                   onDislike={() => console.log("Disliked event")}
+                  onSuperLike={() => console.log("Super liked event")}
                 />
               </div>
             </div>
@@ -675,7 +693,7 @@ export default function UserExplorerPage() {
                   
                   {/* PARTIE 2: Event Card et navigation en dessous */}
                   <div className="order-2 mt-2">
-                    <MobileEventCard 
+                    <MoodEventCard 
                       event={events[currentEventIndex]} 
                       onLike={() => {
                         console.log("Liked event", events[currentEventIndex].id);
@@ -686,6 +704,13 @@ export default function UserExplorerPage() {
                       }}
                       onDislike={() => {
                         console.log("Disliked event", events[currentEventIndex].id);
+                        // Passer à l'événement suivant s'il en reste
+                        if (currentEventIndex < events.length - 1) {
+                          setCurrentEventIndex(currentEventIndex + 1);
+                        }
+                      }}
+                      onSuperLike={() => {
+                        console.log("Super liked event", events[currentEventIndex].id);
                         // Passer à l'événement suivant s'il en reste
                         if (currentEventIndex < events.length - 1) {
                           setCurrentEventIndex(currentEventIndex + 1);
