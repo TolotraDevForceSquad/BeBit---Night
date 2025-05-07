@@ -386,7 +386,19 @@ function App() {
           <ArtistProfilePage />
         </Route>
         
+        <Route path="/artist-details/:id">
+          <ArtistProfilePage />
+        </Route>
+        
+        <Route path="/artist-booking/:id">
+          <ArtistProfilePage />
+        </Route>
+        
         <Route path="/club/:id">
+          <ClubProfilePage />
+        </Route>
+        
+        <Route path="/club-profile/:id">
           <ClubProfilePage />
         </Route>
         
