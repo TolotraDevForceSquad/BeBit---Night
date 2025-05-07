@@ -16,7 +16,7 @@ const CreateEventPage = lazy(() => import("./pages/user/create-event-page"));
 const TableReservationPage = lazy(() => import("./pages/user/table-reservation"));
 
 // Chargement différé des pages club
-const ClubDashboardPage = lazy(() => import("./pages/club/dashboard-page"));
+const ClubDashboardPage = lazy(() => import("./pages/club/simple-dashboard"));
 const ClubProfilePage = lazy(() => import("./pages/club/club-profile-page"));
 const ClubAttendeesPage = lazy(() => import("./pages/club/attendees-page"));
 const ClubFindArtistsPage = lazy(() => import("./pages/club/find-artists-page"));
