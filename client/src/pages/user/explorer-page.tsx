@@ -285,41 +285,8 @@ export default function UserExplorerPage() {
     </div>
   );
 
-  // Sidebar content for desktop
-  const sidebarContent = (
-    <div className="space-y-6">
-      <div className="bg-card rounded-lg p-4 border border-border">
-        <h3 className="font-medium mb-3">Catégories</h3>
-        <div className="space-y-2">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={activeCategory === category ? "default" : "outline"}
-              size="sm"
-              className="mr-2 mb-2"
-              onClick={() => setActiveCategory(category)}
-            >
-              {category === "all" ? "Tous" : category}
-            </Button>
-          ))}
-        </div>
-      </div>
-      
-      <div className="bg-card rounded-lg p-4 border border-border">
-        <h3 className="font-medium mb-3">Artistes Tendance</h3>
-        <div className="space-y-3">
-          {["DJ Elektra", "MC Blaze", "Luna Ray"].map((artist) => (
-            <div key={artist} className="flex items-center">
-              <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
-                {artist.charAt(0)}
-              </div>
-              <span>{artist}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  // Sidebar content for desktop (supprimé car déplacé dans le contenu principal)
+  const sidebarContent = null;
 
   return (
     <ResponsiveLayout
