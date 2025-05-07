@@ -41,6 +41,8 @@ const ReviewsPage = lazy(() => import("@/pages/user/reviews-page"));
 const UserEventsPage = lazy(() => import("@/pages/user/events-page"));
 const UserEventDetailPage = lazy(() => import("@/pages/user/event-detail-page"));
 const CreateEventPage = lazy(() => import("@/pages/user/create-event-page"));
+const SearchArtistsPage = lazy(() => import("@/pages/user/search-artists-page"));
+const SearchClubsPage = lazy(() => import("@/pages/user/search-clubs-page"));
 
 // Type pour l'authentification
 type AuthUser = {
@@ -319,6 +321,14 @@ function App() {
         
         <Route path="/user/notifications">
           {!user ? <SimpleAuth /> : user.role === "user" ? <NotificationsPage /> : <Redirect to="/" />}
+        </Route>
+
+        <Route path="/user/search-artists">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <SearchArtistsPage /> : <Redirect to="/" />}
+        </Route>
+
+        <Route path="/user/search-clubs">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <SearchClubsPage /> : <Redirect to="/" />}
         </Route>
         
         {/* Routes pour les événements créés par les utilisateurs */}
