@@ -136,7 +136,7 @@ export function TableReservationForm({
   };
   
   // Gérer la soumission du formulaire
-  const onSubmit = async (data: ReservationFormData) => {
+  const onSubmit = (data: ReservationFormData) => {
     setIsSubmitting(true);
     
     // Simuler une requête API
