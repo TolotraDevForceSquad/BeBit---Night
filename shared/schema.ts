@@ -109,6 +109,7 @@ export const events = pgTable("events", {
   participantCount: integer("participant_count").notNull().default(0),
   popularity: integer("popularity").notNull().default(0),
   isApproved: boolean("is_approved").notNull().default(false),
+  mood: text("mood", { enum: ["energetic", "chill", "romantic", "dark", "festive"] }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
