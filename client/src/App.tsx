@@ -9,7 +9,7 @@ import { useMobile } from "./hooks/use-mobile";
 const ExplorerPage = lazy(() => import("./pages/user/explorer-page"));
 const EventsPage = lazy(() => import("./pages/user/events-page"));
 const TicketsPage = lazy(() => import("./pages/user/tickets-page"));
-const WalletPage = lazy(() => import("./pages/user/wallet-page"));
+const ProfilePage = lazy(() => import("./pages/user/profile-page"));
 const SearchArtistsPage = lazy(() => import("./pages/user/search-artists-page"));
 const CreateEventPage = lazy(() => import("./pages/user/create-event-page"));
 const TableReservationPage = lazy(() => import("./pages/user/table-reservation"));
@@ -65,7 +65,14 @@ function UserRoutes() {
         <Route path="/user/explorer" component={ExplorerPage} />
         <Route path="/user/events" component={EventsPage} />
         <Route path="/user/tickets" component={TicketsPage} />
-        <Route path="/user/wallet" component={WalletPage} />
+        <Route path="/user/profile" component={ProfilePage} />
+        <Route path="/user/wallet">
+          {() => {
+            // Redirection de l'ancienne URL wallet vers profil
+            window.location.href = "/user/profile";
+            return null;
+          }}
+        </Route>
         <Route path="/user/search-artists" component={SearchArtistsPage} />
         <Route path="/user/create-event" component={CreateEventPage} />
         <Route path="/user/table-reservation" component={TableReservationPage} />

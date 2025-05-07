@@ -60,7 +60,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/user/create-event" 
         },
         { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
-        { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
+        { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
         { icon: <Mic size={24} />, label: "Artistes", href: "/user/search-artists" },
       ];
     }
@@ -148,7 +148,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         href: "/user/create-event" 
       },
       { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
-      { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
+      { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
       { icon: <Mic size={24} />, label: "Artistes", href: "/user/search-artists" },
     ];
   };
