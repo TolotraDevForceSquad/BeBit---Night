@@ -6,6 +6,7 @@ import MoodEventCard from "@/components/MoodEventCard";
 import EventCard from "@/components/EventCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import LocationDisplay from "@/components/LocationDisplay";
+import UserLayout from "@/layouts/user-layout";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,7 +25,8 @@ import {
   MapPin, 
   Navigation,
   X,
-  Building
+  Building,
+  Sparkles
 } from "lucide-react";
 import { Link } from "wouter";
 import { 
@@ -162,6 +164,20 @@ const mockEvents: Event[] = [
 
 export default function UserExplorerPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const isMobile = useMobile();
+  const [activeTab, setActiveTab] = useState("découvrir");
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [maxDistance, setMaxDistance] = useState<number>(25); // Distance maximale en km
+  const [currentEventIndex, setCurrentEventIndex] = useState<number>(0);
+
+  // Utiliser la géolocalisation
+  const { latitude, longitude, city, country, loading: geoLoading } = useGeolocation();
+  
+  // Utiliser les événements mockés au lieu de useQuery
+  const [isLoading, setIsLoading] = useState(true);
+  const [events, setEvents] = useState<Event[]>([]);
   
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
@@ -175,21 +191,6 @@ export default function UserExplorerPage() {
       }
     }
   }, []);
-
-  const isMobile = useMobile();
-  const [activeTab, setActiveTab] = useState("découvrir");
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [maxDistance, setMaxDistance] = useState<number>(25); // Distance maximale en km
-  const [currentEventIndex, setCurrentEventIndex] = useState<number>(0);
-
-  // Utiliser la géolocalisation
-  const { latitude, longitude, city, country, loading: geoLoading } = useGeolocation();
-
-  // Utiliser les événements mockés au lieu de useQuery
-  const [isLoading, setIsLoading] = useState(true);
-  const [events, setEvents] = useState<Event[]>([]);
 
   // Mettre à jour la ville sélectionnée quand la géolocalisation est disponible
   useEffect(() => {
