@@ -74,6 +74,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         },
         { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
         { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
+        { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
       ];
     }
     
@@ -173,6 +174,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       },
       { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
+      { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
     ];
   };
   
