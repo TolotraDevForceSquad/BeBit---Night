@@ -854,7 +854,7 @@ export default function SearchClubsPage() {
   );
   
   return (
-    <ResponsiveLayout headerContent={headerContent}>
+    <>
       <div className="w-full">
         {/* Barre de recherche et filtres */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -990,6 +990,6 @@ export default function SearchClubsPage() {
           </div>
         </div>
       </div>
-    </ResponsiveLayout>
+    </>
   );
 }
