@@ -1,14 +1,12 @@
 import React, { useState } from "react";
-import { Search, Filter, Star, Music, Clock, Map, MapPin, Calendar, Clock12, X } from "lucide-react";
-import UserLayout from "../../layouts/user-layout";
+import { Search, Star, Music, Clock, MapPin, Calendar, Clock12 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 // Types
@@ -85,7 +83,7 @@ export default function SearchArtistsPage() {
   // Filtrer les artistes en fonction des critères de recherche
   const filteredArtists = artists.filter(artist => {
     const matchesSearch = artist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          artist.genre.toLowerCase().includes(searchTerm.toLowerCase());
+                         artist.genre.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesGenre = genreFilter === "all" || artist.genre === genreFilter;
     const matchesLocation = locationFilter === "all" || artist.location === locationFilter;
     
@@ -137,7 +135,7 @@ export default function SearchArtistsPage() {
   };
 
   return (
-    <UserLayout>
+    <>
       <div className="container mx-auto p-4">
         <h1 className="text-2xl font-bold mb-6">Rechercher des Artistes</h1>
         
@@ -252,15 +250,15 @@ export default function SearchArtistsPage() {
               <div className="flex items-center space-x-4 mb-4">
                 <div className="h-16 w-16 rounded-lg overflow-hidden">
                   <img 
-                    src={selectedArtist.profileImage} 
-                    alt={selectedArtist.name}
+                    src={selectedArtist?.profileImage || ""} 
+                    alt={selectedArtist?.name || ""}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold">{selectedArtist.name}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedArtist.genre} • {selectedArtist.location}</p>
-                  <p className="text-sm font-medium">{selectedArtist.fee.toLocaleString()} Ar</p>
+                  <h3 className="font-semibold">{selectedArtist?.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedArtist?.genre} • {selectedArtist?.location}</p>
+                  <p className="text-sm font-medium">{selectedArtist?.fee?.toLocaleString()} Ar</p>
                 </div>
               </div>
             )}
@@ -319,6 +317,6 @@ export default function SearchArtistsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </UserLayout>
+    </>
   );
 }

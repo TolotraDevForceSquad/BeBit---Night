@@ -57,6 +57,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../components/ui/dialog";
+import { Label } from "../../components/ui/label";
 import { Textarea } from "../../components/ui/textarea";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
