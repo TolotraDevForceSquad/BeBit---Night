@@ -8,6 +8,7 @@ import EventsPage from "./pages/user/events-page";
 import TicketsPage from "./pages/user/tickets-page";
 import ProfilePage from "./pages/user/profile-page";
 import SearchArtistsPage from "./pages/user/search-artists-page";
+import SearchClubsPage from "./pages/user/search-clubs-page";
 import CreateEventPage from "./pages/user/create-event-page";
 import TableReservationPage from "./pages/user/table-reservation";
 import InvitationsPage from "./pages/user/invitations-page";
@@ -67,6 +68,12 @@ function App() {
             <Route path="/user/search-artists">
               <UserLayout>
                 <SearchArtistsPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/search-clubs">
+              <UserLayout>
+                <SearchClubsPage />
               </UserLayout>
             </Route>
             
