@@ -4,7 +4,7 @@ import {
   Home, Search, Calendar, Wallet,
   Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus,
   GlassWater, UtensilsCrossed, Music, Mic, Guitar, BellRing,
-  Ticket
+  Ticket, Headphones, Radio, Megaphone
 } from "lucide-react";
 import {
   Sheet,
@@ -61,10 +61,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         },
         { 
           icon: (
-            <div className="relative w-6 h-6">
-              <Mic size={18} className="absolute left-0 top-0 transform -rotate-12" />
-              <Mic size={18} className="absolute right-0 top-0 transform rotate-12" />
-              <Mic size={18} className="absolute bottom-0 left-1/2 transform -translate-x-1/2 rotate-0" />
+            <div className="relative bg-primary/10 rounded-md p-1 flex items-center justify-center w-7 h-7">
+              <Mic size={20} />
             </div>
           ), 
           label: "Artistes", 
@@ -171,10 +169,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       },
       { 
         icon: (
-          <div className="relative w-6 h-6">
-            <Mic size={18} className="absolute left-0 top-0 transform -rotate-12" />
-            <Mic size={18} className="absolute right-0 top-0 transform rotate-12" />
-            <Mic size={18} className="absolute bottom-0 left-1/2 transform -translate-x-1/2 rotate-0" />
+          <div className="relative bg-primary/10 rounded-md p-1 flex items-center justify-center w-7 h-7">
+            <Mic size={20} />
           </div>
         ), 
         label: "Artistes", 
