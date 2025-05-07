@@ -4,7 +4,7 @@ import SimpleAuth from "./pages/simple-auth";
 import UserLayout from "./layouts/user-layout";
 import NotFound from "./pages/not-found";
 import { useMobile } from "./hooks/use-mobile";
-import { useAuth } from "./hooks/use-auth";
+// Suppression de l'import useAuth pour utiliser uniquement l'authentification locale
 
 // Chargement différé des pages principales
 const ExplorerPage = lazy(() => import("./pages/user/explorer-page"));
@@ -108,37 +108,32 @@ function LoadingScreen() {
 }
 
 function App() {
-  const [localUser, setLocalUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useLocation();
-  
-  // Essayer d'utiliser le hook useAuth pour l'authentification via API
-  let apiAuth;
-  
-  try {
-    apiAuth = useAuth();
-  } catch (error) {
-    // Si useAuth échoue, on continuera avec l'authentification locale
-    console.log("Utilisation de l'authentification locale uniquement");
-  }
 
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
+    // Initialiser l'état utilisateur ici
     const storedUser = localStorage.getItem('auth_user');
     if (storedUser) {
       try {
-        setLocalUser(JSON.parse(storedUser));
+        setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Erreur lors de la lecture des données utilisateur:", error);
       }
     }
-    setLoading(false);
+    
+    // Terminer le chargement
+    setTimeout(() => {
+      setLoading(false);
+    }, 500); // Petit délai pour être sûr que tout est chargé
   }, []);
   
   // Gérer la déconnexion
   const handleLogout = () => {
     localStorage.removeItem('auth_user');
-    setLocalUser(null);
+    setUser(null);
     setLocation("/auth");
   };
 
@@ -146,9 +141,6 @@ function App() {
   if (loading) {
     return <LoadingScreen />;
   }
-
-  // Déterminer l'utilisateur à utiliser (API ou localStorage)
-  const user = apiAuth?.user || localUser;
 
   return (
     <Suspense fallback={<LoadingScreen />}>
