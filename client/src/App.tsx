@@ -2,10 +2,11 @@ import { Suspense, lazy, useState, useEffect } from "react";
 import { Route, Switch, useLocation } from "wouter";
 import SimpleAuth from "./pages/simple-auth";
 import UserLayout from "./layouts/user-layout";
+import ClubLayout from "./layouts/club-layout";
 import NotFound from "./pages/not-found";
 import { useMobile } from "./hooks/use-mobile";
 
-// Chargement différé des pages principales
+// Chargement différé des pages utilisateur
 const ExplorerPage = lazy(() => import("./pages/user/explorer-page"));
 const EventsPage = lazy(() => import("./pages/user/events-page"));
 const TicketsPage = lazy(() => import("./pages/user/tickets-page"));
@@ -14,21 +15,26 @@ const SearchArtistsPage = lazy(() => import("./pages/user/search-artists-page"))
 const CreateEventPage = lazy(() => import("./pages/user/create-event-page"));
 const TableReservationPage = lazy(() => import("./pages/user/table-reservation"));
 
+// Chargement différé des pages club
+const ClubDashboardPage = lazy(() => import("./pages/club/dashboard-page"));
+const ClubProfilePage = lazy(() => import("./pages/club/club-profile-page"));
+const ClubAttendeesPage = lazy(() => import("./pages/club/attendees-page"));
+const ClubFindArtistsPage = lazy(() => import("./pages/club/find-artists-page"));
+const ClubReservationsPage = lazy(() => import("./pages/club/manage-reservations-page"));
+
 // Page d'accueil qui redirige vers /user/explorer
 function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
   const isMobile = useMobile();
   
-  // Redirection automatique vers /user/explorer
+  // Redirection automatique vers la page appropriée selon le rôle
   useEffect(() => {
-    // Rediriger vers la page appropriée selon le rôle
     if (user.role === 'user') {
       window.location.href = "/user/explorer";
     } else if (user.role === 'artist') {
       // À activer quand l'interface artiste sera prête
       // window.location.href = "/artist/dashboard";
     } else if (user.role === 'club') {
-      // À activer quand l'interface club sera prête
-      // window.location.href = "/club/dashboard";
+      window.location.href = "/club/dashboard";
     } else if (user.role === 'admin') {
       // À activer quand l'interface admin sera prête
       // window.location.href = "/admin/dashboard";
@@ -79,6 +85,36 @@ function UserRoutes() {
         <Route component={NotFound} />
       </Switch>
     </UserLayout>
+  );
+}
+
+function ClubRoutes() {
+  return (
+    <ClubLayout>
+      <Switch>
+        <Route path="/club">
+          <ClubDashboardPage />
+        </Route>
+        <Route path="/club/dashboard">
+          <ClubDashboardPage />
+        </Route>
+        <Route path="/club/profile">
+          <ClubProfilePage />
+        </Route>
+        <Route path="/club/attendees">
+          <ClubAttendeesPage />
+        </Route>
+        <Route path="/club/find-artists">
+          <ClubFindArtistsPage />
+        </Route>
+        <Route path="/club/reservations">
+          <ClubReservationsPage />
+        </Route>
+        <Route>
+          <NotFound />
+        </Route>
+      </Switch>
+    </ClubLayout>
   );
 }
 
@@ -159,6 +195,9 @@ function App() {
           </Route>
           <Route path="/user/:rest*">
             <UserRoutes />
+          </Route>
+          <Route path="/club/:rest*">
+            <ClubRoutes />
           </Route>
           <Route>
             <NotFound />
