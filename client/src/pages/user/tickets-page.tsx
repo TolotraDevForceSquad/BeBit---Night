@@ -118,18 +118,7 @@ export default function TicketsPage() {
     return format(new Date(dateString), "EEEE d MMMM yyyy, HH'h'mm", { locale: fr });
   };
 
-  // Header content pour la mise en page
-  const headerContent = (
-    <div className="w-full flex items-center">
-      <Link to="/">
-        <Button variant="ghost" size="icon" className="mr-2">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-      </Link>
-      
-      <h1 className="font-semibold text-lg">Mes tickets</h1>
-    </div>
-  );
+  // Le header content n'est pas utilisé car on utilise UserLayout
 
   // Récupérer l'événement réservé depuis le localStorage s'il existe
   const [location, setLocation] = useLocation();
@@ -179,11 +168,6 @@ export default function TicketsPage() {
 
   return (
     <UserLayout>
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 flex items-center justify-center mb-4">
-        <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-          Be bit.
-        </h1>
-      </div>
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
