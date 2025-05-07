@@ -1,8 +1,25 @@
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
+import { Route, Switch, useLocation } from "wouter";
 import SimpleAuth from "./pages/simple-auth";
+import UserLayout from "./layouts/user-layout";
+import NotFound from "./pages/not-found";
+import { useMobile } from "./hooks/use-mobile";
+
+// Chargement différé des pages principales
+const ExplorerPage = lazy(() => import("./pages/user/explorer-page"));
+const EventsPage = lazy(() => import("./pages/user/events-page"));
+const TicketsPage = lazy(() => import("./pages/user/tickets-page"));
+const WalletPage = lazy(() => import("./pages/user/wallet-page"));
+const SearchArtistsPage = lazy(() => import("./pages/user/search-artists-page"));
+const CreateEventPage = lazy(() => import("./pages/user/create-event-page"));
+const TableReservationPage = lazy(() => import("./pages/user/table-reservation-page"));
 
 // Page d'accueil simple pour un utilisateur connecté
 function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
+  const isMobile = useMobile();
+  
+  // Pour la redirection, nous utilisons window.location.href dans les boutons
+
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
@@ -36,16 +53,18 @@ function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
                   Votre plateforme événementielle interactive.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                  <div className="p-4 bg-muted rounded-lg border border-border">
+                  <div className="p-4 bg-muted rounded-lg border border-border hover:bg-accent cursor-pointer"
+                       onClick={() => window.location.href = "/user/explorer"}>
                     <h3 className="font-medium">Découvrir des événements</h3>
                     <p className="text-sm text-muted-foreground mt-1">
                       Explorez des événements près de chez vous
                     </p>
                   </div>
-                  <div className="p-4 bg-muted rounded-lg border border-border">
-                    <h3 className="font-medium">Connectez-vous avec des artistes</h3>
+                  <div className="p-4 bg-muted rounded-lg border border-border hover:bg-accent cursor-pointer"
+                       onClick={() => window.location.href = "/user/events"}>
+                    <h3 className="font-medium">Mes événements</h3>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Découvrez de nouveaux talents
+                      Gérez vos sorties
                     </p>
                   </div>
                 </div>
@@ -71,9 +90,27 @@ function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
   );
 }
 
+function UserRoutes() {
+  return (
+    <UserLayout>
+      <Switch>
+        <Route path="/user/explorer" component={ExplorerPage} />
+        <Route path="/user/events" component={EventsPage} />
+        <Route path="/user/tickets" component={TicketsPage} />
+        <Route path="/user/wallet" component={WalletPage} />
+        <Route path="/user/search-artists" component={SearchArtistsPage} />
+        <Route path="/user/create-event" component={CreateEventPage} />
+        <Route path="/user/table-reservation" component={TableReservationPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </UserLayout>
+  );
+}
+
 function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [location, setLocation] = useLocation();
 
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
@@ -92,6 +129,7 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('auth_user');
     setUser(null);
+    setLocation("/auth");
   };
 
   // Afficher un indicateur de chargement
@@ -110,7 +148,17 @@ function App() {
       </div>
     }>
       {user ? (
-        <HomePage user={user} onLogout={handleLogout} />
+        <Switch>
+          <Route path="/">
+            <HomePage user={user} onLogout={handleLogout} />
+          </Route>
+          <Route path="/user/:rest*">
+            <UserRoutes />
+          </Route>
+          <Route>
+            <NotFound />
+          </Route>
+        </Switch>
       ) : (
         <SimpleAuth />
       )}
