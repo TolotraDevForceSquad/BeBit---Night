@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { format, isPast, isFuture } from "date-fns";
 import { fr } from "date-fns/locale";
 import { ArrowLeft, Calendar, Clock, MapPin, Users, Plus, Euro, Edit, Trash2, Eye, Share2, Heart, X, Settings, Navigation } from "lucide-react";
-// import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import UserLayout from "@/layouts/user-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
