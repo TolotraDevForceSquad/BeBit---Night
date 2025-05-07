@@ -26,63 +26,77 @@ function App() {
   // Afficher l'interface principale
   return (
     <>
-      {user ? (
-        <Switch>
-          <Route path="/" exact>
-            {/* Page d'accueil - redirige vers explorer */}
-            <div>Redirection vers explorer...</div>
-          </Route>
-          
-          {/* Correction: Routes utilisateur avec une seule couche */}
-          <Route path="/user/explorer">
-            <UserLayout>
-              <ExplorerPage />
-            </UserLayout>
-          </Route>
-          
-          <Route path="/user/events">
-            <UserLayout>
-              <EventsPage />
-            </UserLayout>
-          </Route>
-          
-          <Route path="/user/tickets">
-            <UserLayout>
-              <TicketsPage />
-            </UserLayout>
-          </Route>
-          
-          <Route path="/user/profile">
-            <UserLayout>
-              <ProfilePage />
-            </UserLayout>
-          </Route>
-          
-          <Route path="/user/search-artists">
-            <UserLayout>
-              <SearchArtistsPage />
-            </UserLayout>
-          </Route>
-          
-          <Route path="/user/create-event">
-            <UserLayout>
-              <CreateEventPage />
-            </UserLayout>
-          </Route>
-          
-          <Route path="/user/table-reservation">
-            <UserLayout>
-              <TableReservationPage />
-            </UserLayout>
-          </Route>
-          
+      <Switch>
+        {/* Route spécifique pour auth */}
+        <Route path="/auth">
+          <SimpleAuth />
+        </Route>
+        
+        {user ? (
+          <>
+            <Route path="/">
+              {/* Page d'accueil - redirige vers explorer */}
+              <div>Redirection vers explorer...</div>
+            </Route>
+            
+            {/* Correction: Routes utilisateur avec une seule couche */}
+            <Route path="/user/explorer">
+              <UserLayout>
+                <ExplorerPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/events">
+              <UserLayout>
+                <EventsPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/tickets">
+              <UserLayout>
+                <TicketsPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/profile">
+              <UserLayout>
+                <ProfilePage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/search-artists">
+              <UserLayout>
+                <SearchArtistsPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/create-event">
+              <UserLayout>
+                <CreateEventPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/table-reservation">
+              <UserLayout>
+                <TableReservationPage />
+              </UserLayout>
+            </Route>
+          </>
+        ) : (
+          // Redirection vers auth quand non connecté et pas sur /auth
           <Route>
-            <NotFound />
+            {window.location.pathname !== "/auth" && (
+              window.location.href = "/auth",
+              <div>Redirection vers auth...</div>
+            )}
           </Route>
-        </Switch>
-      ) : (
-        <SimpleAuth />
-      )}
+        )}
+        
+        {/* 404 quand aucune autre route ne correspond */}
+        <Route>
+          <NotFound />
+        </Route>
+      </Switch>
     </>
   );
 }
