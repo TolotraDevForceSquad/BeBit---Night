@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMobile } from "@/hooks/use-mobile";
 import { useGeolocation } from "@/hooks/use-geolocation";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import MobileEventCard from "@/components/MobileEventCard";
 import MoodEventCard from "@/components/MoodEventCard";
 import EventCard from "@/components/EventCard";
@@ -300,11 +299,9 @@ export default function UserExplorerPage() {
   const sidebarContent = null;
 
   return (
-    <ResponsiveLayout
-      activeItem="home"
-      headerContent={headerContent}
-      sidebarContent={sidebarContent}
-    >
+    <div className="pb-16">
+      {/* Mobile header - peut être supprimé car il est dans UserLayout */}
+      {/* {isMobile && headerContent} */}
       {/* Mobile search and filters */}
       {isMobile && (
         <div className="mb-4 space-y-4">
@@ -772,6 +769,6 @@ export default function UserExplorerPage() {
           ))}
         </div>
       )}
-    </ResponsiveLayout>
+    </div>
   );
 }
