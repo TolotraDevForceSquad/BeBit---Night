@@ -61,10 +61,10 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         },
         { 
           icon: (
-            <div className="relative">
-              <Mic size={20} className="absolute -left-1 -top-1" />
-              <Mic size={20} className="absolute right-0 top-0" />
-              <Mic size={20} className="absolute bottom-0 left-1" />
+            <div className="relative w-6 h-6">
+              <Mic size={18} className="absolute left-0 top-0 transform -rotate-12" />
+              <Mic size={18} className="absolute right-0 top-0 transform rotate-12" />
+              <Mic size={18} className="absolute bottom-0 left-1/2 transform -translate-x-1/2 rotate-0" />
             </div>
           ), 
           label: "Artistes", 
@@ -171,10 +171,10 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       },
       { 
         icon: (
-          <div className="relative">
-            <Mic size={20} className="absolute -left-1 -top-1" />
-            <Mic size={20} className="absolute right-0 top-0" />
-            <Mic size={20} className="absolute bottom-0 left-1" />
+          <div className="relative w-6 h-6">
+            <Mic size={18} className="absolute left-0 top-0 transform -rotate-12" />
+            <Mic size={18} className="absolute right-0 top-0 transform rotate-12" />
+            <Mic size={18} className="absolute bottom-0 left-1/2 transform -translate-x-1/2 rotate-0" />
           </div>
         ), 
         label: "Artistes", 
