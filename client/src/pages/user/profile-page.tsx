@@ -7,7 +7,7 @@ import {
   Banknote, DollarSign, Settings, User, Bell, Shield, 
   Globe, LogOut, MapPin, Calendar, Mail, Phone
 } from "lucide-react";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
+import UserLayout from "@/layouts/user-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -193,19 +193,6 @@ export default function ProfilePage() {
   
   const stats = getTransactionStats();
 
-  // Header content pour la mise en page
-  const headerContent = (
-    <div className="w-full flex items-center">
-      <Link to="/">
-        <Button variant="ghost" size="icon" className="mr-2">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-      </Link>
-      
-      <h1 className="font-semibold text-lg">Mon profil</h1>
-    </div>
-  );
-
   const handleLogout = () => {
     localStorage.removeItem('auth_user');
     window.location.href = '/auth';
@@ -216,7 +203,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <ResponsiveLayout activeItem="wallet" headerContent={headerContent}>
+    <UserLayout>
       <div className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-6">
@@ -466,7 +453,7 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {filteredTransactions.map((transaction) => (
+                    {filteredTransactions.map(transaction => (
                       <TransactionItem key={transaction.id} transaction={transaction} />
                     ))}
                   </div>
@@ -477,100 +464,100 @@ export default function ProfilePage() {
           
           {/* Tab content for Settings */}
           <TabsContent value="settings" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Settings className="h-6 w-6 mr-2" />
+                <h2 className="text-2xl font-bold">Paramètres</h2>
+              </div>
+              
+              <Button onClick={handleLogout} variant="destructive">
+                <LogOut className="h-4 w-4 mr-2" />
+                Déconnexion
+              </Button>
+            </div>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Paramètres du compte</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="username">Nom d'utilisateur</Label>
-                  <Input id="username" defaultValue={user.username} />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Adresse email</Label>
-                  <Input id="email" type="email" defaultValue={user.email} />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Mot de passe</Label>
-                  <Input id="password" type="password" value="••••••••" />
-                  <Button variant="link" className="px-0">Changer le mot de passe</Button>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="language">Langue</Label>
-                  <select id="language" className="w-full p-2 border rounded-md">
-                    <option value="fr">Français</option>
-                    <option value="en">English</option>
-                    <option value="mg">Malagasy</option>
-                  </select>
-                </div>
-                
-                <Button className="w-full">Sauvegarder les modifications</Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Sécurité</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="2fa" className="block mb-1">Authentification à deux facteurs</Label>
-                    <p className="text-sm text-muted-foreground">Renforcer la sécurité de votre compte</p>
+                  <h3 className="font-medium">Langue et région</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label htmlFor="language">Langue</Label>
+                      <Input 
+                        id="language" 
+                        value="Français" 
+                        className="bg-muted" 
+                        readOnly 
+                      />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <Label htmlFor="region">Région</Label>
+                      <Input 
+                        id="region" 
+                        value="Madagascar" 
+                        className="bg-muted" 
+                        readOnly 
+                      />
+                    </div>
                   </div>
-                  <Switch id="2fa" />
                 </div>
                 
-                <div>
-                  <Label className="block mb-1">Appareils connectés</Label>
-                  <Button variant="outline" className="mt-2">Gérer les appareils</Button>
+                <div className="space-y-2">
+                  <h3 className="font-medium">Notifications</h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="push" className="block mb-1">Notifications push</Label>
+                      <p className="text-sm text-muted-foreground">Recevoir des alertes sur votre appareil</p>
+                    </div>
+                    <Switch id="push" checked />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="email" className="block mb-1">Notifications par email</Label>
+                      <p className="text-sm text-muted-foreground">Recevoir des mises à jour par email</p>
+                    </div>
+                    <Switch id="email" checked />
+                  </div>
                 </div>
                 
-                <div>
-                  <Label className="block mb-1">Activité du compte</Label>
-                  <Button variant="outline" className="mt-2">Voir l'historique de connexion</Button>
+                <div className="space-y-2">
+                  <h3 className="font-medium">Sécurité</h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="2fa" className="block mb-1">Authentification à deux facteurs</Label>
+                      <p className="text-sm text-muted-foreground">Renforcer la sécurité de votre compte</p>
+                    </div>
+                    <Switch id="2fa" />
+                  </div>
+                  
+                  <div>
+                    <Label className="block mb-1">Appareils connectés</Label>
+                    <Button variant="outline" className="mt-2">Gérer les appareils</Button>
+                  </div>
+                  
+                  <div>
+                    <Label className="block mb-1">Activité du compte</Label>
+                    <Button variant="outline" className="mt-2">Voir l'historique de connexion</Button>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <Button variant="destructive" className="w-full sm:w-auto">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Supprimer mon compte
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-destructive">Zone de danger</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="font-medium mb-1">Désactiver le compte</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Votre compte sera temporairement désactivé et caché des autres utilisateurs
-                  </p>
-                  <Button variant="outline" className="text-yellow-600 border-yellow-600">
-                    Désactiver mon compte
-                  </Button>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium mb-1">Supprimer le compte</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Suppression permanente de toutes vos données. Cette action est irréversible.
-                  </p>
-                  <Button variant="destructive">
-                    Supprimer définitivement mon compte
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Button variant="outline" className="w-full" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Se déconnecter
-            </Button>
           </TabsContent>
         </Tabs>
       </div>
-    </ResponsiveLayout>
+    </UserLayout>
   );
 }
 
