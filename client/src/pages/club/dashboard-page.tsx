@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Calendar, Search, Users, Wallet, QrCode, Plus, Settings, ChevronRight, CalendarDays, Map, Clock, Phone, UserPlus, Check, X } from "lucide-react";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
+import ClubLayout from "@/layouts/club-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -305,10 +305,7 @@ export default function ClubDashboardPage({ activeTab = "overview" }: ClubDashbo
   );
 
   return (
-    <ResponsiveLayout
-      activeItem="événements"
-      headerContent={headerContent}
-    >
+    <ClubLayout>
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
@@ -885,6 +882,6 @@ export default function ClubDashboardPage({ activeTab = "overview" }: ClubDashbo
           </Tabs>
         </div>
       )}
-    </ResponsiveLayout>
+    </ClubLayout>
   );
 }
