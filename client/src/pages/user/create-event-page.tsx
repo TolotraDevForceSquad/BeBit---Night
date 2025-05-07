@@ -177,9 +177,9 @@ export default function CreateEventPage() {
           </button>
         </div>
         
-        <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-          Be bit.
-        </h1>
+        <div className="w-10 opacity-0">
+          {/* Espace invisible pour maintenir l'alignement */}
+        </div>
         
         <div className="flex items-center gap-2">
           <button 
