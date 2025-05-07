@@ -393,6 +393,10 @@ export default function ClubProfilePage() {
                   <MapPin className="h-4 w-4" />
                   Itinéraire
                 </Button>
+                <Button variant="default" className="gap-1.5" onClick={() => setLocation(`/club/table-reservation/${club.id}`)}>
+                  <Calendar className="h-4 w-4" />
+                  Réserver une table
+                </Button>
               </div>
             </div>
             

@@ -28,6 +28,8 @@ const ClubsManagementPage = lazy(() => import("@/pages/admin/clubs-management-pa
 const ClubFormPage = lazy(() => import("@/pages/admin/club-form-page"));
 const EventsManagementPage = lazy(() => import("@/pages/admin/events-management-page"));
 const EventDetailsPage = lazy(() => import("@/pages/event-details-page"));
+const TableReservationPage = lazy(() => import("@/pages/club/table-reservation-page"));
+const ManageReservationsPage = lazy(() => import("@/pages/club/manage-reservations-page"));
 const SettingsPage = lazy(() => import("@/pages/settings-page"));
 const NotificationsPage = lazy(() => import("@/pages/user/notifications-page"));
 const TicketsPage = lazy(() => import("@/pages/user/tickets-page"));
@@ -217,6 +219,19 @@ function App() {
               ? <ClubDashboardPage activeTab="reservations" /> 
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
+        </Route>
+        
+        <Route path="/club/manage-reservations">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "club" 
+              ? <ManageReservationsPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/club/table-reservation/:id">
+          <TableReservationPage />
         </Route>
         
         <Route path="/club/outings">
