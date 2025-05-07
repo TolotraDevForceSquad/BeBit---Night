@@ -44,7 +44,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     // Utilisateur standard
     if (user?.role === 'user') {
       return [
-        { icon: <Home size={24} />, label: "Explorer", href: "/" },
+        { icon: <Home size={24} />, label: "Explorer", href: "/swipe" },
         { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
         { icon: <Calendar size={24} />, label: "Créer", href: "/user/events/create" },
         { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },

@@ -90,6 +90,15 @@ function App() {
           {!user 
             ? <SimpleAuth /> 
             : user.role === "user" 
+              ? <Redirect to="/swipe" /> 
+              : <Redirect to={`/${user.role}`} />
+          }
+        </Route>
+        
+        <Route path="/swipe">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "user" 
               ? <UserExplorerPage /> 
               : <Redirect to={`/${user.role}`} />
           }

@@ -22,7 +22,9 @@ import {
   Star, 
   Settings, 
   MapPin, 
-  Navigation
+  Navigation,
+  X,
+  Building
 } from "lucide-react";
 import { Link } from "wouter";
 import { 
@@ -448,59 +450,156 @@ export default function UserExplorerPage() {
       {isMobile && events && events.length > 0 && (
         <div className="space-y-4">
           {activeTab === "découvrir" && (
-            <div className="flex flex-col">
-              {/* Partie principale: Card plein écran style TikTok/Tinder */}
-              <div className="mb-2 h-[calc(100vh-180px)]">
-                <MobileEventCard 
-                  event={events[0]} 
-                  onLike={() => console.log("Liked event", events[0].id)}
-                  onDislike={() => console.log("Disliked event", events[0].id)}
-                />
-              </div>
+            <div className="flex flex-col h-full">
+              {/* Version Tinder complète avec swipe card et boutons d'action */}
+              {events.length > 0 ? (
+                <>
+                  {/* Barre de progression */}
+                  <div className="flex mb-2 px-1">
+                    {events.slice(0, Math.min(5, events.length)).map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`h-1 flex-1 rounded-full mx-0.5 ${
+                          i < currentEventIndex ? "bg-primary" : "bg-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
               
-              {/* Filtres style Tinder en bas */}
-              <div className="mt-3 mb-3">
-                <div className="flex justify-between items-center px-1">
-                  <h3 className="text-sm font-medium">Filtres</h3>
-                  <Button variant="ghost" size="sm" className="text-xs h-7 px-3 text-primary">
-                    Réinitialiser
+                  {/* Carte principale en plein écran */}
+                  <div className="relative h-[calc(100vh-180px)] mb-2">
+                    <MobileEventCard 
+                      event={events[currentEventIndex]} 
+                      onLike={() => {
+                        // Animation puis passage à l'événement suivant
+                        if (currentEventIndex < events.length - 1) {
+                          setCurrentEventIndex(currentEventIndex + 1);
+                        } else {
+                          // Plus d'événements, afficher un message
+                          alert("Vous avez parcouru tous les événements disponibles!");
+                        }
+                      }}
+                      onDislike={() => {
+                        // Animation puis passage à l'événement suivant
+                        if (currentEventIndex < events.length - 1) {
+                          setCurrentEventIndex(currentEventIndex + 1);
+                        } else {
+                          // Plus d'événements, afficher un message
+                          alert("Vous avez parcouru tous les événements disponibles!");
+                        }
+                      }}
+                    />
+                    
+                    {/* Boutons d'action style Tinder */}
+                    <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-4 z-10">
+                      <Button 
+                        size="lg" 
+                        variant="outline"
+                        className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-orange-500 hover:bg-orange-50"
+                        onClick={() => {
+                          // Animation de rewind (revenir à l'événement précédent)
+                          if (currentEventIndex > 0) {
+                            setCurrentEventIndex(currentEventIndex - 1);
+                          }
+                        }}
+                      >
+                        <Calendar className="h-6 w-6 text-orange-500" />
+                      </Button>
+                      
+                      <Button 
+                        size="lg" 
+                        variant="outline"
+                        className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-red-500 hover:bg-red-50"
+                        onClick={() => {
+                          // Animation de dislike puis passage à l'événement suivant
+                          if (currentEventIndex < events.length - 1) {
+                            setCurrentEventIndex(currentEventIndex + 1);
+                          }
+                        }}
+                      >
+                        <X className="h-8 w-8 text-red-500" />
+                      </Button>
+                      
+                      <Button 
+                        size="lg" 
+                        variant="outline"
+                        className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-green-500 hover:bg-green-50"
+                        onClick={() => {
+                          // Animation de like puis passage à l'événement suivant
+                          console.log("Liked event", events[currentEventIndex].id);
+                          if (currentEventIndex < events.length - 1) {
+                            setCurrentEventIndex(currentEventIndex + 1);
+                          }
+                        }}
+                      >
+                        <Heart className="h-8 w-8 text-green-500" />
+                      </Button>
+                      
+                      <Button 
+                        size="lg" 
+                        variant="outline"
+                        className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-blue-500 hover:bg-blue-50"
+                        onClick={() => {
+                          // Super like
+                          console.log("Super liked event", events[currentEventIndex].id);
+                          if (currentEventIndex < events.length - 1) {
+                            setCurrentEventIndex(currentEventIndex + 1);
+                          }
+                        }}
+                      >
+                        <Ticket className="h-6 w-6 text-blue-500" />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Filtres compacts en style Tinder */}
+                  <div className="mt-1 mb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="p-0"
+                          onClick={() => {
+                            // Ouvrir une sheet/drawer pour les filtres avancés
+                            console.log("Open filters");
+                          }}
+                        >
+                          <Settings className="h-4 w-4 mr-1" />
+                          <span className="text-xs">Filtres</span>
+                        </Button>
+                      </div>
+                      
+                      <Badge 
+                        variant="outline" 
+                        className="font-normal"
+                      >
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {city || "Votre position"} • {maxDistance} km
+                      </Badge>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // État vide
+                <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)]">
+                  <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <MapPin className="h-10 w-10 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-medium mb-2">
+                    Aucun événement à proximité
+                  </h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Essayez d'augmenter votre rayon de recherche<br/>ou de changer de localisation
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setMaxDistance(Math.min(maxDistance + 10, 50))}
+                  >
+                    Augmenter le rayon à {Math.min(maxDistance + 10, 50)} km
                   </Button>
                 </div>
-                
-                {/* Catégories en style chips */}
-                <div className="overflow-x-auto py-2 flex gap-2 no-scrollbar">
-                  {categories.map((category) => (
-                    <Button
-                      key={category}
-                      variant={activeCategory === category ? "default" : "outline"}
-                      size="sm"
-                      className={`text-xs rounded-full px-4 whitespace-nowrap ${
-                        activeCategory === category 
-                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none" 
-                          : "border-gray-300"
-                      }`}
-                      onClick={() => setActiveCategory(category)}
-                    >
-                      {category === "all" ? "Tous" : category}
-                    </Button>
-                  ))}
-                </div>
-                
-                {/* Curseur de distance */}
-                <div className="px-1 mt-3">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs text-muted-foreground">Distance max: {maxDistance} km</span>
-                    <Badge variant="outline" className="text-xs rounded-full">{city || "Votre position"}</Badge>
-                  </div>
-                  <Slider
-                    defaultValue={[maxDistance]}
-                    max={50} 
-                    step={5}
-                    onValueChange={(value) => setMaxDistance(value[0])}
-                    className="py-2"
-                  />
-                </div>
-              </div>
+              )}
             </div>
           )}
           
