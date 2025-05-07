@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Wallet,
-  Settings, User, PartyPopper, Users, LogOut
+  Settings, User, PartyPopper, Users, LogOut, CalendarPlus
 } from "lucide-react";
 import {
   Sheet,
@@ -46,7 +46,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       return [
         { icon: <Home size={24} />, label: "Explorer", href: "/" },
         { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
-        { icon: <CalendarPlus size={24} />, label: "Créer", href: "/user/events/create" },
+        { icon: <Calendar size={24} />, label: "Créer", href: "/user/events/create" },
         { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
         { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
@@ -90,7 +90,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     return [
       { icon: <Home size={24} />, label: "Explorer", href: "/" },
       { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
-      { icon: <CalendarPlus size={24} />, label: "Créer", href: "/user/events/create" },
+      { icon: <Calendar size={24} />, label: "Créer", href: "/user/events/create" },
       { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
       { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
