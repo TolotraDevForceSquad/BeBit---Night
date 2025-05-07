@@ -458,7 +458,7 @@ export default function CreateEventPage() {
                     Création en cours...
                   </>
                 ) : (
-                  "Créer l'événement"
+                  "Créer la sortie"
                 )}
               </Button>
             </div>
