@@ -11,6 +11,7 @@ import SearchArtistsPage from "./pages/user/search-artists-page";
 import CreateEventPage from "./pages/user/create-event-page";
 import TableReservationPage from "./pages/user/table-reservation";
 import InvitationsPage from "./pages/user/invitations-page";
+import GalleryPage from "./pages/user/gallery-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
 
 // Version simplifiée sans chargement d'animation pour débloquer
@@ -84,6 +85,12 @@ function App() {
             <Route path="/user/invitations">
               <UserLayout>
                 <InvitationsPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/gallery">
+              <UserLayout>
+                <GalleryPage />
               </UserLayout>
             </Route>
 
