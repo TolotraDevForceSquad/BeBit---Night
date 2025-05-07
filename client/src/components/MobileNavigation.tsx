@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Wallet,
   Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus,
-  GlassWater, UtensilsCrossed
+  GlassWater, UtensilsCrossed, Music, Mic, Guitar
 } from "lucide-react";
 import {
   Sheet,
@@ -59,10 +59,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           label: "Créer", 
           href: "/user/create-event" 
         },
-        { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
+        { icon: <Mic size={24} />, label: "Artistes", href: "/user/search-artists" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
-        { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
-        { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
       ];
     }
     
@@ -148,7 +146,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         label: "Créer", 
         href: "/user/create-event" 
       },
-      { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
+      { icon: <Mic size={24} />, label: "Artistes", href: "/user/search-artists" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
     ];
   };
