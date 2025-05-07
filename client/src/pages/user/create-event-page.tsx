@@ -172,262 +172,21 @@ export default function CreateEventPage() {
         </p>
       </div>
       
-      <div className="max-w-2xl">
+      <div className="max-w-2xl mx-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Titre et description */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titre de la sortie</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Soirée au club" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Catégorie</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une catégorie" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Décrivez votre sortie en détail" 
-                      className="min-h-[120px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Date et heure */}
-            <div className="grid gap-6 md:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: fr })
-                            ) : (
-                              <span>Sélectionner une date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
-                          locale={fr}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Heure</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            {/* Prix */}
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cotisation (en Ariary)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      min="0" 
-                      step="1000"
-                      placeholder="0 pour gratuit" 
-                      {...field} 
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value === "" ? "0" : value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Type de lieu */}
-            <FormField
-              control={form.control}
-              name="venueType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type de lieu</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      setSelectedVenueType(value as "club" | "other");
-                    }} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un type de lieu" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="club">Club existant</SelectItem>
-                      <SelectItem value="other">Autre endroit</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            {/* Nom du lieu (conditionnel selon le type) */}
-            {selectedVenueType === "club" ? (
-              <FormField
-                control={form.control}
-                name="venueName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sélectionner un club</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un club" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {clubs.map((club) => (
-                          <SelectItem key={club.id} value={club.name}>
-                            {club.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <FormField
-                control={form.control}
-                name="venueName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nom du lieu</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Chez moi, Plage de ..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-            
-            {/* Localisation */}
-            <FormField
-              control={form.control}
-              name="useCurrentLocation"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Utiliser ma position actuelle</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      {city ? `Position détectée: ${city}` : "Détection de votre position..."}
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                      disabled={geoLoading}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            {/* Afficher les champs d'adresse si l'utilisateur ne veut pas utiliser sa position actuelle */}
-            {!form.watch("useCurrentLocation") && (
-              <>
+            {/* Section: Informations de base */}
+            <div className="bg-card p-4 rounded-lg border border-border mb-4">
+              <h2 className="text-lg font-semibold mb-4">Informations générales</h2>
+              <div className="grid gap-6 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="address"
+                  name="title"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Adresse</FormLabel>
+                      <FormLabel>Titre de la sortie</FormLabel>
                       <FormControl>
-                        <Input placeholder="21 rue de la Paix" {...field} />
+                        <Input placeholder="Soirée au club" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -436,36 +195,295 @@ export default function CreateEventPage() {
                 
                 <FormField
                   control={form.control}
-                  name="city"
+                  name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Ville</FormLabel>
+                      <FormLabel>Catégorie</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner une catégorie" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Décrivez votre sortie en détail" 
+                        className="min-h-[120px]"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* Section: Date et heure */}
+            <div className="bg-card p-4 rounded-lg border border-border mb-4">
+              <h2 className="text-lg font-semibold mb-4">Date et heure</h2>
+              <div className="grid gap-6 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP", { locale: fr })
+                              ) : (
+                                <span>Sélectionner une date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            locale={fr}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Heure</FormLabel>
                       <FormControl>
-                        <Input placeholder="Paris" {...field} />
+                        <Input type="time" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </>
+              </div>
+            </div>
+            
+            {/* Section: Tarification */}
+            <div className="bg-card p-4 rounded-lg border border-border mb-4">
+              <h2 className="text-lg font-semibold mb-4">Tarification</h2>
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cotisation (en Ariary)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min="0" 
+                        step="1000"
+                        placeholder="0 pour gratuit" 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === "" ? "0" : value);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* Section: Localisation */}
+            <div className="bg-card p-4 rounded-lg border border-border mb-4">
+              <h2 className="text-lg font-semibold mb-4">Lieu</h2>
+              
+              <FormField
+                control={form.control}
+                name="venueType"
+                render={({ field }) => (
+                  <FormItem className="mb-4">
+                    <FormLabel>Type de lieu</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedVenueType(value as "club" | "other");
+                      }} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un type de lieu" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="club">Club existant</SelectItem>
+                        <SelectItem value="other">Autre endroit</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              {/* Nom du lieu (conditionnel selon le type) */}
+              {selectedVenueType === "club" ? (
+                <FormField
+                  control={form.control}
+                  name="venueName"
+                  render={({ field }) => (
+                    <FormItem className="mb-4">
+                      <FormLabel>Sélectionner un club</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionner un club" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {clubs.map((club) => (
+                            <SelectItem key={club.id} value={club.name}>
+                              {club.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="venueName"
+                  render={({ field }) => (
+                    <FormItem className="mb-4">
+                      <FormLabel>Nom du lieu</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Chez moi, Plage de ..." {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
+              {/* Localisation */}
+              <FormField
+                control={form.control}
+                name="useCurrentLocation"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Utiliser ma position actuelle</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        {city ? `Position détectée: ${city}` : "Détection de votre position..."}
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={geoLoading}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* Afficher les champs d'adresse si l'utilisateur ne veut pas utiliser sa position actuelle */}
+            {!form.watch("useCurrentLocation") && (
+              <div className="bg-card p-4 rounded-lg border border-border mb-4">
+                <h2 className="text-lg font-semibold mb-4">Localisation manuelle</h2>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adresse</FormLabel>
+                        <FormControl>
+                          <Input placeholder="21 rue de la Paix" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ville</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Paris" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             )}
             
             {/* Boutons */}
-            <div className="flex gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={() => setLocation("/user/events")}>
-                Annuler
-              </Button>
-              
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Création en cours...
-                  </>
-                ) : (
-                  "Créer la sortie"
-                )}
-              </Button>
+            <div className="bg-card p-4 rounded-lg border border-border">
+              <div className="flex gap-4">
+                <Button type="button" variant="outline" onClick={() => setLocation("/user/events")}>
+                  Annuler
+                </Button>
+                
+                <Button type="submit" disabled={isSubmitting} className="bg-gradient-to-r from-pink-500 to-purple-600">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Création en cours...
+                    </>
+                  ) : (
+                    "Créer la sortie"
+                  )}
+                </Button>
+              </div>
             </div>
           </form>
         </Form>
