@@ -90,31 +90,29 @@ function UserRoutes() {
 
 function ClubRoutes() {
   return (
-    <ClubLayout>
-      <Switch>
-        <Route path="/club">
-          <ClubDashboardPage />
-        </Route>
-        <Route path="/club/dashboard">
-          <ClubDashboardPage />
-        </Route>
-        <Route path="/club/profile">
-          <ClubProfilePage />
-        </Route>
-        <Route path="/club/attendees">
-          <ClubAttendeesPage />
-        </Route>
-        <Route path="/club/find-artists">
-          <ClubFindArtistsPage />
-        </Route>
-        <Route path="/club/reservations">
-          <ClubReservationsPage />
-        </Route>
-        <Route>
-          <NotFound />
-        </Route>
-      </Switch>
-    </ClubLayout>
+    <Switch>
+      <Route path="/club">
+        <ClubDashboardPage />
+      </Route>
+      <Route path="/club/dashboard">
+        <ClubDashboardPage />
+      </Route>
+      <Route path="/club/profile">
+        <ClubProfilePage />
+      </Route>
+      <Route path="/club/attendees">
+        <ClubAttendeesPage />
+      </Route>
+      <Route path="/club/find-artists">
+        <ClubFindArtistsPage />
+      </Route>
+      <Route path="/club/reservations">
+        <ClubReservationsPage />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
+    </Switch>
   );
 }
 
