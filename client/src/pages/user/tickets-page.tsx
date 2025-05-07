@@ -254,49 +254,51 @@ function TicketCard({ ticket }: { ticket: UserTicket }) {
   
   switch (ticket.status) {
     case "valid":
-      statusColor = "bg-green-100 text-green-700";
+      statusColor = "bg-green-100 text-green-700 border-green-200";
       statusLabel = "Valide";
       break;
     case "used":
-      statusColor = "bg-blue-100 text-blue-700";
+      statusColor = "bg-blue-100 text-blue-700 border-blue-200";
       statusLabel = "Utilisé";
       break;
     case "expired":
-      statusColor = "bg-amber-100 text-amber-700";
+      statusColor = "bg-amber-100 text-amber-700 border-amber-200";
       statusLabel = "Expiré";
       break;
     case "refunded":
-      statusColor = "bg-red-100 text-red-700";
+      statusColor = "bg-red-100 text-red-700 border-red-200";
       statusLabel = "Remboursé";
       break;
     default:
-      statusColor = "bg-gray-100 text-gray-700";
+      statusColor = "bg-gray-100 text-gray-700 border-gray-200";
       statusLabel = ticket.status;
   }
   
   const eventDate = format(new Date(ticket.eventDate), "EEEE d MMMM yyyy, HH'h'mm", { locale: fr });
   
   return (
-    <Card className="overflow-hidden">
-      <div className="relative bg-primary text-primary-foreground p-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-bold text-lg">{ticket.eventTitle}</h3>
-            <p className="opacity-80 text-sm">{ticket.venueName}</p>
+    <Card className="overflow-hidden border border-border/50 shadow-sm">
+      <CardHeader className="p-0">
+        <div className="relative bg-primary/90 text-primary-foreground p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-bold text-lg">{ticket.eventTitle}</h3>
+              <p className="opacity-80 text-sm">{ticket.venueName}</p>
+            </div>
+            
+            <Badge className={`${statusColor} border text-xs font-medium`}>
+              {statusLabel}
+            </Badge>
           </div>
           
-          <Badge className={`${statusColor} text-xs font-medium`}>
-            {statusLabel}
-          </Badge>
+          {/* Effet perforé de ticket */}
+          <div className="absolute -bottom-3 left-0 w-full flex justify-between px-4">
+            <div className="h-6 w-6 rounded-full bg-background"></div>
+            <div className="border-dashed border-t border-primary-foreground/30 flex-1 mx-2"></div>
+            <div className="h-6 w-6 rounded-full bg-background"></div>
+          </div>
         </div>
-        
-        {/* Effet perforé de ticket */}
-        <div className="absolute -bottom-3 left-0 w-full flex justify-between px-4">
-          <div className="h-6 w-6 rounded-full bg-background"></div>
-          <div className="border-dashed border-t border-primary-foreground/30 flex-1 mx-2"></div>
-          <div className="h-6 w-6 rounded-full bg-background"></div>
-        </div>
-      </div>
+      </CardHeader>
       
       <CardContent className="pt-6 pb-2">
         <div className="grid grid-cols-2 gap-4">
@@ -336,21 +338,22 @@ function TicketCard({ ticket }: { ticket: UserTicket }) {
         </div>
         
         {ticket.status === "valid" && (
-          <div className="flex justify-center my-4">
-            <div className="bg-gray-100 p-3 rounded-lg">
-              <QrCode className="h-32 w-32 text-gray-800" />
+          <div className="flex flex-col items-center justify-center my-4">
+            <div className="bg-muted p-3 rounded-lg mb-2">
+              <QrCode className="h-32 w-32 text-foreground" />
             </div>
+            <p className="text-xs text-muted-foreground">Présentez ce QR code à l'entrée</p>
           </div>
         )}
       </CardContent>
       
       <CardFooter className="flex justify-between border-t p-4">
-        <Button variant="ghost" size="sm">
+        <Button variant="outline" size="sm" className="border-primary/20 text-primary">
           <Download className="h-4 w-4 mr-2" />
           Télécharger
         </Button>
         
-        <Button variant="ghost" size="sm">
+        <Button variant="outline" size="sm" className="border-primary/20 text-primary">
           <Share2 className="h-4 w-4 mr-2" />
           Partager
         </Button>
