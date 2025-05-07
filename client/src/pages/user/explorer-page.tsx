@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useMobile } from "@/hooks/use-mobile";
 import { useGeolocation } from "@/hooks/use-geolocation";
+import { useToast } from "@/hooks/use-toast";
 import MobileEventCard from "@/components/MobileEventCard";
 import MoodEventCard from "@/components/MoodEventCard";
 import EventCard from "@/components/EventCard";
@@ -63,6 +64,7 @@ type Event = {
   isLiked?: boolean;
   calculatedDistance?: number; // Distance calculée par rapport à la position de l'utilisateur
   mood?: EventMood; // Ambiance de l'événement
+  superLiked?: boolean; // Si l'utilisateur a super-liké l'événement
 };
 
 // Données statiques pour les tests
@@ -172,6 +174,7 @@ export default function UserExplorerPage() {
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [maxDistance, setMaxDistance] = useState<number>(25); // Distance maximale en km
   const [currentEventIndex, setCurrentEventIndex] = useState<number>(0);
+  const { toast } = useToast();
 
   // Utiliser la géolocalisation
   const { latitude, longitude, city, country, loading: geoLoading } = useGeolocation();
@@ -542,7 +545,18 @@ export default function UserExplorerPage() {
                         onClick={() => {
                           // Animation de rewind (revenir à l'événement précédent)
                           if (currentEventIndex > 0) {
+                            toast({
+                              title: "Événement précédent",
+                              description: "Retour à l'événement précédent",
+                              duration: 2000,
+                            });
                             setCurrentEventIndex(currentEventIndex - 1);
+                          } else {
+                            toast({
+                              description: "C'est le premier événement",
+                              variant: "destructive",
+                              duration: 2000,
+                            });
                           }
                         }}
                       >
@@ -555,9 +569,25 @@ export default function UserExplorerPage() {
                         className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-red-500 hover:bg-red-50"
                         onClick={() => {
                           // Animation de dislike puis passage à l'événement suivant
-                          if (currentEventIndex < events.length - 1) {
-                            setCurrentEventIndex(currentEventIndex + 1);
-                          }
+                          toast({
+                            description: `Vous n'êtes pas intéressé par "${events[currentEventIndex].title}"`,
+                            variant: "default",
+                            duration: 2000,
+                          });
+                          
+                          // Passage à l'événement suivant avec délai pour voir le toast
+                          setTimeout(() => {
+                            if (currentEventIndex < events.length - 1) {
+                              setCurrentEventIndex(currentEventIndex + 1);
+                            } else {
+                              toast({
+                                title: "Fin des événements",
+                                description: "Vous avez vu tous les événements disponibles",
+                                variant: "default",
+                                duration: 3000,
+                              });
+                            }
+                          }, 300);
                         }}
                       >
                         <X className="h-8 w-8 text-red-500" />
@@ -570,9 +600,27 @@ export default function UserExplorerPage() {
                         onClick={() => {
                           // Animation de like puis passage à l'événement suivant
                           console.log("Liked event", events[currentEventIndex].id);
-                          if (currentEventIndex < events.length - 1) {
-                            setCurrentEventIndex(currentEventIndex + 1);
-                          }
+                          // Afficher un message toast de confirmation
+                          toast({
+                            title: "J'adore!",
+                            description: `Vous avez aimé "${events[currentEventIndex].title}"`,
+                            duration: 3000,
+                          });
+                          
+                          // Marquer l'événement comme aimé
+                          const updatedEvents = [...events];
+                          updatedEvents[currentEventIndex] = {
+                            ...updatedEvents[currentEventIndex],
+                            isLiked: true
+                          };
+                          setEvents(updatedEvents);
+                          
+                          // Attendre un peu avant de passer au suivant pour voir l'animation
+                          setTimeout(() => {
+                            if (currentEventIndex < events.length - 1) {
+                              setCurrentEventIndex(currentEventIndex + 1);
+                            }
+                          }, 500);
                         }}
                       >
                         <Heart className="h-8 w-8 text-green-500" />
@@ -583,11 +631,41 @@ export default function UserExplorerPage() {
                         variant="outline"
                         className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-blue-500 hover:bg-blue-50"
                         onClick={() => {
-                          // Super like
+                          // Super like (réserver un ticket)
                           console.log("Super liked event", events[currentEventIndex].id);
-                          if (currentEventIndex < events.length - 1) {
-                            setCurrentEventIndex(currentEventIndex + 1);
-                          }
+                          
+                          // Afficher un message toast avec une action
+                          toast({
+                            title: "Réserver un ticket",
+                            description: `Pour l'événement "${events[currentEventIndex].title}"`,
+                            action: (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => {
+                                  window.location.href = `/user/tickets?event=${events[currentEventIndex].id}`;
+                                }}
+                              >
+                                Confirmer
+                              </Button>
+                            ),
+                            duration: 5000,
+                          });
+                          
+                          // Marquer l'événement avec une indication visuelle
+                          const updatedEvents = [...events];
+                          updatedEvents[currentEventIndex] = {
+                            ...updatedEvents[currentEventIndex],
+                            superLiked: true
+                          };
+                          setEvents(updatedEvents);
+                          
+                          // Attendre avant de passer au suivant
+                          setTimeout(() => {
+                            if (currentEventIndex < events.length - 1) {
+                              setCurrentEventIndex(currentEventIndex + 1);
+                            }
+                          }, 1000);
                         }}
                       >
                         <Ticket className="h-6 w-6 text-blue-500" />
