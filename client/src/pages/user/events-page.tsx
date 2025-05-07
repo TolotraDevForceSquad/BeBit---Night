@@ -257,6 +257,7 @@ export default function EventsPage() {
   const [myEvents, setMyEvents] = useState<UserEvent[]>([]);
   const [invitedEvents, setInvitedEvents] = useState<EventInvitation[]>([]);
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [currentEventIndex, setCurrentEventIndex] = useState(0);
   
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
@@ -483,7 +484,7 @@ export default function EventsPage() {
                           <div 
                             key={i} 
                             className={`h-1 flex-1 rounded-full mx-0.5 ${
-                              i === 0 ? "bg-primary" : "bg-gray-300"
+                              i === currentEventIndex ? "bg-primary" : "bg-gray-300"
                             }`}
                           />
                         ))}
@@ -496,7 +497,7 @@ export default function EventsPage() {
                             <div 
                               className="w-full h-full bg-cover bg-center"
                               style={{ 
-                                backgroundImage: `url(${filteredEvents.invitedEvents[0].event.imageUrl || 
+                                backgroundImage: `url(${filteredEvents.invitedEvents[currentEventIndex]?.event.imageUrl || 
                                   "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000"})`
                               }}
                             >
@@ -505,28 +506,28 @@ export default function EventsPage() {
                               
                               {/* Contenu de la carte */}
                               <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                                <h3 className="text-xl font-bold mb-1">{filteredEvents.invitedEvents[0].event.title}</h3>
+                                <h3 className="text-xl font-bold mb-1">{filteredEvents.invitedEvents[currentEventIndex]?.event.title}</h3>
                                 <div className="flex items-center mb-1">
                                   <MapPin className="h-4 w-4 mr-1" />
-                                  <span className="text-sm">{filteredEvents.invitedEvents[0].event.clubName}, {filteredEvents.invitedEvents[0].event.clubLocation}</span>
+                                  <span className="text-sm">{filteredEvents.invitedEvents[currentEventIndex]?.event.clubName}, {filteredEvents.invitedEvents[currentEventIndex]?.event.clubLocation}</span>
                                 </div>
                                 <div className="flex items-center mb-2">
                                   <Calendar className="h-4 w-4 mr-1" />
                                   <span className="text-sm">
-                                    {format(new Date(filteredEvents.invitedEvents[0].event.date), "EEEE d MMMM, HH'h'mm", { locale: fr })}
+                                    {format(new Date(filteredEvents.invitedEvents[currentEventIndex]?.event.date), "EEEE d MMMM, HH'h'mm", { locale: fr })}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between mb-1">
                                   <div className="flex items-center">
                                     <Users className="h-4 w-4 mr-1" />
                                     <span className="text-sm">
-                                      {filteredEvents.invitedEvents[0].event.currentParticipants}/{filteredEvents.invitedEvents[0].event.maxParticipants} participants
+                                      {filteredEvents.invitedEvents[currentEventIndex]?.event.currentParticipants}/{filteredEvents.invitedEvents[currentEventIndex]?.event.maxParticipants} participants
                                     </span>
                                   </div>
-                                  {filteredEvents.invitedEvents[0].event.contribution > 0 && (
+                                  {filteredEvents.invitedEvents[currentEventIndex]?.event.contribution > 0 && (
                                     <Badge className="bg-primary">
                                       <Euro className="h-3 w-3 mr-1" />
-                                      {filteredEvents.invitedEvents[0].event.contribution} Ar
+                                      {filteredEvents.invitedEvents[currentEventIndex]?.event.contribution} Ar
                                     </Badge>
                                   )}
                                 </div>
@@ -541,6 +542,11 @@ export default function EventsPage() {
                             size="lg" 
                             variant="outline"
                             className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-orange-500 hover:bg-orange-50"
+                            onClick={() => {
+                              if (currentEventIndex > 0) {
+                                setCurrentEventIndex(currentEventIndex - 1);
+                              }
+                            }}
                           >
                             <Calendar className="h-6 w-6 text-orange-500" />
                           </Button>
@@ -549,6 +555,15 @@ export default function EventsPage() {
                             size="lg" 
                             variant="outline"
                             className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-red-500 hover:bg-red-50"
+                            onClick={() => {
+                              // Passer à l'événement suivant
+                              if (currentEventIndex < filteredEvents.invitedEvents.length - 1) {
+                                setCurrentEventIndex(currentEventIndex + 1);
+                              } else {
+                                // Afficher un message si plus d'événements
+                                alert("Vous avez parcouru toutes les sorties disponibles !");
+                              }
+                            }}
                           >
                             <X className="h-8 w-8 text-red-500" />
                           </Button>
@@ -557,6 +572,16 @@ export default function EventsPage() {
                             size="lg" 
                             variant="outline"
                             className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-green-500 hover:bg-green-50"
+                            onClick={() => {
+                              console.log("Liked event", filteredEvents.invitedEvents[currentEventIndex]?.event.id);
+                              // Passer à l'événement suivant
+                              if (currentEventIndex < filteredEvents.invitedEvents.length - 1) {
+                                setCurrentEventIndex(currentEventIndex + 1);
+                              } else {
+                                // Afficher un message si plus d'événements
+                                alert("Vous avez parcouru toutes les sorties disponibles !");
+                              }
+                            }}
                           >
                             <Heart className="h-8 w-8 text-green-500" />
                           </Button>
@@ -565,6 +590,9 @@ export default function EventsPage() {
                             size="lg" 
                             variant="outline"
                             className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-blue-500 hover:bg-blue-50"
+                            onClick={() => {
+                              alert("Sortie partagée !");
+                            }}
                           >
                             <Share2 className="h-6 w-6 text-blue-500" />
                           </Button>
@@ -577,14 +605,14 @@ export default function EventsPage() {
                         <div className="flex items-center">
                           <Avatar className="h-8 w-8 mr-2">
                             <AvatarImage 
-                              src={filteredEvents.invitedEvents[0].event.createdBy.profileImage} 
-                              alt={filteredEvents.invitedEvents[0].event.createdBy.username} 
+                              src={filteredEvents.invitedEvents[currentEventIndex]?.event.createdBy.profileImage} 
+                              alt={filteredEvents.invitedEvents[currentEventIndex]?.event.createdBy.username} 
                             />
                             <AvatarFallback>
-                              {filteredEvents.invitedEvents[0].event.createdBy.username.charAt(0).toUpperCase()}
+                              {filteredEvents.invitedEvents[currentEventIndex]?.event.createdBy.username.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="font-medium">{filteredEvents.invitedEvents[0].event.createdBy.username}</span>
+                          <span className="font-medium">{filteredEvents.invitedEvents[currentEventIndex]?.event.createdBy.username}</span>
                         </div>
                       </div>
                     </div>
