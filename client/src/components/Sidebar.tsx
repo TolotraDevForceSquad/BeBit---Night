@@ -51,7 +51,8 @@ export default function Sidebar({ activeItem }: SidebarProps) {
     if (user?.role === 'user') {
       return [
         { icon: <Home className="h-5 w-5" />, label: "Explorer", href: "/" },
-        { icon: <PartyPopper className="h-5 w-5" />, label: "Sorties", href: "/user/events" },
+        { icon: <CalendarPlus className="h-5 w-5" />, label: "Créer Sortie", href: "/user/events/create" },
+        { icon: <PartyPopper className="h-5 w-5" />, label: "Mes Sorties", href: "/user/events" },
         { icon: <Calendar className="h-5 w-5" />, label: "Invitations", href: "/user/invitations" },
         { icon: <Image className="h-5 w-5" />, label: "Galerie", href: "/user/gallery" },
         { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/user/wallet" },
@@ -99,7 +100,8 @@ export default function Sidebar({ activeItem }: SidebarProps) {
     // Par défaut, retourner les éléments utilisateur
     return [
       { icon: <Home className="h-5 w-5" />, label: "Explorer", href: "/" },
-      { icon: <CalendarPlus className="h-5 w-5" />, label: "Créer Événement", href: "/user/events/create" },
+      { icon: <CalendarPlus className="h-5 w-5" />, label: "Créer Sortie", href: "/user/events/create" },
+      { icon: <PartyPopper className="h-5 w-5" />, label: "Mes Sorties", href: "/user/events" },
       { icon: <Calendar className="h-5 w-5" />, label: "Invitations", href: "/user/invitations" },
       { icon: <Image className="h-5 w-5" />, label: "Galerie", href: "/user/gallery" },
       { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/user/wallet" },

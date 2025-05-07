@@ -45,7 +45,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'user') {
       return [
         { icon: <Home size={24} />, label: "Explorer", href: "/" },
-        { icon: <PartyPopper size={24} />, label: "Créer", href: "/user/events/create" },
+        { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
+        { icon: <CalendarPlus size={24} />, label: "Créer", href: "/user/events/create" },
         { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
         { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
@@ -88,7 +89,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     // Par défaut, retourner la navigation utilisateur
     return [
       { icon: <Home size={24} />, label: "Explorer", href: "/" },
-      { icon: <PartyPopper size={24} />, label: "Créer", href: "/user/events/create" },
+      { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
+      { icon: <CalendarPlus size={24} />, label: "Créer", href: "/user/events/create" },
       { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
       { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
