@@ -1,49 +1,51 @@
-import React, { useState, useEffect } from "react";
-import { Search, Filter, Music, MapPin, Star, Calendar, ArrowUpDown, X } from "lucide-react";
-import { useLocation } from "wouter";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { useMobile } from "@/hooks/use-mobile";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { 
+  Search, 
+  SlidersHorizontal, 
+  ArrowUpDown, 
+  X, 
+  Music,
+  MapPin,
+  Clock,
+  Users,
+  Calendar
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { 
+  Select, 
+  SelectContent, 
+  SelectGroup, 
+  SelectItem, 
+  SelectLabel, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetTrigger,
+  SheetFooter
+} from "@/components/ui/sheet";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-// Type pour les clubs
+// Définition du type Club
 type Club = {
   id: number;
   name: string;
@@ -73,334 +75,402 @@ type Club = {
   tableReservationEnabled: boolean;
 };
 
-// Données fictives de clubs pour la démo
-const mockClubs: Club[] = [
-  {
-    id: 1,
-    name: "Club Oxygen",
-    category: "Nightclub",
-    image: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=400&h=300&auto=format&fit=crop",
-    coverImage: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&h=400&auto=format&fit=crop",
-    location: "Antananarivo",
-    address: "Lot II J 34 D, Analakely",
-    rating: 4.7,
-    reviewCount: 124,
-    description: "Club Oxygen est le lieu de prédilection de la vie nocturne à Antananarivo avec son ambiance électrique et sa musique de premier ordre.",
-    featured: true,
-    hasTableReservation: true,
-    capacity: 300,
-    instagram: "cluboxygen",
-    website: "https://cluboxygen.com",
-    openingHours: {
-      "monday": "Fermé",
-      "tuesday": "Fermé",
-      "wednesday": "20:00 - 03:00",
-      "thursday": "20:00 - 03:00",
-      "friday": "20:00 - 05:00",
-      "saturday": "20:00 - 05:00",
-      "sunday": "18:00 - 02:00"
-    },
-    features: ["DJ résident", "Espace VIP", "Service de bouteilles", "Piste de danse"],
-    upcomingEvents: [
-      { id: 101, name: "Summer Vibes", date: "2025-05-15", image: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=300&h=200&auto=format&fit=crop" },
-      { id: 102, name: "House Music Festival", date: "2025-05-22", image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6a3?w=300&h=200&auto=format&fit=crop" }
-    ],
-    tableReservationEnabled: true
-  },
-  {
-    id: 2,
-    name: "Le Studio",
-    category: "Lounge Bar",
-    image: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=400&h=300&auto=format&fit=crop",
-    coverImage: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=400&auto=format&fit=crop",
-    location: "Antananarivo",
-    address: "Ivandry, Route de l'aéroport",
-    rating: 4.5,
-    reviewCount: 87,
-    description: "Un espace lounge élégant offrant une sélection de cocktails artisanaux et une ambiance plus détendue pour les discussions et networking.",
-    featured: false,
-    hasTableReservation: true,
-    capacity: 150,
-    instagram: "lestudiomada",
-    openingHours: {
-      "monday": "Fermé",
-      "tuesday": "18:00 - 00:00",
-      "wednesday": "18:00 - 01:00",
-      "thursday": "18:00 - 01:00",
-      "friday": "18:00 - 02:00",
-      "saturday": "18:00 - 02:00",
-      "sunday": "18:00 - 00:00"
-    },
-    features: ["Cocktails artisanaux", "Espace lounge", "Terrasse", "Ambiance jazz"],
-    upcomingEvents: [
-      { id: 103, name: "Jazz Night", date: "2025-05-18", image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&h=200&auto=format&fit=crop" }
-    ],
-    tableReservationEnabled: true
-  },
-  {
-    id: 3,
-    name: "Havana Club",
-    category: "Nightclub",
-    image: "https://images.unsplash.com/photo-1485872299829-c673f5194813?w=400&h=300&auto=format&fit=crop",
-    coverImage: "https://images.unsplash.com/photo-1485872299829-c673f5194813?w=800&h=400&auto=format&fit=crop",
-    location: "Tamatave",
-    address: "Boulevard de la libération",
-    rating: 4.8,
-    reviewCount: 156,
-    description: "Havana Club vous transporte dans l'ambiance cubaine avec sa musique latino, ses cocktails cubains et son atmosphère chaleureuse.",
-    featured: true,
-    hasTableReservation: true,
-    capacity: 250,
-    instagram: "havanaclub_mada",
-    website: "https://havanaclub-mada.com",
-    openingHours: {
-      "monday": "Fermé",
-      "tuesday": "Fermé",
-      "wednesday": "Fermé",
-      "thursday": "21:00 - 04:00",
-      "friday": "21:00 - 05:00",
-      "saturday": "21:00 - 05:00",
-      "sunday": "19:00 - 02:00"
-    },
-    features: ["Soirées à thème", "Musique latine", "Spectacles live", "Bar à rhum"],
-    upcomingEvents: [
-      { id: 104, name: "Salsa Night", date: "2025-05-16", image: "https://images.unsplash.com/photo-1502635385003-ee1e6a1a742d?w=300&h=200&auto=format&fit=crop" },
-      { id: 105, name: "Cuban Party", date: "2025-05-23", image: "https://images.unsplash.com/photo-1535359056830-d4badde79747?w=300&h=200&auto=format&fit=crop" }
-    ],
-    tableReservationEnabled: true
-  },
-  {
-    id: 4,
-    name: "Sky Lounge",
-    category: "Rooftop Bar",
-    image: "https://images.unsplash.com/photo-1527015102068-d6dd86f90cf6?w=400&h=300&auto=format&fit=crop",
-    coverImage: "https://images.unsplash.com/photo-1527015102068-d6dd86f90cf6?w=800&h=400&auto=format&fit=crop",
-    location: "Antananarivo",
-    address: "Ankorondrano, Tour Zital 15ème étage",
-    rating: 4.6,
-    reviewCount: 92,
-    description: "Un rooftop bar avec une vue panoramique sur la ville, parfait pour les couchers de soleil et une ambiance sophistiquée.",
-    featured: false,
-    hasTableReservation: true,
-    capacity: 120,
-    instagram: "skylounge_tana",
-    website: "https://skylounge.mg",
-    openingHours: {
-      "monday": "17:00 - 00:00",
-      "tuesday": "17:00 - 00:00",
-      "wednesday": "17:00 - 01:00",
-      "thursday": "17:00 - 01:00",
-      "friday": "17:00 - 02:00",
-      "saturday": "17:00 - 02:00",
-      "sunday": "16:00 - 23:00"
-    },
-    features: ["Vue panoramique", "Cocktails premium", "Cuisine fusion", "DJ weekend"],
-    tableReservationEnabled: true
-  },
-  {
-    id: 5,
-    name: "Jungle Club",
-    category: "Beach Club",
-    image: "https://images.unsplash.com/photo-1519214605650-76a613ee3245?w=400&h=300&auto=format&fit=crop",
-    coverImage: "https://images.unsplash.com/photo-1519214605650-76a613ee3245?w=800&h=400&auto=format&fit=crop",
-    location: "Majunga",
-    address: "Plage d'Amborovy",
-    rating: 4.4,
-    reviewCount: 78,
-    description: "Beach club en plein air avec piscine, accès à la plage et ambiance détendue de jour comme de nuit.",
-    featured: false,
-    hasTableReservation: false,
-    capacity: 200,
-    instagram: "jungleclub_mada",
-    openingHours: {
-      "monday": "10:00 - 22:00",
-      "tuesday": "10:00 - 22:00",
-      "wednesday": "10:00 - 22:00",
-      "thursday": "10:00 - 00:00",
-      "friday": "10:00 - 02:00",
-      "saturday": "10:00 - 03:00",
-      "sunday": "10:00 - 22:00"
-    },
-    features: ["Piscine", "Accès plage", "Restaurant", "Bar extérieur"],
-    upcomingEvents: [
-      { id: 106, name: "Beach Party", date: "2025-05-17", image: "https://images.unsplash.com/photo-1533105079780-92b9be482077?w=300&h=200&auto=format&fit=crop" }
-    ],
-    tableReservationEnabled: false
-  },
-  {
-    id: 6,
-    name: "Le Club",
-    category: "Nightclub",
-    image: "https://images.unsplash.com/photo-1545128485-c400ce7b15ca?w=400&h=300&auto=format&fit=crop",
-    coverImage: "https://images.unsplash.com/photo-1545128485-c400ce7b15ca?w=800&h=400&auto=format&fit=crop",
-    location: "Antananarivo",
-    address: "Behoririka, Rue Rainandriamampandry",
-    rating: 4.2,
-    reviewCount: 65,
-    description: "Club moderne avec un système son de pointe et des DJs nationaux et internationaux qui s'y produisent régulièrement.",
-    featured: false,
-    hasTableReservation: true,
-    capacity: 280,
-    instagram: "leclub_tana",
-    openingHours: {
-      "monday": "Fermé",
-      "tuesday": "Fermé",
-      "wednesday": "Fermé",
-      "thursday": "22:00 - 04:00",
-      "friday": "22:00 - 05:00",
-      "saturday": "22:00 - 05:00",
-      "sunday": "Fermé"
-    },
-    features: ["Système son Funktion One", "Grands DJs", "Spectacles de lumière", "Espace fumeur"],
-    upcomingEvents: [
-      { id: 107, name: "Techno Night", date: "2025-05-24", image: "https://images.unsplash.com/photo-1575417017574-4780862a3234?w=300&h=200&auto=format&fit=crop" }
-    ],
-    tableReservationEnabled: true
-  }
-];
-
-// Catégories de clubs
-const clubCategories = [
-  "Toutes les catégories",
-  "Nightclub",
-  "Lounge Bar",
-  "Rooftop Bar",
-  "Beach Club",
-  "Live Music Venue",
-  "Jazz Club",
-  "Sports Bar"
-];
-
-// Villes
-const locations = [
-  "Toutes les villes",
-  "Antananarivo",
-  "Tamatave",
-  "Majunga",
-  "Fianarantsoa",
-  "Diego-Suarez",
-  "Tuléar"
-];
-
-// Fonctionnalités de club
-const clubFeatures = [
-  "DJ résident",
-  "Espace VIP",
-  "Service de bouteilles",
-  "Terrasse",
-  "Vue panoramique",
-  "Spectacles live",
-  "Piscine",
-  "Accès plage",
-  "Restaurant",
-  "Cuisine fusion",
-  "Cocktails artisanaux",
-  "Bar à rhum",
-  "Musique latine",
-  "Ambiance jazz"
-];
-
-// Composant pour afficher une carte de club
+// Composant ClubCard
 function ClubCard({ club }: { club: Club }) {
-  const [, setLocation] = useLocation();
+  const currentDay = getDayOfWeek();
+  const openingTime = club.openingHours[currentDay] || "Fermé aujourd'hui";
   
   return (
-    <Card className={cn(
-      "h-full overflow-hidden transition-all duration-200 hover:shadow-md",
-      club.featured && "border-primary/40"
-    )}>
-      <div className="relative">
-        <div className="aspect-video overflow-hidden">
-          <img 
-            src={club.image} 
-            alt={club.name} 
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-          />
+    <Card className="h-full flex flex-col">
+      <div className="relative h-48 overflow-hidden rounded-t-lg">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
+        <img 
+          src={club.coverImage} 
+          alt={club.name} 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute bottom-3 left-3 z-20">
+          <h3 className="font-bold text-white">{club.name}</h3>
+          <div className="flex items-center text-xs text-white/80 mt-1">
+            <MapPin className="h-3 w-3 mr-1" />
+            <span>{club.location}</span>
+          </div>
         </div>
-        
-        {club.featured && (
-          <Badge className="absolute top-2 right-2 bg-primary">
-            Featured
-          </Badge>
-        )}
-        
         {club.tableReservationEnabled && (
-          <Badge className="absolute top-2 left-2 bg-green-600">
+          <Badge className="absolute top-3 right-3 z-20 bg-primary">
             Réservation de table
           </Badge>
         )}
       </div>
       
-      <CardHeader className="p-4">
-        <CardTitle className="text-lg md:text-xl font-bold mb-0">{club.name}</CardTitle>
-        <div className="flex items-center text-sm text-muted-foreground gap-1 mt-1">
-          <MapPin className="h-3.5 w-3.5" />
-          <span>{club.location}</span>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-4 pt-0">
-        <div className="flex items-center gap-1 mb-2">
-          <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
-          <span className="font-medium">{club.rating}</span>
-          <span className="text-muted-foreground text-sm">({club.reviewCount} avis)</span>
-        </div>
-        
-        <Badge variant="outline" className="bg-muted/50 mb-3">
-          {club.category}
-        </Badge>
-        
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-          {club.description}
-        </p>
-        
-        <div className="mt-2 text-sm">
-          <span className="font-medium">Horaires aujourd'hui: </span>
-          {club.openingHours[getDayOfWeek()] || "Fermé"}
+      <CardContent className="flex-grow py-4">
+        <div className="flex items-center justify-between mb-2">
+          <Badge variant="outline" className="px-2 py-0">
+            {club.category}
+          </Badge>
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-4 h-4 text-yellow-500 mr-1"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span className="text-sm font-medium">
+              {club.rating.toFixed(1)} ({club.reviewCount})
+            </span>
+          </div>
         </div>
         
-        <div className="flex flex-wrap gap-1 mt-3">
-          {club.features.slice(0, 3).map((feature, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-              {feature}
-            </Badge>
-          ))}
-          {club.features.length > 3 && (
-            <Badge variant="secondary" className="text-xs">
-              +{club.features.length - 3}
-            </Badge>
+        <div className="space-y-2 mt-3">
+          <div className="flex items-center text-sm">
+            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+            <span>{openingTime}</span>
+          </div>
+          <div className="flex items-center text-sm">
+            <Users className="h-4 w-4 mr-2 text-muted-foreground" />
+            <span>Capacité: {club.capacity} personnes</span>
+          </div>
+          {club.upcomingEvents && club.upcomingEvents.length > 0 && (
+            <div className="flex items-center text-sm">
+              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span>{club.upcomingEvents.length} événement{club.upcomingEvents.length > 1 ? 's' : ''} à venir</span>
+            </div>
           )}
         </div>
+        
+        {club.features.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-3">
+            {club.features.slice(0, 3).map((feature, index) => (
+              <Badge key={index} variant="secondary" className="px-2 py-0 text-xs">
+                {feature}
+              </Badge>
+            ))}
+            {club.features.length > 3 && (
+              <Badge variant="outline" className="px-2 py-0 text-xs">
+                +{club.features.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
       </CardContent>
       
-      <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button 
-          onClick={() => setLocation(`/club-profile/${club.id}`)}
-          className="w-full"
-          variant="default"
-        >
-          Voir profil
+      <CardFooter className="border-t pt-4">
+        <Button variant="default" className="w-full">
+          Voir le profil
         </Button>
-        
-        {club.tableReservationEnabled && (
-          <Button 
-            onClick={() => setLocation(`/club/table-reservation/${club.id}`)}
-            className="w-full"
-            variant="outline"
-          >
-            Réserver une table
-          </Button>
-        )}
       </CardFooter>
     </Card>
   );
 }
 
-// Obtenir le jour de la semaine actuel (en français, en minuscules)
+// Fonction utilitaire pour obtenir le jour de la semaine actuel
 function getDayOfWeek(): string {
   const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-  return days[new Date().getDay()];
+  const today = new Date().getDay();
+  return days[today];
 }
+
+// Données simulées pour les clubs
+const clubsData: Club[] = [
+  {
+    id: 1,
+    name: "Oxygen Club",
+    category: "Nightclub",
+    image: "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2030&q=80",
+    coverImage: "https://images.unsplash.com/photo-1545128485-c400ce7b6892?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    location: "Antananarivo",
+    address: "15 Rue des Lilas, Antananarivo",
+    rating: 4.7,
+    reviewCount: 234,
+    description: "Le club Oxygen est l'un des meilleurs clubs de la ville avec une ambiance électrique et des DJs de renommée mondiale.",
+    featured: true,
+    hasTableReservation: true,
+    capacity: 500,
+    instagram: "@oxygen_club",
+    website: "https://oxygen-club.com",
+    openingHours: {
+      monday: "Fermé",
+      tuesday: "Fermé",
+      wednesday: "19:00 - 02:00",
+      thursday: "19:00 - 03:00",
+      friday: "20:00 - 05:00",
+      saturday: "20:00 - 05:00",
+      sunday: "18:00 - 00:00"
+    },
+    features: ["DJ international", "VIP", "Fumoir", "Dancefloor", "Bar premium"],
+    upcomingEvents: [
+      {
+        id: 101,
+        name: "Neon Night",
+        date: "2023-10-15",
+        image: "https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      },
+      {
+        id: 102,
+        name: "Électro Fusion",
+        date: "2023-10-22",
+        image: "https://images.unsplash.com/photo-1642207533814-99d689774beb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      }
+    ],
+    tableReservationEnabled: true
+  },
+  {
+    id: 2,
+    name: "Pulse Lounge",
+    category: "Lounge",
+    image: "https://images.unsplash.com/photo-1568495248636-6432b97bd949?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80",
+    coverImage: "https://images.unsplash.com/photo-1563292958-8a78955889d7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    location: "Antananarivo",
+    address: "47 Avenue des Roses, Antananarivo",
+    rating: 4.5,
+    reviewCount: 187,
+    description: "Pulse Lounge offre un espace élégant et détendu avec d'excellents cocktails et une musique ambient parfaite pour les soirées entre amis.",
+    featured: false,
+    hasTableReservation: true,
+    capacity: 200,
+    instagram: "@pulse_lounge",
+    website: "https://pulselounge.com",
+    openingHours: {
+      monday: "17:00 - 00:00",
+      tuesday: "17:00 - 00:00",
+      wednesday: "17:00 - 01:00",
+      thursday: "17:00 - 01:00",
+      friday: "17:00 - 03:00",
+      saturday: "17:00 - 03:00",
+      sunday: "16:00 - 00:00"
+    },
+    features: ["Cocktails artisanaux", "Terrasse", "Musique live", "Cuisine fusion"],
+    upcomingEvents: [
+      {
+        id: 103,
+        name: "Jazz & Cocktails",
+        date: "2023-10-18",
+        image: "https://images.unsplash.com/photo-1560359614-870d1a7ea91d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80"
+      }
+    ],
+    tableReservationEnabled: true
+  },
+  {
+    id: 3,
+    name: "Bass Drop",
+    category: "Nightclub",
+    image: "https://images.unsplash.com/photo-1571935441005-02501f89285a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    coverImage: "https://images.unsplash.com/photo-1513554612610-9d8454b61b5a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    location: "Antsirabe",
+    address: "23 Rue des Artistes, Antsirabe",
+    rating: 4.3,
+    reviewCount: 156,
+    description: "Bass Drop est le paradis des amateurs de musique électronique avec l'un des meilleurs systèmes de son du pays.",
+    featured: true,
+    hasTableReservation: false,
+    capacity: 350,
+    instagram: "@bassdrop",
+    website: "https://bassdrop.com",
+    openingHours: {
+      monday: "Fermé",
+      tuesday: "Fermé",
+      wednesday: "Fermé",
+      thursday: "21:00 - 04:00",
+      friday: "21:00 - 06:00",
+      saturday: "21:00 - 06:00",
+      sunday: "19:00 - 02:00"
+    },
+    features: ["Sound system premium", "Guest DJs", "Soirées à thème", "Événements EDM"],
+    upcomingEvents: [
+      {
+        id: 104,
+        name: "Dubstep Night",
+        date: "2023-10-20",
+        image: "https://images.unsplash.com/photo-1576525772176-5f5243de7e7f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      },
+      {
+        id: 105,
+        name: "Techno Masters",
+        date: "2023-10-27",
+        image: "https://images.unsplash.com/photo-1556749031-71e62933bd8d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      }
+    ],
+    tableReservationEnabled: false
+  },
+  {
+    id: 4,
+    name: "Skyview Rooftop",
+    category: "Lounge",
+    image: "https://images.unsplash.com/photo-1575444758702-4a6b9222336e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    coverImage: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    location: "Antananarivo",
+    address: "85 Avenue Panorama, Antananarivo",
+    rating: 4.8,
+    reviewCount: 215,
+    description: "Skyview Rooftop offre une vue imprenable sur la ville avec des cocktails raffinés et une ambiance détendue.",
+    featured: true,
+    hasTableReservation: true,
+    capacity: 150,
+    instagram: "@skyview_rooftop",
+    website: "https://skyviewrooftop.com",
+    openingHours: {
+      monday: "17:00 - 23:00",
+      tuesday: "17:00 - 23:00",
+      wednesday: "17:00 - 00:00",
+      thursday: "17:00 - 00:00",
+      friday: "17:00 - 02:00",
+      saturday: "17:00 - 02:00",
+      sunday: "16:00 - 22:00"
+    },
+    features: ["Vue panoramique", "Cocktails signature", "Apéritifs", "Chef invité"],
+    upcomingEvents: [
+      {
+        id: 106,
+        name: "Sunset Sessions",
+        date: "2023-10-19",
+        image: "https://images.unsplash.com/photo-1587116987928-227a0c8a1c0f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80"
+      }
+    ],
+    tableReservationEnabled: true
+  },
+  {
+    id: 5,
+    name: "Vinyl House",
+    category: "Music Bar",
+    image: "https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    coverImage: "https://images.unsplash.com/photo-1594620302200-9a762244a156?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
+    location: "Tamatave",
+    address: "12 Rue du Vinyle, Tamatave",
+    rating: 4.6,
+    reviewCount: 178,
+    description: "Vinyl House est un bar à musique unique où vous pouvez écouter des vinyles classiques tout en sirotant d'excellents cocktails.",
+    featured: false,
+    hasTableReservation: true,
+    capacity: 80,
+    instagram: "@vinyl_house",
+    website: "https://vinylhouse.com",
+    openingHours: {
+      monday: "18:00 - 00:00",
+      tuesday: "18:00 - 00:00",
+      wednesday: "18:00 - 00:00",
+      thursday: "18:00 - 01:00",
+      friday: "18:00 - 02:00",
+      saturday: "18:00 - 02:00",
+      sunday: "18:00 - 00:00"
+    },
+    features: ["Collection de vinyles", "DJ sets", "Acoustique", "Craft beers"],
+    tableReservationEnabled: true
+  },
+  {
+    id: 6,
+    name: "Cosmos Club",
+    category: "Nightclub",
+    image: "https://images.unsplash.com/photo-1598495496118-f8763b94bde5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80",
+    coverImage: "https://images.unsplash.com/photo-1602816505236-10de2318e4b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    location: "Antananarivo",
+    address: "34 Avenue de l'Espace, Antananarivo",
+    rating: 4.4,
+    reviewCount: 203,
+    description: "Cosmos Club est un club futuriste avec une ambiance interstellaire, des lumières impressionnantes et une musique électrisante.",
+    featured: true,
+    hasTableReservation: true,
+    capacity: 400,
+    instagram: "@cosmos_club",
+    website: "https://cosmosclub.com",
+    openingHours: {
+      monday: "Fermé",
+      tuesday: "Fermé",
+      wednesday: "21:00 - 03:00",
+      thursday: "21:00 - 03:00",
+      friday: "22:00 - 05:00",
+      saturday: "22:00 - 06:00",
+      sunday: "20:00 - 02:00"
+    },
+    features: ["Thème spatial", "Light show", "VIP", "DJs internationaux"],
+    upcomingEvents: [
+      {
+        id: 107,
+        name: "Galaxy Party",
+        date: "2023-10-21",
+        image: "https://images.unsplash.com/photo-1609244919273-5e3def8ccaa4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      }
+    ],
+    tableReservationEnabled: true
+  },
+  {
+    id: 7,
+    name: "Jazz Corner",
+    category: "Music Bar",
+    image: "https://images.unsplash.com/photo-1569230516306-5a8cb5586399?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    coverImage: "https://images.unsplash.com/photo-1531651008558-ed1740375b39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+    location: "Antananarivo",
+    address: "57 Rue du Jazz, Antananarivo",
+    rating: 4.9,
+    reviewCount: 167,
+    description: "Jazz Corner est un lieu intime où vous pourrez écouter les meilleurs musiciens de jazz locaux et internationaux.",
+    featured: false,
+    hasTableReservation: true,
+    capacity: 100,
+    instagram: "@jazz_corner",
+    website: "https://jazzcorner.com",
+    openingHours: {
+      monday: "Fermé",
+      tuesday: "19:00 - 00:00",
+      wednesday: "19:00 - 00:00",
+      thursday: "19:00 - 01:00",
+      friday: "19:00 - 02:00",
+      saturday: "19:00 - 02:00",
+      sunday: "18:00 - 00:00"
+    },
+    features: ["Musique live", "Jazz", "Cocktails classiques", "Acoustique parfaite"],
+    upcomingEvents: [
+      {
+        id: 108,
+        name: "Jazz Quartet",
+        date: "2023-10-17",
+        image: "https://images.unsplash.com/photo-1488841714725-bb4c32d1ac94?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2030&q=80"
+      }
+    ],
+    tableReservationEnabled: true
+  },
+  {
+    id: 8,
+    name: "Tropical Beach Club",
+    category: "Beach Club",
+    image: "https://images.unsplash.com/photo-1539758462369-43adaa19bc1f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    coverImage: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    location: "Nosy Be",
+    address: "Plage de Belle Vue, Nosy Be",
+    rating: 4.8,
+    reviewCount: 245,
+    description: "Tropical Beach Club est un paradis au bord de la mer où vous pourrez danser les pieds dans le sable avec des cocktails exotiques.",
+    featured: true,
+    hasTableReservation: true,
+    capacity: 300,
+    instagram: "@tropical_beach",
+    website: "https://tropicalbeachclub.com",
+    openingHours: {
+      monday: "12:00 - 22:00",
+      tuesday: "12:00 - 22:00",
+      wednesday: "12:00 - 22:00",
+      thursday: "12:00 - 00:00",
+      friday: "12:00 - 03:00",
+      saturday: "12:00 - 03:00",
+      sunday: "12:00 - 22:00"
+    },
+    features: ["Plage privée", "Bar de plage", "Cocktails tropicaux", "Sunsets DJ"],
+    upcomingEvents: [
+      {
+        id: 109,
+        name: "Beach Party",
+        date: "2023-10-23",
+        image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6a3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      }
+    ],
+    tableReservationEnabled: true
+  }
+];
 
 export default function SearchClubsPage() {
   const isMobile = useMobile();
@@ -408,320 +478,246 @@ export default function SearchClubsPage() {
   const [selectedCategory, setSelectedCategory] = useState("Toutes les catégories");
   const [selectedLocation, setSelectedLocation] = useState("Toutes les villes");
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  const [capacityRange, setCapacityRange] = useState([100, 350]);
-  const [sortBy, setSortBy] = useState("rating");
+  const [sortBy, setSortBy] = useState("recommended");
   const [showTableReservationOnly, setShowTableReservationOnly] = useState(false);
-  const [filteredClubs, setFilteredClubs] = useState<Club[]>(mockClubs);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const { toast } = useToast();
   
-  // Fonction pour basculer une fonctionnalité sélectionnée
-  const toggleFeature = (feature: string) => {
-    if (selectedFeatures.includes(feature)) {
-      setSelectedFeatures(selectedFeatures.filter(item => item !== feature));
-    } else {
-      setSelectedFeatures([...selectedFeatures, feature]);
-    }
-  };
+  // Extraire les catégories et emplacements uniques
+  const categories = ["Toutes les catégories", ...Array.from(new Set(clubsData.map(club => club.category)))];
+  const locations = ["Toutes les villes", ...Array.from(new Set(clubsData.map(club => club.location)))];
   
-  // Appliquer les filtres
-  useEffect(() => {
-    let result = [...mockClubs];
-    
-    // Filtre par recherche
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        club => club.name.toLowerCase().includes(query) ||
-                club.description.toLowerCase().includes(query) ||
-                club.category.toLowerCase().includes(query) ||
-                club.features.some(feature => feature.toLowerCase().includes(query))
-      );
-    }
+  // Extraire les caractéristiques uniques de tous les clubs
+  const allFeatures: string[] = [];
+  clubsData.forEach(club => {
+    club.features.forEach(feature => {
+      if (!allFeatures.includes(feature)) {
+        allFeatures.push(feature);
+      }
+    });
+  });
+  
+  // Filtrer les clubs en fonction des critères de recherche
+  const filteredClubs = clubsData.filter(club => {
+    // Filtre par recherche textuelle
+    const matchesSearch = searchQuery === "" || 
+      club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      club.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      club.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      club.features.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase()));
     
     // Filtre par catégorie
-    if (selectedCategory !== "Toutes les catégories") {
-      result = result.filter(
-        club => club.category === selectedCategory
-      );
-    }
+    const matchesCategory = selectedCategory === "Toutes les catégories" || club.category === selectedCategory;
     
-    // Filtre par lieu
-    if (selectedLocation !== "Toutes les villes") {
-      result = result.filter(
-        club => club.location === selectedLocation
-      );
-    }
+    // Filtre par emplacement
+    const matchesLocation = selectedLocation === "Toutes les villes" || club.location === selectedLocation;
     
-    // Filtre par fonctionnalités
-    if (selectedFeatures.length > 0) {
-      result = result.filter(
-        club => selectedFeatures.every(feature => club.features.includes(feature))
-      );
-    }
+    // Filtre par caractéristiques
+    const matchesFeatures = selectedFeatures.length === 0 || 
+      selectedFeatures.every(feature => club.features.includes(feature));
     
-    // Filtre par réservation de table
-    if (showTableReservationOnly) {
-      result = result.filter(club => club.tableReservationEnabled);
-    }
+    // Filtre pour la réservation de table
+    const matchesTableReservation = !showTableReservationOnly || club.tableReservationEnabled;
     
-    // Filtre par capacité
-    result = result.filter(
-      club => club.capacity >= capacityRange[0] && club.capacity <= capacityRange[1]
-    );
-    
-    // Tri
-    if (sortBy === "rating") {
-      result.sort((a, b) => b.rating - a.rating);
-    } else if (sortBy === "popularity") {
-      result.sort((a, b) => b.reviewCount - a.reviewCount);
-    } else if (sortBy === "name") {
-      result.sort((a, b) => a.name.localeCompare(b.name));
-    }
-    
-    setFilteredClubs(result);
-  }, [searchQuery, selectedCategory, selectedLocation, selectedFeatures, capacityRange, showTableReservationOnly, sortBy]);
+    return matchesSearch && matchesCategory && matchesLocation && matchesFeatures && matchesTableReservation;
+  });
   
-  // Réinitialiser les filtres
+  // Trier les résultats
+  const sortedClubs = [...filteredClubs].sort((a, b) => {
+    switch (sortBy) {
+      case "rating":
+        return b.rating - a.rating;
+      case "popularity":
+        return b.reviewCount - a.reviewCount;
+      case "name_asc":
+        return a.name.localeCompare(b.name);
+      case "name_desc":
+        return b.name.localeCompare(a.name);
+      default: // recommended (default)
+        return b.featured ? 1 : -1;
+    }
+  });
+  
+  // Réinitialiser tous les filtres
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCategory("Toutes les catégories");
     setSelectedLocation("Toutes les villes");
     setSelectedFeatures([]);
-    setCapacityRange([100, 350]);
+    setSortBy("recommended");
     setShowTableReservationOnly(false);
-    setSortBy("rating");
-    
-    toast({
-      title: "Filtres réinitialisés",
-      description: "Tous les filtres ont été remis à zéro.",
-    });
   };
   
-  // Contenu de l'en-tête
-  const headerContent = (
-    <div className="flex items-center justify-between">
-      <h1 className="font-heading font-bold text-lg md:text-xl">
-        <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
-        <span className="ml-2 text-foreground">Rechercher un club</span>
-      </h1>
-      
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/25 px-3 py-1">
-          <Music className="h-3 w-3 mr-1" />
-          <span>Clubs</span>
-        </Badge>
-      </div>
-    </div>
-  );
-  
-  // Contenu de filtrage pour mobile
+  // Contenu du filtre mobile
   const mobileFilterContent = (
-    <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+    <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1">
-          <Filter className="h-4 w-4" />
+        <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4" />
           <span>Filtres</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-xl">
-        <SheetHeader className="mb-4">
-          <SheetTitle>Filtrer les clubs</SheetTitle>
-          <SheetDescription>
-            Affinez votre recherche avec les filtres ci-dessous
-          </SheetDescription>
+      <SheetContent side="bottom" className="h-[85vh]">
+        <SheetHeader>
+          <SheetTitle>Filtres</SheetTitle>
         </SheetHeader>
-        
-        <ScrollArea className="h-[calc(85vh-10rem)] pr-4">
-          <div className="space-y-6">
-            {/* Catégorie de club */}
-            <div className="space-y-2">
-              <Label>Catégorie</Label>
-              <Select 
-                value={selectedCategory} 
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez une catégorie" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Catégories</SelectLabel>
-                    {clubCategories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+        <Tabs defaultValue="category" className="mt-4">
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="category">Catégorie</TabsTrigger>
+            <TabsTrigger value="location">Lieu</TabsTrigger>
+            <TabsTrigger value="features">Options</TabsTrigger>
+          </TabsList>
+          <TabsContent value="category" className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              {categories.map((category) => (
+                <div 
+                  key={category} 
+                  className={`
+                    border rounded-md p-3 text-sm cursor-pointer transition-colors
+                    ${selectedCategory === category 
+                      ? 'border-primary bg-primary/10 text-primary' 
+                      : 'border-border hover:border-muted-foreground'
+                    }
+                  `}
+                  onClick={() => setSelectedCategory(category)}
+                >
+                  {category}
+                </div>
+              ))}
             </div>
-            
-            {/* Localisation */}
-            <div className="space-y-2">
-              <Label>Ville</Label>
-              <Select 
-                value={selectedLocation} 
-                onValueChange={setSelectedLocation}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionnez une ville" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Villes</SelectLabel>
-                    {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Capacité */}
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <Label>Capacité</Label>
-                <span className="text-sm text-muted-foreground">
-                  {capacityRange[0]} - {capacityRange[1]} personnes
-                </span>
-              </div>
-              <Slider 
-                defaultValue={[100, 350]} 
-                value={capacityRange}
-                onValueChange={setCapacityRange}
-                min={50} 
-                max={500}
-                step={10}
-                className="py-2"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>50 pers.</span>
-                <span>500 pers.</span>
-              </div>
-            </div>
-            
-            {/* Fonctionnalités */}
-            <div className="space-y-2">
-              <Label>Fonctionnalités</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {clubFeatures.map((feature) => (
-                  <Button
-                    key={feature}
-                    variant={selectedFeatures.includes(feature) ? "default" : "outline"}
-                    size="sm"
-                    className="justify-start"
-                    onClick={() => toggleFeature(feature)}
+          </TabsContent>
+          
+          <TabsContent value="location" className="space-y-4">
+            <ScrollArea className="h-[50vh]">
+              <div className="grid grid-cols-2 gap-2">
+                {locations.map((location) => (
+                  <div 
+                    key={location} 
+                    className={`
+                      border rounded-md p-3 text-sm cursor-pointer transition-colors
+                      ${selectedLocation === location 
+                        ? 'border-primary bg-primary/10 text-primary' 
+                        : 'border-border hover:border-muted-foreground'
+                      }
+                    `}
+                    onClick={() => setSelectedLocation(location)}
                   >
-                    <span className="truncate">{feature}</span>
-                  </Button>
+                    {location}
+                  </div>
                 ))}
               </div>
+            </ScrollArea>
+          </TabsContent>
+          
+          <TabsContent value="features" className="space-y-4">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="table-reservation" 
+                  checked={showTableReservationOnly}
+                  onCheckedChange={(checked) => setShowTableReservationOnly(checked === true)}
+                />
+                <Label htmlFor="table-reservation">Réservation de table disponible</Label>
+              </div>
+              
+              <Separator className="my-4" />
+              
+              <div className="text-sm font-medium mb-2">Caractéristiques</div>
+              <ScrollArea className="h-[40vh]">
+                <div className="space-y-2">
+                  {allFeatures.map((feature) => (
+                    <div key={feature} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`feature-${feature}`} 
+                        checked={selectedFeatures.includes(feature)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedFeatures([...selectedFeatures, feature]);
+                          } else {
+                            setSelectedFeatures(selectedFeatures.filter(f => f !== feature));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`feature-${feature}`}>{feature}</Label>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
-            
-            {/* Réservation de table */}
-            <div className="flex items-center justify-between">
-              <Label>Réservation de table uniquement</Label>
-              <Switch 
-                checked={showTableReservationOnly} 
-                onCheckedChange={setShowTableReservationOnly} 
-              />
-            </div>
-          </div>
-        </ScrollArea>
+          </TabsContent>
+        </Tabs>
         
-        <SheetFooter className="flex gap-2 mt-4">
-          <Button 
-            variant="outline" 
-            onClick={resetFilters}
-            className="flex-1"
-          >
+        <SheetFooter className="mt-4 flex-row justify-between gap-2">
+          <Button variant="outline" className="flex-1" onClick={resetFilters}>
             Réinitialiser
           </Button>
-          <SheetClose asChild>
-            <Button className="flex-1">Appliquer</Button>
-          </SheetClose>
+          <Button className="flex-1">
+            Appliquer ({filteredClubs.length})
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
   );
   
-  // Contenu de tri pour mobile
+  // Contenu du tri mobile
   const mobileSortContent = (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1">
+        <Button variant="outline" size="sm" className="flex items-center gap-2">
           <ArrowUpDown className="h-4 w-4" />
           <span>Trier</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="h-[40vh] rounded-t-xl">
-        <SheetHeader className="mb-4">
-          <SheetTitle>Trier les clubs</SheetTitle>
-          <SheetDescription>
-            Choisissez comment ordonner les résultats
-          </SheetDescription>
+      <SheetContent side="bottom">
+        <SheetHeader>
+          <SheetTitle>Trier par</SheetTitle>
         </SheetHeader>
-        
-        <div className="space-y-2">
-          <Button 
-            variant={sortBy === "rating" ? "default" : "outline"}
-            className="w-full justify-start" 
-            onClick={() => setSortBy("rating")}
-          >
-            <Star className="h-4 w-4 mr-2" />
-            Meilleure note
-          </Button>
-          
-          <Button 
-            variant={sortBy === "popularity" ? "default" : "outline"}
-            className="w-full justify-start" 
-            onClick={() => setSortBy("popularity")}
-          >
-            <ArrowUpDown className="h-4 w-4 mr-2" />
-            Popularité
-          </Button>
-          
-          <Button 
-            variant={sortBy === "name" ? "default" : "outline"}
-            className="w-full justify-start" 
-            onClick={() => setSortBy("name")}
-          >
-            <ArrowUpDown className="h-4 w-4 mr-2" />
-            Ordre alphabétique
-          </Button>
+        <div className="grid gap-2 py-4">
+          {[
+            { value: "recommended", label: "Recommandés" },
+            { value: "rating", label: "Meilleures notes" },
+            { value: "popularity", label: "Popularité" },
+            { value: "name_asc", label: "Nom (A-Z)" },
+            { value: "name_desc", label: "Nom (Z-A)" }
+          ].map((option) => (
+            <div 
+              key={option.value} 
+              className={`
+                border rounded-md p-3 text-sm cursor-pointer transition-colors
+                ${sortBy === option.value 
+                  ? 'border-primary bg-primary/10 text-primary' 
+                  : 'border-border hover:border-muted-foreground'
+                }
+              `}
+              onClick={() => setSortBy(option.value)}
+            >
+              {option.label}
+            </div>
+          ))}
         </div>
       </SheetContent>
     </Sheet>
   );
   
-  // Contenu de filtrage pour desktop
+  // Contenu du filtre desktop
   const desktopFilterContent = (
-    <Card className="h-fit">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Filtres</CardTitle>
-        <CardDescription>
-          Affinez votre recherche de clubs
-        </CardDescription>
+    <Card>
+      <CardHeader>
+        <CardTitle>Filtres</CardTitle>
+        <CardDescription>Affinez votre recherche</CardDescription>
       </CardHeader>
-      
       <CardContent className="space-y-6">
-        {/* Catégorie de club */}
-        <div className="space-y-2">
-          <Label>Catégorie</Label>
+        <div>
+          <Label htmlFor="category-select" className="block mb-2">Catégorie</Label>
           <Select 
             value={selectedCategory} 
             onValueChange={setSelectedCategory}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionnez une catégorie" />
+            <SelectTrigger id="category-select">
+              <SelectValue placeholder="Sélectionner une catégorie" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Catégories</SelectLabel>
-                {clubCategories.map((category) => (
+                {categories.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
                   </SelectItem>
@@ -731,19 +727,18 @@ export default function SearchClubsPage() {
           </Select>
         </div>
         
-        {/* Localisation */}
-        <div className="space-y-2">
-          <Label>Ville</Label>
+        <div>
+          <Label htmlFor="location-select" className="block mb-2">Lieu</Label>
           <Select 
             value={selectedLocation} 
             onValueChange={setSelectedLocation}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionnez une ville" />
+            <SelectTrigger id="location-select">
+              <SelectValue placeholder="Sélectionner un lieu" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Villes</SelectLabel>
+                <SelectLabel>Lieux</SelectLabel>
                 {locations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -754,93 +749,65 @@ export default function SearchClubsPage() {
           </Select>
         </div>
         
-        {/* Capacité */}
-        <div className="space-y-3">
-          <div className="flex justify-between">
-            <Label>Capacité</Label>
-            <span className="text-sm text-muted-foreground">
-              {capacityRange[0]} - {capacityRange[1]} personnes
-            </span>
-          </div>
-          <Slider 
-            defaultValue={[100, 350]} 
-            value={capacityRange}
-            onValueChange={setCapacityRange}
-            min={50} 
-            max={500}
-            step={10}
-            className="py-2"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>50 pers.</span>
-            <span>500 pers.</span>
+        <div>
+          <Label htmlFor="sort-select" className="block mb-2">Trier par</Label>
+          <Select 
+            value={sortBy} 
+            onValueChange={setSortBy}
+          >
+            <SelectTrigger id="sort-select">
+              <SelectValue placeholder="Trier par" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Options de tri</SelectLabel>
+                <SelectItem value="recommended">Recommandés</SelectItem>
+                <SelectItem value="rating">Meilleures notes</SelectItem>
+                <SelectItem value="popularity">Popularité</SelectItem>
+                <SelectItem value="name_asc">Nom (A-Z)</SelectItem>
+                <SelectItem value="name_desc">Nom (Z-A)</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <Separator />
+        
+        <div>
+          <div className="flex items-center space-x-2 mb-4">
+            <Checkbox 
+              id="desktop-table-reservation" 
+              checked={showTableReservationOnly}
+              onCheckedChange={(checked) => setShowTableReservationOnly(checked === true)}
+            />
+            <Label htmlFor="desktop-table-reservation">Réservation de table disponible</Label>
           </div>
         </div>
         
-        {/* Réservation de table */}
-        <div className="flex items-center justify-between">
-          <Label>Réservation de table uniquement</Label>
-          <Switch 
-            checked={showTableReservationOnly} 
-            onCheckedChange={setShowTableReservationOnly} 
-          />
-        </div>
-        
-        {/* Fonctionnalités */}
-        <div className="space-y-2 pt-2">
-          <Label>Fonctionnalités</Label>
-          <div className="grid grid-cols-1 gap-2 mt-2">
-            {clubFeatures.map((feature) => (
-              <Button
-                key={feature}
-                variant={selectedFeatures.includes(feature) ? "default" : "outline"}
-                size="sm"
-                className="justify-start px-3 py-1 h-auto"
-                onClick={() => toggleFeature(feature)}
-              >
-                <span className="truncate">{feature}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Options de tri */}
-        <div className="space-y-2 pt-4 border-t">
-          <Label>Trier par</Label>
-          <div className="grid grid-cols-1 gap-2">
-            <Button 
-              variant={sortBy === "rating" ? "default" : "outline"}
-              className="w-full justify-start" 
-              onClick={() => setSortBy("rating")}
-              size="sm"
-            >
-              <Star className="h-4 w-4 mr-2" />
-              Meilleure note
-            </Button>
-            
-            <Button 
-              variant={sortBy === "popularity" ? "default" : "outline"}
-              className="w-full justify-start" 
-              onClick={() => setSortBy("popularity")}
-              size="sm"
-            >
-              <ArrowUpDown className="h-4 w-4 mr-2" />
-              Popularité
-            </Button>
-            
-            <Button 
-              variant={sortBy === "name" ? "default" : "outline"}
-              className="w-full justify-start" 
-              onClick={() => setSortBy("name")}
-              size="sm"
-            >
-              <ArrowUpDown className="h-4 w-4 mr-2" />
-              Ordre alphabétique
-            </Button>
-          </div>
+        <div>
+          <h3 className="text-sm font-medium mb-3">Caractéristiques</h3>
+          <ScrollArea className="h-[200px] pr-4">
+            <div className="space-y-2">
+              {allFeatures.map((feature) => (
+                <div key={feature} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`desktop-feature-${feature}`} 
+                    checked={selectedFeatures.includes(feature)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedFeatures([...selectedFeatures, feature]);
+                      } else {
+                        setSelectedFeatures(selectedFeatures.filter(f => f !== feature));
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`desktop-feature-${feature}`}>{feature}</Label>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       </CardContent>
-      
       <CardFooter>
         <Button 
           variant="outline" 
@@ -855,6 +822,19 @@ export default function SearchClubsPage() {
   
   return (
     <>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-heading font-bold text-lg md:text-xl">
+          <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
+          <span className="ml-2 text-foreground">Rechercher un club</span>
+        </h1>
+        
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="bg-primary/10 text-primary border-primary/25 px-3 py-1">
+            {filteredClubs.length} club{filteredClubs.length !== 1 ? 's' : ''}
+          </Badge>
+        </div>
+      </div>
+
       <div className="w-full">
         {/* Barre de recherche et filtres */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
