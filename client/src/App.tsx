@@ -35,7 +35,7 @@ function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
     }
   }, [user]);
 
-  // Afficher un écran de chargement pendant la redirection
+  // Afficher un écran de chargement musical pendant la redirection
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background">
       <div className="mb-8">
@@ -44,9 +44,15 @@ function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
         </h1>
         <p className="text-sm text-muted-foreground mt-2 text-center">Redirection en cours...</p>
       </div>
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 rounded-full border-4 border-muted"></div>
-        <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
+      <div className="flex space-x-2 h-16">
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.2s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.3s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.4s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.5s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.6s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.7s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.8s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.9s] h-full rounded-t-lg"></div>
       </div>
     </div>
   );
@@ -94,7 +100,7 @@ function App() {
     setLocation("/auth");
   };
 
-  // Afficher un écran de chargement stylisé avec le nom Be bit
+  // Afficher un écran de chargement stylisé avec le nom Be bit et animation musicale
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background">
@@ -104,9 +110,15 @@ function App() {
           </h1>
           <p className="text-sm text-muted-foreground mt-2 text-center">La plateforme événementielle</p>
         </div>
-        <div className="relative w-24 h-24">
-          <div className="absolute inset-0 rounded-full border-4 border-muted"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
+        <div className="flex space-x-2 h-16">
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.2s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.3s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.4s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.5s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.6s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.7s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.8s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.9s] h-full rounded-t-lg"></div>
         </div>
       </div>
     );
@@ -121,9 +133,15 @@ function App() {
           </h1>
           <p className="text-sm text-muted-foreground mt-2 text-center">La plateforme événementielle</p>
         </div>
-        <div className="relative w-24 h-24">
-          <div className="absolute inset-0 rounded-full border-4 border-muted"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
+        <div className="flex space-x-2 h-16">
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.2s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.3s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.4s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.5s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.6s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.7s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.8s] h-full rounded-t-lg"></div>
+          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.9s] h-full rounded-t-lg"></div>
         </div>
       </div>
     }>
