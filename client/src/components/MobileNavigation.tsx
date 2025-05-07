@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Wallet,
   Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus,
-  GlassWater, UtensilsCrossed, Music, Mic, Guitar
+  GlassWater, UtensilsCrossed, Music, Mic, Guitar, BellRing
 } from "lucide-react";
 import {
   Sheet,
@@ -46,7 +46,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'user') {
       return [
         { icon: <Home size={24} />, label: "Explorer", href: "/user/explorer" },
-        { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
+        { 
+          icon: (
+            <div className="relative">
+              <PartyPopper size={24} />
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-[10px] font-bold">3</span>
+              </div>
+            </div>
+          ), 
+          label: "Mes Sorties", 
+          href: "/user/events" 
+        },
         { 
           icon: (
             <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
@@ -134,7 +145,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     // Par défaut, retourner la navigation utilisateur
     return [
       { icon: <Home size={24} />, label: "Explorer", href: "/user/explorer" },
-      { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
+      { 
+        icon: (
+          <div className="relative">
+            <PartyPopper size={24} />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-[10px] font-bold">3</span>
+            </div>
+          </div>
+        ), 
+        label: "Mes Sorties", 
+        href: "/user/events" 
+      },
       { 
         icon: (
           <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
