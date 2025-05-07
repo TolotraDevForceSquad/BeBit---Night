@@ -152,17 +152,18 @@ export default function CreateEventPage() {
     setTimeout(() => {
       setIsSubmitting(false);
       // Rediriger vers la page des événements avec un message de succès
-      alert("Événement créé avec succès!");
-      setLocation("/user/explorer");
+      alert("Sortie créée avec succès!");
+      // Rediriger vers la page explorer pour éviter l'erreur 404
+      window.location.href = "/";
     }, 1500);
   };
   
   return (
     <ResponsiveLayout activeItem="create_event">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Créer un événement</h1>
+        <h1 className="text-3xl font-bold mb-2">Créer une sortie</h1>
         <p className="text-muted-foreground">
-          Organisez votre propre sortie ou événement et invitez vos amis
+          Organisez votre propre sortie et invitez vos amis
         </p>
       </div>
       
@@ -176,7 +177,7 @@ export default function CreateEventPage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Titre de l'événement</FormLabel>
+                    <FormLabel>Titre de la sortie</FormLabel>
                     <FormControl>
                       <Input placeholder="Soirée au club" {...field} />
                     </FormControl>
@@ -222,7 +223,7 @@ export default function CreateEventPage() {
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Décrivez votre événement en détail" 
+                      placeholder="Décrivez votre sortie en détail" 
                       className="min-h-[120px]"
                       {...field} 
                     />
@@ -295,7 +296,7 @@ export default function CreateEventPage() {
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Prix d'entrée (en Ariary)</FormLabel>
+                  <FormLabel>Cotisation (en Ariary)</FormLabel>
                   <FormControl>
                     <Input 
                       type="number" 
