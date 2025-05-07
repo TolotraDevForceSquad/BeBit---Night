@@ -327,8 +327,7 @@ export default function EventsPage() {
   // Le header content n'est pas utilisé car on utilise UserLayout
 
   return (
-    <UserLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Calendar className="h-6 w-6 mr-2" />
@@ -767,7 +766,6 @@ export default function EventsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </UserLayout>
   );
 }
 
