@@ -72,7 +72,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         { icon: <Calendar size={24} />, label: "Agenda", href: "/artist/agenda" },
         { 
           icon: (
-            <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
+            <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -83,8 +83,6 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/artist/create-event" 
         },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/artist/wallet" },
-        { icon: <User size={24} />, label: "Profil", href: "/artist/profile" },
-        { icon: <Settings size={24} />, label: "Réglages", href: "/artist/settings" },
       ];
     }
     
@@ -95,7 +93,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         { icon: <Search size={24} />, label: "Artistes", href: "/club/find-artists" },
         { 
           icon: (
-            <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
+            <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -106,8 +104,6 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/club/create-event" 
         },
         { icon: <Users size={24} />, label: "Participants", href: "/club/attendees" },
-        { icon: <Wallet size={24} />, label: "Wallet", href: "/club/wallet" },
-        { icon: <Settings size={24} />, label: "Réglages", href: "/club/settings" },
       ];
     }
     
@@ -127,7 +123,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
       { 
         icon: (
-          <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
+          <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
