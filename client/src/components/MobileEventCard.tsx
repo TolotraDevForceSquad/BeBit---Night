@@ -119,13 +119,14 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
 
   return (
     <motion.div
-      className="relative h-[calc(100vh-200px)] w-full rounded-lg overflow-hidden"
+      className="relative h-[calc(100vh-120px)] w-full rounded-lg overflow-hidden shadow-xl"
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={0.7}
       onDragEnd={handleDragEnd}
       animate={controls}
       initial={{ x: 0, opacity: 1 }}
+      whileTap={{ scale: 0.98 }}
     >
       {/* Image de couverture en arrière-plan */}
       <div 
@@ -133,11 +134,11 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
         style={{ backgroundImage: `url(${event.coverImage})` }}
       />
       
-      {/* Overlay pour une meilleure lisibilité du contenu */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+      {/* Overlay pour une meilleure lisibilité du contenu - Style TikTok */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
       
-      {/* Badge catégorie */}
-      <Badge className="absolute top-4 left-4 z-10">
+      {/* Badge catégorie - Style TikTok/Tinder */}
+      <Badge className="absolute top-4 left-4 z-10 bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none font-medium">
         {event.category}
       </Badge>
       
