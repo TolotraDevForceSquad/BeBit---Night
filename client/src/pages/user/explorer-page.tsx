@@ -305,14 +305,19 @@ export default function UserExplorerPage() {
       {/* Mobile search and filters */}
       {isMobile && (
         <div className="mb-4 space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold">Explorer</h2>
+          {/* Entête avec titre et localisation */}
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold flex items-center">
+              <Sparkles className="h-5 w-5 mr-2 text-primary" />
+              Explorer
+            </h2>
             <LocationDisplay 
               displayMode="badge" 
               onCitySelect={handleCityChange}
             />
           </div>
           
+          {/* Barre de recherche */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
@@ -323,6 +328,7 @@ export default function UserExplorerPage() {
             />
           </div>
           
+          {/* Filtres par catégorie - scrollable */}
           <div className="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
             <CategoryFilter
               categories={categories.map(c => c === 'all' ? 'Tous' : c)}
@@ -331,11 +337,21 @@ export default function UserExplorerPage() {
             />
           </div>
           
+          {/* Onglets principaux */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full">
-              <TabsTrigger value="découvrir" className="flex-1">Découvrir</TabsTrigger>
-              <TabsTrigger value="tendances" className="flex-1">Tendances</TabsTrigger>
-              <TabsTrigger value="nearby" className="flex-1">À proximité</TabsTrigger>
+              <TabsTrigger value="découvrir" className="flex-1">
+                <Heart className="h-3.5 w-3.5 mr-1" />
+                Découvrir
+              </TabsTrigger>
+              <TabsTrigger value="tendances" className="flex-1">
+                <Star className="h-3.5 w-3.5 mr-1" />
+                Tendances
+              </TabsTrigger>
+              <TabsTrigger value="nearby" className="flex-1">
+                <MapPin className="h-3.5 w-3.5 mr-1" />
+                Proximité
+              </TabsTrigger>
             </TabsList>
           </Tabs>
           
@@ -460,20 +476,33 @@ export default function UserExplorerPage() {
               {/* Version Tinder complète avec swipe card et boutons d'action */}
               {events.length > 0 ? (
                 <>
-                  {/* Barre de progression */}
-                  <div className="flex mb-2 px-1">
-                    {events.slice(0, Math.min(5, events.length)).map((_, i) => (
-                      <div 
-                        key={i} 
-                        className={`h-1 flex-1 rounded-full mx-0.5 ${
-                          i < currentEventIndex ? "bg-primary" : "bg-gray-300"
-                        }`}
-                      />
-                    ))}
+                  {/* En-tête avec barre de progression */}
+                  <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-2 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-sm">
+                        <Sparkles className="h-4 w-4 inline mr-1 text-primary" />
+                        Découvrez des événements près de vous
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {currentEventIndex + 1} / {events.length}
+                      </span>
+                    </div>
+                    
+                    {/* Barre de progression */}
+                    <div className="flex mb-1 px-1">
+                      {events.slice(0, Math.min(5, events.length)).map((_, i) => (
+                        <div 
+                          key={i} 
+                          className={`h-1 flex-1 rounded-full mx-0.5 ${
+                            i <= currentEventIndex ? "bg-primary" : "bg-gray-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
               
                   {/* Carte principale en plein écran avec fond dynamique basé sur l'ambiance */}
-                  <div className="relative h-[calc(100vh-180px)] mb-2">
+                  <div className="relative h-[calc(100vh-220px)] mb-2">
                     <MoodEventCard 
                       event={events[currentEventIndex]} 
                       onLike={() => {
@@ -763,10 +792,42 @@ export default function UserExplorerPage() {
       
       {/* Desktop event grid */}
       {!isMobile && events && events.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
+        <div className="space-y-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold flex items-center">
+              <Sparkles className="h-5 w-5 mr-2 text-primary" />
+              Événements pour vous
+            </h2>
+            
+            <div className="flex items-center space-x-2">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="mr-4">
+                <TabsList>
+                  <TabsTrigger value="découvrir">Découvrir</TabsTrigger>
+                  <TabsTrigger value="tendances">Tendances</TabsTrigger>
+                  <TabsTrigger value="nearby">À proximité</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
+              <Badge variant="outline" className="flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {selectedCity || city || "Localisation"}
+              </Badge>
+            </div>
+          </div>
+          
+          {activeTab === "tendances" && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {events.filter(e => e.isFeatured).map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
         </div>
       )}
     </div>
