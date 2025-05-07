@@ -305,6 +305,13 @@ export default function UserExplorerPage() {
 
   return (
     <div className="pb-16">
+      {/* Logo en haut */}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 flex items-center justify-center mb-4">
+        <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+          Be bit.
+        </h1>
+      </div>
+      
       {/* Mobile search and filters */}
       {isMobile && (
         <div className="mb-4 space-y-4">
