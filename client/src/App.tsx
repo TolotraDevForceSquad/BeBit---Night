@@ -331,6 +331,10 @@ function App() {
           {!user ? <SimpleAuth /> : user.role === "user" ? <SearchClubsPage /> : <Redirect to="/" />}
         </Route>
         
+        <Route path="/user/explorer">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserExplorerPage /> : <Redirect to="/" />}
+        </Route>
+        
         {/* Routes pour les événements créés par les utilisateurs */}
         <Route path="/user/events">
           {!user ? <SimpleAuth /> : user.role === "user" ? <UserEventsPage /> : <Redirect to="/" />}
