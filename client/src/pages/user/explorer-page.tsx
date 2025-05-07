@@ -274,43 +274,15 @@ export default function UserExplorerPage() {
   // Dummy categories for now
   const categories = ["all", "House", "Techno", "Hip-Hop", "Jazz", "Funk", "EDM"];
 
-  // Header content for the layout
-  const headerContent = (
-    <div className="w-full flex items-center justify-between">
-      <h1 className="font-heading font-bold text-lg text-white">
-        <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
-      </h1>
-      
-      <div className="flex items-center space-x-2">
-        <Link to="/user/notifications">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
-              3
-            </Badge>
-          </Button>
-        </Link>
-        
-        <Link to="/user/tickets">
-          <Button variant="ghost" size="icon">
-            <Ticket className="h-5 w-5" />
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
+  // Header content for the layout (supprimé car dupliqué avec UserLayout)
 
   // Sidebar content for desktop (supprimé car déplacé dans le contenu principal)
   const sidebarContent = null;
 
   return (
     <div className="pb-16">
-      {/* Logo en haut */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 flex items-center justify-center mb-4">
-        <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-          Be bit.
-        </h1>
-      </div>
+      {/* Espace pour l'en-tête géré par UserLayout */}
+      <div className="mb-4"></div>
       
       {/* Mobile search and filters */}
       {isMobile && (
