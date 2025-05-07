@@ -18,29 +18,25 @@ export default function SimpleAuth() {
         role: 'user'
       }));
       
-      // Afficher un message de succès
-      alert("Connexion réussie en tant qu'utilisateur!");
+      // Se connecter sans redirection ni alerte
       window.location.reload();
     } else if (username === "dj_elektra" && password === "password123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: username,
         role: 'artist'
       }));
-      alert("Connexion réussie en tant qu'artiste!");
       window.location.reload();
     } else if (username === "club_oxygen" && password === "password123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: username,
         role: 'club'
       }));
-      alert("Connexion réussie en tant que club!");
       window.location.reload();
     } else if (username === "admin" && password === "adminpass123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: username,
         role: 'admin'
       }));
-      alert("Connexion réussie en tant qu'admin!");
       window.location.reload();
     } else {
       setError("Identifiants invalides");
