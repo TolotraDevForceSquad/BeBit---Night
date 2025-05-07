@@ -65,7 +65,13 @@ export default function UserLayout({ children }: UserLayoutProps) {
       
       {/* Contenu principal */}
       <div className="flex-1 overflow-auto pb-16 md:pb-0">
-        {/* Le header a été retiré ici pour éviter la duplication avec les headers des pages enfants */}
+        {/* Header pour toutes les pages */}
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 flex items-center justify-center mb-4">
+          <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+            Be bit.
+          </h1>
+        </div>
+        
         {children}
       </div>
       
