@@ -12,6 +12,7 @@ import CreateEventPage from "./pages/user/create-event-page";
 import TableReservationPage from "./pages/user/table-reservation";
 import InvitationsPage from "./pages/user/invitations-page";
 import GalleryPage from "./pages/user/gallery-page";
+import WalletPage from "./pages/user/wallet-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
 
 // Version simplifiée sans chargement d'animation pour débloquer
@@ -91,6 +92,12 @@ function App() {
             <Route path="/user/gallery">
               <UserLayout>
                 <GalleryPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/user/wallet">
+              <UserLayout>
+                <WalletPage />
               </UserLayout>
             </Route>
 
