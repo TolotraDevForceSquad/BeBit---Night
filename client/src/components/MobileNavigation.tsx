@@ -131,7 +131,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     // Par défaut, retourner la navigation utilisateur
     return [
       { icon: <Home size={24} />, label: "Explorer", href: "/" },
-      { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
+      { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
       { 
         icon: (
           <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
@@ -144,9 +144,9 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         label: "Créer", 
         href: "/user/events/create" 
       },
+      { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
       { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
-      { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
       { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
     ];
   };
