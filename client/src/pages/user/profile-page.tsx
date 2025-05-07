@@ -204,6 +204,11 @@ export default function ProfilePage() {
 
   return (
     <UserLayout>
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 flex items-center justify-center mb-4">
+        <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+          Be bit.
+        </h1>
+      </div>
       <div className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-6">
