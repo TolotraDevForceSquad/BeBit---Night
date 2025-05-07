@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Filter, Star, Music, Clock, Map, MapPin } from "lucide-react";
+import { Search, Filter, Star, Music, Clock, Map, MapPin, Calendar, Clock12, X } from "lucide-react";
 import UserLayout from "../../layouts/user-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // Types
 type Artist = {
@@ -93,9 +96,44 @@ export default function SearchArtistsPage() {
   const genres = Array.from(new Set(artists.map(artist => artist.genre)));
   const locations = Array.from(new Set(artists.map(artist => artist.location)));
 
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [showReservationForm, setShowReservationForm] = useState(false);
+  const [reservationDate, setReservationDate] = useState('');
+  const [reservationTime, setReservationTime] = useState('');
+  const [reservationDetails, setReservationDetails] = useState('');
+
   const handleReservation = (artistId: number) => {
     console.log(`Réservation demandée pour l'artiste #${artistId}`);
-    alert(`Demande de réservation envoyée à ${artists.find(a => a.id === artistId)?.name}`);
+    const artist = artists.find(a => a.id === artistId);
+    if (artist) {
+      setSelectedArtist(artist);
+      setShowReservationForm(true);
+    }
+  };
+
+  const submitReservation = () => {
+    if (!selectedArtist || !reservationDate || !reservationTime) {
+      alert("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    // Ici on simule l'envoi de la réservation
+    console.log("Réservation soumise:", {
+      artistId: selectedArtist.id,
+      artistName: selectedArtist.name,
+      date: reservationDate,
+      time: reservationTime,
+      details: reservationDetails
+    });
+
+    alert(`Demande de réservation envoyée à ${selectedArtist.name} pour le ${reservationDate} à ${reservationTime}`);
+    
+    // Réinitialiser le formulaire
+    setShowReservationForm(false);
+    setSelectedArtist(null);
+    setReservationDate('');
+    setReservationTime('');
+    setReservationDetails('');
   };
 
   return (
@@ -199,6 +237,88 @@ export default function SearchArtistsPage() {
           )}
         </div>
       </div>
+
+      {/* Formulaire de réservation dans une modal */}
+      <Dialog open={showReservationForm} onOpenChange={setShowReservationForm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span>Réserver {selectedArtist?.name}</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {selectedArtist && (
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="h-16 w-16 rounded-lg overflow-hidden">
+                  <img 
+                    src={selectedArtist.profileImage} 
+                    alt={selectedArtist.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{selectedArtist.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedArtist.genre} • {selectedArtist.location}</p>
+                  <p className="text-sm font-medium">{selectedArtist.fee.toLocaleString()} Ar</p>
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="date">Date de l'événement</Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+                <Input 
+                  id="date" 
+                  type="date" 
+                  className="pl-10" 
+                  value={reservationDate}
+                  onChange={(e) => setReservationDate(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="time">Heure de début</Label>
+              <div className="relative">
+                <Clock12 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+                <Input 
+                  id="time" 
+                  type="time" 
+                  className="pl-10" 
+                  value={reservationTime}
+                  onChange={(e) => setReservationTime(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="details">Détails de l'événement</Label>
+              <Textarea 
+                id="details" 
+                placeholder="Décrivez votre événement (type d'événement, lieu, durée, équipement disponible, etc.)" 
+                className="min-h-[120px]" 
+                value={reservationDetails}
+                onChange={(e) => setReservationDetails(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter className="sm:justify-between">
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Annuler
+              </Button>
+            </DialogClose>
+            <Button type="button" onClick={submitReservation}>
+              Envoyer la demande
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </UserLayout>
   );
 }
