@@ -195,7 +195,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
   return (
     <div className="flex items-center p-2 bg-background border-t border-border">
       {/* Navigation principale avec tous les boutons sur une ligne */}
-      <div className="grid grid-cols-6 w-full gap-1">
+      <div className="grid grid-cols-7 w-full gap-1">
         <Link 
           href={navigationItems[0].href}
           className="text-center"
@@ -275,23 +275,37 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           </div>
         </Link>
 
-        {navigationItems[5] && (
-          <Link 
-            href={navigationItems[5].href}
-            className="text-center"
+        <Link 
+          href={navigationItems[5].href}
+          className="text-center"
+        >
+          <div 
+            className={`flex flex-col items-center py-2 rounded-lg ${
+              activeItem === navigationItems[5].label.toLowerCase()
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
           >
-            <div 
-              className={`flex flex-col items-center py-2 rounded-lg ${
-                activeItem === navigationItems[5].label.toLowerCase()
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {navigationItems[5].icon}
-              <span className="text-xs mt-1">{navigationItems[5].label}</span>
-            </div>
-          </Link>
-        )}
+            {navigationItems[5].icon}
+            <span className="text-xs mt-1">{navigationItems[5].label}</span>
+          </div>
+        </Link>
+        
+        <Link 
+          href={navigationItems[6].href}
+          className="text-center"
+        >
+          <div 
+            className={`flex flex-col items-center py-2 rounded-lg ${
+              activeItem === navigationItems[6].label.toLowerCase()
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            {navigationItems[6].icon}
+            <span className="text-xs mt-1">{navigationItems[6].label}</span>
+          </div>
+        </Link>
       </div>
     </div>
   );
