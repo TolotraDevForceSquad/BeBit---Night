@@ -9,7 +9,7 @@ interface ClubLayoutProps {
 }
 
 export default function ClubLayout({ children }: ClubLayoutProps) {
-  const { isMobile } = useMobile();
+  const isMobile = useMobile();
   const [location] = useLocation();
   const [activeItem, setActiveItem] = useState<string>("");
   

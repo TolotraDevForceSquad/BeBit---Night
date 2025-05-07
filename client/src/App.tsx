@@ -15,6 +15,7 @@ const ArtistCreateEventPage = lazy(() => import("@/pages/artist/create-event-pag
 const ArtistCollaborationsPage = lazy(() => import("@/pages/artist/collaborations-page"));
 const ArtistSettingsPage = lazy(() => import("@/pages/artist/settings-page"));
 const ArtistMediaPage = lazy(() => import("@/pages/artist/media-page"));
+const ArtistFindClubsPage = lazy(() => import("@/pages/artist/find-clubs-page"));
 const LogoutPage = lazy(() => import("@/pages/logout-page"));
 const ClubDashboardPage = lazy(() => import("@/pages/club/dashboard-page"));
 const ClubProfilePage = lazy(() => import("@/pages/club/club-profile-page"));
@@ -43,6 +44,7 @@ const UserEventDetailPage = lazy(() => import("@/pages/user/event-detail-page"))
 const CreateEventPage = lazy(() => import("@/pages/user/create-event-page"));
 const SearchArtistsPage = lazy(() => import("@/pages/user/search-artists-page"));
 const SearchClubsPage = lazy(() => import("@/pages/user/search-clubs-page"));
+const UserTableReservationPage = lazy(() => import("@/pages/user/table-reservation-page"));
 
 // Type pour l'authentification
 type AuthUser = {
@@ -195,6 +197,15 @@ function App() {
               : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
           }
         </Route>
+
+        <Route path="/artist/find-clubs">
+          {!user 
+            ? <SimpleAuth /> 
+            : user.role === "artist" 
+              ? <ArtistFindClubsPage /> 
+              : <Redirect to={user.role === "user" ? "/" : `/${user.role}`} />
+          }
+        </Route>
         
         <Route path="/club">
           {!user 
@@ -338,6 +349,10 @@ function App() {
 
         <Route path="/user/search-clubs">
           {!user ? <SimpleAuth /> : user.role === "user" ? <SearchClubsPage /> : <Redirect to="/" />}
+        </Route>
+        
+        <Route path="/user/table-reservation">
+          {!user ? <SimpleAuth /> : user.role === "user" ? <UserTableReservationPage /> : <Redirect to="/" />}
         </Route>
         
         <Route path="/user/explorer">

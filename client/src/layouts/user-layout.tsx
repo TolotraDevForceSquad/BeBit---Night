@@ -9,7 +9,7 @@ interface UserLayoutProps {
 }
 
 export default function UserLayout({ children }: UserLayoutProps) {
-  const { isMobile } = useMobile();
+  const isMobile = useMobile();
   const [location] = useLocation();
   const [activeItem, setActiveItem] = useState<string>("");
   

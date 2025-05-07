@@ -9,7 +9,7 @@ interface ArtistLayoutProps {
 }
 
 export default function ArtistLayout({ children }: ArtistLayoutProps) {
-  const { isMobile } = useMobile();
+  const isMobile = useMobile();
   const [location] = useLocation();
   const [activeItem, setActiveItem] = useState<string>("");
   
