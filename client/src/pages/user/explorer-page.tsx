@@ -648,7 +648,7 @@ export default function UserExplorerPage() {
                                   toast({
                                     title: "Réservation confirmée!",
                                     description: `Votre ticket pour "${events[currentEventIndex].title}" a été réservé`,
-                                    variant: "success",
+                                    variant: "default",
                                     duration: 3000,
                                   });
                                   

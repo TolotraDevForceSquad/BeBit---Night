@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
-import { Ticket, QrCode, Calendar, Clock, MapPin, ArrowLeft, Download, Share2 } from "lucide-react";
+import UserLayout from "@/layouts/user-layout"; // Changé pour UserLayout au lieu de ResponsiveLayout
+import { Ticket, QrCode, Calendar, Clock, MapPin, ArrowLeft, Download, Share2, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 // Type pour l'utilisateur authentifié
 type AuthUser = {
@@ -130,17 +131,70 @@ export default function TicketsPage() {
     </div>
   );
 
+  // Récupérer l'événement réservé depuis le localStorage s'il existe
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [newlyReservedEvent, setNewlyReservedEvent] = useState<any>(null);
+  
+  useEffect(() => {
+    // Vérifier si un événement a été réservé récemment
+    const reservedEventJson = localStorage.getItem('reserved_event');
+    if (reservedEventJson) {
+      try {
+        const reservedEvent = JSON.parse(reservedEventJson);
+        setNewlyReservedEvent(reservedEvent);
+        
+        // Ajouter un nouveau ticket basé sur l'événement réservé
+        const newTicket: UserTicket = {
+          id: Math.max(...tickets.map(t => t.id), 0) + 1,
+          eventId: reservedEvent.id,
+          eventTitle: reservedEvent.title,
+          eventDate: reservedEvent.date,
+          venueName: reservedEvent.venueName,
+          venueAddress: reservedEvent.city || "Adresse non spécifiée",
+          ticketType: "Standard",
+          price: reservedEvent.price || 0,
+          purchaseDate: new Date().toISOString(),
+          status: "valid",
+          qrCode: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+        };
+        
+        // Ajouter le ticket au tableau des tickets
+        setTickets(prev => [newTicket, ...prev]);
+        
+        // Afficher une notification de succès
+        toast({
+          title: "Ticket ajouté!",
+          description: `Votre ticket pour "${reservedEvent.title}" a été ajouté`,
+          duration: 5000,
+        });
+        
+        // Supprimer l'événement réservé du localStorage
+        localStorage.removeItem('reserved_event');
+      } catch (error) {
+        console.error("Erreur lors de la lecture de l'événement réservé:", error);
+      }
+    }
+  }, []);
+
   return (
-    <ResponsiveLayout activeItem="tickets" headerContent={headerContent}>
-      <div className="space-y-6">
+    <UserLayout>
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Ticket className="h-6 w-6 mr-2" />
+            <Ticket className="h-6 w-6 mr-2 text-primary" />
             <h1 className="text-2xl font-bold">Mes tickets</h1>
           </div>
           
-          <div className="text-sm text-muted-foreground">
-            {tickets.filter(t => t.status === "valid").length} tickets actifs
+          <div className="flex items-center space-x-2">
+            <Badge variant="outline" className="text-xs font-medium">
+              {tickets.filter(t => t.status === "valid").length} tickets actifs
+            </Badge>
+            <Button variant="outline" size="sm">
+              <Link to="/user/explorer">
+                Explorer plus d'événements
+              </Link>
+            </Button>
           </div>
         </div>
         
@@ -188,7 +242,7 @@ export default function TicketsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </ResponsiveLayout>
+    </UserLayout>
   );
 }
 
