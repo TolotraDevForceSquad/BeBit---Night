@@ -151,10 +151,10 @@ export default function CreateEventPage() {
     // Simuler l'envoi au serveur avec un délai
     setTimeout(() => {
       setIsSubmitting(false);
-      // Rediriger vers la page des événements avec un message de succès
+      // Rediriger vers la page des sorties avec un message de succès
       alert("Sortie créée avec succès!");
-      // Rediriger vers la page explorer pour éviter l'erreur 404
-      window.location.href = "/";
+      // Rediriger vers la page de mes sorties
+      window.location.href = "/user/events";
     }, 1500);
   };
   
@@ -447,7 +447,7 @@ export default function CreateEventPage() {
             
             {/* Boutons */}
             <div className="flex gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={() => setLocation("/user/explorer")}>
+              <Button type="button" variant="outline" onClick={() => setLocation("/user/events")}>
                 Annuler
               </Button>
               
