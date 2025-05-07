@@ -1,8 +1,8 @@
-# NightConnect - Exigences du Projet
+# Be bit. - Exigences du Projet
 
 ## 1. Aperçu
 
-NightConnect est une plateforme inspirée de TikTok qui connecte les artistes, les clubs et les utilisateurs dans l'écosystème de la vie nocturne. Elle permet aux artistes de trouver des engagements, aux clubs de découvrir des talents, et aux utilisateurs de découvrir des événements excitants.
+Be bit. est une plateforme moderne inspirée de TikTok qui connecte les artistes, les clubs et les utilisateurs dans l'écosystème de la vie nocturne. Elle permet aux artistes de trouver des engagements, aux clubs de découvrir des talents, et aux utilisateurs de découvrir des événements excitants via une interface de swipe similaire à TikTok et Tinder.
 
 ## 2. Public cible et utilisateurs
 
@@ -16,12 +16,15 @@ La plateforme sert quatre types d'utilisateurs principaux :
 ## 3. Fonctionnalités clés
 
 ### Pour les utilisateurs standard
-- Découvrir les événements à proximité avec une expérience de swipe inspirée de TikTok
+- Découvrir les événements à proximité avec une expérience de swipe inspirée de TikTok/Tinder
 - Parcourir les profils d'artistes et de clubs
 - Acheter des billets pour des événements
+- Créer des événements informels appelés "sorties"
 - Utiliser des codes QR pour valider l'entrée aux événements
 - Donner des avis sur les événements et les artistes
 - Gérer un portefeuille numérique pour les paiements
+- Réserver des tables dans les clubs
+- Recevoir des notifications pour les événements à venir
 
 ### Pour les artistes
 - Créer et gérer un profil professionnel
@@ -36,8 +39,11 @@ La plateforme sert quatre types d'utilisateurs principaux :
 - Créer et publier des événements
 - Chercher et inviter des artistes
 - Générer des codes QR pour la validation des billets
+- Configurer les zones et plans de table pour les réservations
+- Gérer les réservations de tables
 - Consulter les statistiques sur leurs événements et leur public
 - Effectuer et recevoir des paiements
+- Définir des tarifs spéciaux et des offres promotionnelles
 
 ### Pour les administrateurs
 - Tableau de bord de supervision globale
@@ -49,11 +55,16 @@ La plateforme sert quatre types d'utilisateurs principaux :
 ## 4. Exigences techniques
 
 ### Frontend
-- Interface responsive (mobile et web)
-- Design moderne inspiré de TikTok pour la partie mobile
+- Interface responsive (mobile et web) avec approche "mobile-first"
+- Design moderne inspiré de TikTok/Tinder pour la partie mobile
 - Navigation par swipe pour la découverte d'événements
-- Thème sombre par défaut
+- Système de navigation distinct pour mobile (barre inférieure) et desktop (barre latérale)
+- Thème sombre par défaut avec dégradé rose-violet pour les éléments de marque
 - Animations fluides pour une expérience engageante
+- Icônes distinctes et intuitives pour la navigation
+- Notifications visuelles pour les actions importantes
+- Interface de réservation de tables interactive
+- Adaptabilité automatique entre les vues mobile et desktop
 
 ### Backend
 - API REST sécurisée
