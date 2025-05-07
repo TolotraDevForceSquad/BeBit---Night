@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Search, Filter, Star, Music, Clock, Map, MapPin, Coins } from "lucide-react";
-import ClubLayout from "@/layouts/club-layout";
+import ClubLayout from "../../layouts/club-layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
