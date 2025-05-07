@@ -59,7 +59,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           label: "Mes Sorties", 
           href: "/user/events" 
         },
-        { icon: <Music size={24} />, label: "Artistes", href: "/user/search-artists" },
+        { icon: <Mic size={24} />, label: "Artistes", href: "/user/search-artists" },
         { 
           icon: (
             <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
@@ -158,7 +158,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         label: "Mes Sorties", 
         href: "/user/events" 
       },
-      { icon: <Music size={24} />, label: "Artistes", href: "/user/search-artists" },
+      { icon: <Mic size={24} />, label: "Artistes", href: "/user/search-artists" },
       { 
         icon: (
           <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
