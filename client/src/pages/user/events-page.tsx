@@ -324,18 +324,7 @@ export default function EventsPage() {
     setMyEvents(myEvents.filter(event => event.id !== id));
   };
 
-  // Header content pour la mise en page
-  const headerContent = (
-    <div className="w-full flex items-center">
-      <Link to="/">
-        <Button variant="ghost" size="icon" className="mr-2">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-      </Link>
-      
-      <h1 className="font-semibold text-lg">Mes sorties</h1>
-    </div>
-  );
+  // Le header content n'est pas utilisé car on utilise UserLayout
 
   return (
     <UserLayout>
