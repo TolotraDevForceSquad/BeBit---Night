@@ -76,7 +76,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           label: "Créer", 
           href: "/user/events/create" 
         },
-        { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
+        { 
+          icon: (
+            <div className="relative">
+              <BellRing size={24} />
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-[10px] font-bold">2</span>
+              </div>
+            </div>
+          ), 
+          label: "Invitations", 
+          href: "/user/invitations" 
+        },
         { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
         { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
       ];
@@ -170,7 +181,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       },
       { 
         icon: (
-          <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
+          <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -180,7 +191,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         label: "Créer", 
         href: "/user/events/create" 
       },
-      { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
+      { 
+        icon: (
+          <div className="relative">
+            <BellRing size={24} />
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-[10px] font-bold">2</span>
+            </div>
+          </div>
+        ), 
+        label: "Invitations", 
+        href: "/user/invitations" 
+      },
       { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
       { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
     ];

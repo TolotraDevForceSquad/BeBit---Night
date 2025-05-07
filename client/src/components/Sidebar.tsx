@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Mail, Image, Users,
   Wallet, Star, Settings, LogOut, PartyPopper,
-  CalendarPlus, MessageSquare, PieChart
+  CalendarPlus, MessageSquare, PieChart, BellRing
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

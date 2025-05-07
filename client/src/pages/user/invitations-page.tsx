@@ -1,385 +1,327 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import { useState } from "react";
+import { Bell, Check, Clock, MapPin, X } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, Mail, Calendar, MapPin, Clock, Users, Ticket, Music } from "lucide-react";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "../../components/ui/badge";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { useToast } from "../../hooks/use-toast";
 
-// Type pour l'utilisateur authentifié
-type AuthUser = {
-  username: string;
-  role: string;
-  firstName?: string;
-  profileImage?: string;
-};
-
-// Type pour les invitations
-type UserInvitation = {
+// Types
+type Invitation = {
   id: number;
   eventId: number;
-  eventTitle: string;
-  eventDate: string;
-  eventImage: string;
-  clubName: string;
-  clubId: number;
-  clubImage?: string;
-  message: string;
+  event: {
+    id: number;
+    title: string;
+    description: string;
+    date: string;
+    clubId: number;
+    clubName: string;
+    clubLocation: string;
+    clubImage?: string;
+    imageUrl?: string;
+    maxParticipants: number;
+    currentParticipants: number;
+    contribution: number;
+    isPrivate: boolean;
+    createdAt: string;
+  };
   status: "pending" | "accepted" | "declined";
   invitedBy: {
     id: number;
-    name: string;
-    image?: string;
+    username: string;
+    profileImage?: string;
   };
   invitedAt: string;
 };
 
-// Données fictives pour les invitations
-const mockInvitations: UserInvitation[] = [
-  {
-    id: 1,
-    eventId: 101,
-    eventTitle: "Nuit Électro Premium",
-    eventDate: "2023-12-25T22:00:00",
-    eventImage: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000",
-    clubName: "Club Oxygen",
-    clubId: 201,
-    clubImage: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?q=80&w=1000",
-    message: "Salut ! On organise une soirée spéciale pour Noël et on aimerait t'y voir. Tu auras accès au carré VIP !",
-    status: "pending",
-    invitedBy: {
-      id: 301,
-      name: "Marc Dubois",
-      image: "https://randomuser.me/api/portraits/men/32.jpg"
-    },
-    invitedAt: "2023-12-10T14:30:00"
-  },
-  {
-    id: 2,
-    eventId: 102,
-    eventTitle: "Soirée Masquée",
-    eventDate: "2024-01-15T23:00:00",
-    eventImage: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000",
-    clubName: "Le Bunker",
-    clubId: 202,
-    message: "Hey, on organise une soirée masquée au Bunker le 15 janvier. L'entrée t'est offerte si tu viens déguisé(e) !",
-    status: "accepted",
-    invitedBy: {
-      id: 302,
-      name: "Sophie Martin",
-      image: "https://randomuser.me/api/portraits/women/44.jpg"
-    },
-    invitedAt: "2023-12-05T18:15:00"
-  },
-  {
-    id: 3,
-    eventId: 103,
-    eventTitle: "After Work Jazzy",
-    eventDate: "2023-12-22T19:00:00",
-    eventImage: "https://images.unsplash.com/photo-1563841930606-67e2bce48b78?q=80&w=1000",
-    clubName: "Blue Note",
-    clubId: 203,
-    clubImage: "https://images.unsplash.com/photo-1577201561968-fd58f12e8dcd?q=80&w=1000",
-    message: "Nous organisons une soirée jazz ce vendredi. Une place t'est réservée avec un cocktail offert !",
-    status: "declined",
-    invitedBy: {
-      id: 303,
-      name: "Jean Moreau",
-      image: "https://randomuser.me/api/portraits/men/67.jpg"
-    },
-    invitedAt: "2023-12-01T10:45:00"
-  }
-];
-
 export default function InvitationsPage() {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [invitations, setInvitations] = useState<UserInvitation[]>([]);
-  const [activeTab, setActiveTab] = useState("pending");
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<string>("pending");
   
-  // Récupérer les données utilisateur du localStorage
-  useEffect(() => {
-    const authData = localStorage.getItem('auth_user');
-    if (authData) {
-      try {
-        const userData = JSON.parse(authData);
-        setUser(userData);
-      } catch (error) {
-        console.error("Erreur lors de la lecture des données d'authentification:", error);
-      }
+  // Données simulées pour les invitations
+  const [invitations, setInvitations] = useState<Invitation[]>([
+    {
+      id: 1,
+      eventId: 1,
+      event: {
+        id: 1,
+        title: "After-work Jazz & Cocktails",
+        description: "Rejoignez-nous pour une soirée décontractée avec du jazz live et des cocktails exquis.",
+        date: "2023-06-15T19:00:00Z",
+        clubId: 1,
+        clubName: "Le Blue Note",
+        clubLocation: "Antananarivo, MG",
+        imageUrl: "https://images.unsplash.com/photo-1602025239586-46f9a046f73f?q=80&w=1000",
+        maxParticipants: 20,
+        currentParticipants: 12,
+        contribution: 15000,
+        isPrivate: true,
+        createdAt: "2023-06-01T10:00:00Z"
+      },
+      status: "pending",
+      invitedBy: {
+        id: 2,
+        username: "marie_claire",
+        profileImage: "https://images.unsplash.com/photo-1550525811-e5869dd03032?w=250&h=250&auto=format&fit=crop"
+      },
+      invitedAt: "2023-06-10T14:30:00Z"
+    },
+    {
+      id: 2,
+      eventId: 2,
+      event: {
+        id: 2,
+        title: "Soirée House & Techno",
+        description: "Une nuit complète dédiée à la house et la techno avec des DJs internationaux.",
+        date: "2023-06-20T22:00:00Z",
+        clubId: 2,
+        clubName: "Klub Elektronica",
+        clubLocation: "Antananarivo, MG",
+        imageUrl: "https://images.unsplash.com/photo-1571266163388-8a8d891f85f5?q=80&w=1000",
+        maxParticipants: 50,
+        currentParticipants: 35,
+        contribution: 25000,
+        isPrivate: false,
+        createdAt: "2023-06-05T10:00:00Z"
+      },
+      status: "accepted",
+      invitedBy: {
+        id: 3,
+        username: "dj_thomas",
+        profileImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=250&h=250&auto=format&fit=crop"
+      },
+      invitedAt: "2023-06-12T09:15:00Z"
+    },
+    {
+      id: 3,
+      eventId: 3,
+      event: {
+        id: 3,
+        title: "Hip-Hop Anniversary",
+        description: "Célébrons l'anniversaire du club avec une soirée hip-hop all night long.",
+        date: "2023-06-25T21:00:00Z",
+        clubId: 3,
+        clubName: "Basement Club",
+        clubLocation: "Antananarivo, MG",
+        imageUrl: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1000",
+        maxParticipants: 100,
+        currentParticipants: 65,
+        contribution: 20000,
+        isPrivate: false,
+        createdAt: "2023-06-08T10:00:00Z"
+      },
+      status: "declined",
+      invitedBy: {
+        id: 4,
+        username: "alex_promoter",
+        profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=250&h=250&auto=format&fit=crop"
+      },
+      invitedAt: "2023-06-14T17:45:00Z"
+    },
+    {
+      id: 4,
+      eventId: 4,
+      event: {
+        id: 4,
+        title: "Festival Pre-Party",
+        description: "Échauffement officiel avant le grand festival de musique électronique du week-end.",
+        date: "2023-06-28T20:00:00Z",
+        clubId: 2,
+        clubName: "Klub Elektronica",
+        clubLocation: "Antananarivo, MG",
+        imageUrl: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000",
+        maxParticipants: 75,
+        currentParticipants: 40,
+        contribution: 30000,
+        isPrivate: true,
+        createdAt: "2023-06-15T10:00:00Z"
+      },
+      status: "pending",
+      invitedBy: {
+        id: 5,
+        username: "festival_team",
+        profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=250&h=250&auto=format&fit=crop"
+      },
+      invitedAt: "2023-06-20T13:20:00Z"
     }
-    
-    // Simuler un chargement des invitations
-    setInvitations(mockInvitations);
-  }, []);
+  ]);
 
   // Filtrer les invitations selon l'onglet actif
   const filteredInvitations = invitations.filter(invitation => {
-    if (activeTab === "pending") {
-      return invitation.status === "pending";
-    } else if (activeTab === "accepted") {
-      return invitation.status === "accepted";
-    } else if (activeTab === "declined") {
-      return invitation.status === "declined";
-    }
-    
+    if (activeTab === "pending") return invitation.status === "pending";
+    if (activeTab === "accepted") return invitation.status === "accepted";
+    if (activeTab === "declined") return invitation.status === "declined";
     return true;
   });
 
-  // Formater la date des événements
-  const formatEventDate = (dateString: string) => {
-    return format(new Date(dateString), "EEEE d MMMM yyyy, HH'h'mm", { locale: fr });
-  };
-
-  // Header content pour la mise en page
-  const headerContent = (
-    <div className="w-full flex items-center">
-      <Link to="/">
-        <Button variant="ghost" size="icon" className="mr-2">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-      </Link>
-      
-      <h1 className="font-semibold text-lg">Mes invitations</h1>
-    </div>
-  );
-
   // Fonction pour accepter une invitation
-  const handleAccept = (id: number) => {
-    setInvitations(prev => 
-      prev.map(invitation => 
-        invitation.id === id 
-          ? { ...invitation, status: "accepted" } 
-          : invitation
-      )
-    );
+  const handleAcceptInvitation = (invitationId: number) => {
+    setInvitations(invitations.map(invitation => 
+      invitation.id === invitationId 
+        ? { ...invitation, status: "accepted" } 
+        : invitation
+    ));
+    
+    toast({
+      title: "Invitation acceptée",
+      description: "Vous avez accepté l'invitation à cet événement.",
+      variant: "default",
+    });
   };
 
   // Fonction pour refuser une invitation
-  const handleDecline = (id: number) => {
-    setInvitations(prev => 
-      prev.map(invitation => 
-        invitation.id === id 
-          ? { ...invitation, status: "declined" } 
-          : invitation
-      )
-    );
+  const handleDeclineInvitation = (invitationId: number) => {
+    setInvitations(invitations.map(invitation => 
+      invitation.id === invitationId 
+        ? { ...invitation, status: "declined" } 
+        : invitation
+    ));
+    
+    toast({
+      title: "Invitation refusée",
+      description: "Vous avez refusé l'invitation à cet événement.",
+      variant: "default",
+    });
   };
 
   return (
-    <ResponsiveLayout activeItem="invitations" headerContent={headerContent}>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Mail className="h-6 w-6 mr-2" />
-            <h1 className="text-2xl font-bold">Mes invitations</h1>
-          </div>
-          
-          <div className="text-sm text-muted-foreground">
-            {invitations.filter(i => i.status === "pending").length} invitation(s) en attente
-          </div>
-        </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="pending" className="flex-1">En attente</TabsTrigger>
-            <TabsTrigger value="accepted" className="flex-1">Acceptées</TabsTrigger>
-            <TabsTrigger value="declined" className="flex-1">Refusées</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="pending" className="space-y-4">
-            {filteredInvitations.length === 0 ? (
-              <div className="text-center py-12">
-                <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-medium mb-2">
-                  Pas d'invitations en attente
-                </h3>
-                <p className="text-muted-foreground">
-                  Vous n'avez aucune invitation en attente pour le moment
-                </p>
-              </div>
-            ) : (
-              filteredInvitations.map((invitation) => (
-                <InvitationCard 
-                  key={invitation.id} 
-                  invitation={invitation} 
-                  onAccept={handleAccept}
-                  onDecline={handleDecline}
-                />
-              ))
-            )}
-          </TabsContent>
-          
-          <TabsContent value="accepted" className="space-y-4">
-            {filteredInvitations.length === 0 ? (
-              <div className="text-center py-12">
-                <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-medium mb-2">
-                  Pas d'invitations acceptées
-                </h3>
-                <p className="text-muted-foreground">
-                  Vous n'avez accepté aucune invitation pour le moment
-                </p>
-              </div>
-            ) : (
-              filteredInvitations.map((invitation) => (
-                <InvitationCard 
-                  key={invitation.id} 
-                  invitation={invitation} 
-                />
-              ))
-            )}
-          </TabsContent>
-          
-          <TabsContent value="declined" className="space-y-4">
-            {filteredInvitations.length === 0 ? (
-              <div className="text-center py-12">
-                <Mail className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-medium mb-2">
-                  Pas d'invitations refusées
-                </h3>
-                <p className="text-muted-foreground">
-                  Vous n'avez refusé aucune invitation pour le moment
-                </p>
-              </div>
-            ) : (
-              filteredInvitations.map((invitation) => (
-                <InvitationCard 
-                  key={invitation.id} 
-                  invitation={invitation} 
-                />
-              ))
-            )}
-          </TabsContent>
-        </Tabs>
+    <div className="space-y-6">
+      <div className="flex items-center">
+        <Bell className="h-6 w-6 mr-2 text-primary" />
+        <h1 className="text-2xl font-bold">Mes invitations</h1>
       </div>
-    </ResponsiveLayout>
-  );
-}
-
-// Composant pour afficher une invitation
-interface InvitationCardProps {
-  invitation: UserInvitation;
-  onAccept?: (id: number) => void;
-  onDecline?: (id: number) => void;
-}
-
-function InvitationCard({ invitation, onAccept, onDecline }: InvitationCardProps) {
-  const eventDate = format(new Date(invitation.eventDate), "EEEE d MMMM yyyy, HH'h'mm", { locale: fr });
-  const invitedDate = format(new Date(invitation.invitedAt), "d MMMM yyyy", { locale: fr });
-  
-  // Badge de statut
-  let statusColor = "";
-  let statusLabel = "";
-  
-  switch (invitation.status) {
-    case "pending":
-      statusColor = "bg-yellow-100 text-yellow-700";
-      statusLabel = "En attente";
-      break;
-    case "accepted":
-      statusColor = "bg-green-100 text-green-700";
-      statusLabel = "Acceptée";
-      break;
-    case "declined":
-      statusColor = "bg-red-100 text-red-700";
-      statusLabel = "Refusée";
-      break;
-  }
-  
-  return (
-    <Card className="overflow-hidden">
-      <div className="relative">
-        {invitation.eventImage && (
-          <div 
-            className="h-32 w-full bg-center bg-cover"
-            style={{ 
-              backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.7)), url(${invitation.eventImage})` 
-            }}
-          >
-            <div className="absolute bottom-3 left-3 text-white">
-              <h3 className="font-bold text-lg">{invitation.eventTitle}</h3>
-              <p className="opacity-80 text-sm">{invitation.clubName}</p>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="w-full mb-4">
+          <TabsTrigger value="pending" className="flex-1">
+            En attente 
+            {invitations.filter(inv => inv.status === "pending").length > 0 && (
+              <Badge className="ml-2 bg-primary">{invitations.filter(inv => inv.status === "pending").length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="accepted" className="flex-1">Acceptées</TabsTrigger>
+          <TabsTrigger value="declined" className="flex-1">Refusées</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value={activeTab} className="space-y-4">
+          {filteredInvitations.length === 0 ? (
+            <div className="text-center py-12">
+              <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-xl font-medium mb-2">
+                Pas d'invitations {activeTab === "pending" ? "en attente" : activeTab === "accepted" ? "acceptées" : "refusées"}
+              </h3>
+              <p className="text-muted-foreground">
+                {activeTab === "pending" 
+                  ? "Vous n'avez pas d'invitations en attente de réponse."
+                  : activeTab === "accepted"
+                  ? "Vous n'avez pas encore accepté d'invitations."
+                  : "Vous n'avez pas encore refusé d'invitations."}
+              </p>
             </div>
-            
-            <Badge className={`${statusColor} absolute top-3 right-3 text-xs font-medium`}>
-              {statusLabel}
-            </Badge>
-          </div>
-        )}
-      </div>
-      
-      <CardContent className="pt-4">
-        <div className="flex items-center mb-3">
-          <Avatar className="h-8 w-8 mr-2">
-            <AvatarImage src={invitation.invitedBy.image} alt={invitation.invitedBy.name} />
-            <AvatarFallback>{invitation.invitedBy.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-medium">
-              <span className="font-semibold">{invitation.invitedBy.name}</span> vous a invité
-            </p>
-            <p className="text-xs text-muted-foreground">
-              le {invitedDate}
-            </p>
-          </div>
-        </div>
-        
-        <div className="border p-3 rounded-md mb-3 text-sm bg-muted/50">
-          {invitation.message}
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center">
-              <Calendar className="h-3 w-3 mr-1" /> Date
-            </p>
-            <p className="text-sm font-medium">
-              {format(new Date(invitation.eventDate), "d MMMM yyyy", { locale: fr })}
-            </p>
-          </div>
-          
-          <div>
-            <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center">
-              <Clock className="h-3 w-3 mr-1" /> Heure
-            </p>
-            <p className="text-sm font-medium">
-              {format(new Date(invitation.eventDate), "HH'h'mm", { locale: fr })}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-      
-      {invitation.status === "pending" && onAccept && onDecline && (
-        <CardFooter className="flex justify-between border-t p-4">
-          <Button variant="outline" size="sm" onClick={() => onDecline(invitation.id)}>
-            Refuser
-          </Button>
-          
-          <Button size="sm" onClick={() => onAccept(invitation.id)}>
-            Accepter
-          </Button>
-        </CardFooter>
-      )}
-      
-      {invitation.status !== "pending" && (
-        <CardFooter className="flex justify-between border-t p-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link to={`/club/${invitation.clubId}`}>
-              Voir le club
-            </Link>
-          </Button>
-          
-          <Button size="sm" asChild>
-            <Link to={`/event/${invitation.eventId}`}>
-              Voir l'événement
-            </Link>
-          </Button>
-        </CardFooter>
-      )}
-    </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredInvitations.map((invitation) => (
+                <Card key={invitation.id} className="overflow-hidden">
+                  <div className="h-32 w-full bg-cover bg-center relative" 
+                    style={{ 
+                      backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7)), url(${invitation.event.imageUrl})` 
+                    }}>
+                    <div className="absolute inset-0 flex flex-col justify-end p-4 text-white">
+                      <h3 className="font-bold text-lg">{invitation.event.title}</h3>
+                      <div className="flex items-center text-sm opacity-90">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span>{invitation.event.clubName}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Badge du statut */}
+                    <div className="absolute top-3 right-3">
+                      {invitation.status === "pending" && (
+                        <Badge className="bg-amber-500 hover:bg-amber-600">En attente</Badge>
+                      )}
+                      {invitation.status === "accepted" && (
+                        <Badge className="bg-green-500 hover:bg-green-600">Acceptée</Badge>
+                      )}
+                      {invitation.status === "declined" && (
+                        <Badge className="bg-red-500 hover:bg-red-600">Refusée</Badge>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3 mb-4">
+                      <Avatar>
+                        <AvatarImage 
+                          src={invitation.invitedBy.profileImage} 
+                          alt={invitation.invitedBy.username} 
+                        />
+                        <AvatarFallback>
+                          {invitation.invitedBy.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-medium">{invitation.invitedBy.username}</span>{" "}
+                          vous a invité à rejoindre cet événement
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Invité le {format(new Date(invitation.invitedAt), "d MMMM à HH'h'mm", { locale: fr })}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center mb-3">
+                      <Clock className="h-4 w-4 text-muted-foreground mr-2" />
+                      <span className="text-sm">
+                        {format(new Date(invitation.event.date), "EEEE d MMMM, HH'h'mm", { locale: fr })}
+                      </span>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {invitation.event.description}
+                    </p>
+                    
+                    {invitation.status === "pending" && (
+                      <div className="flex gap-2 justify-end">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDeclineInvitation(invitation.id)}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Refuser
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleAcceptInvitation(invitation.id)}
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Accepter
+                        </Button>
+                      </div>
+                    )}
+                    
+                    {invitation.status !== "pending" && (
+                      <div className="flex justify-end">
+                        <Button size="sm" asChild variant="outline">
+                          <a href={`/user/events/${invitation.event.id}`}>
+                            Voir les détails
+                          </a>
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
