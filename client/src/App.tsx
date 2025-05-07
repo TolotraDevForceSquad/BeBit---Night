@@ -14,77 +14,39 @@ const SearchArtistsPage = lazy(() => import("./pages/user/search-artists-page"))
 const CreateEventPage = lazy(() => import("./pages/user/create-event-page"));
 const TableReservationPage = lazy(() => import("./pages/user/table-reservation-page"));
 
-// Page d'accueil simple pour un utilisateur connecté
+// Page d'accueil qui redirige vers /user/explorer
 function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
   const isMobile = useMobile();
   
-  // Pour la redirection, nous utilisons window.location.href dans les boutons
+  // Redirection automatique vers /user/explorer
+  useEffect(() => {
+    // Rediriger vers la page appropriée selon le rôle
+    if (user.role === 'user') {
+      window.location.href = "/user/explorer";
+    } else if (user.role === 'artist') {
+      // À activer quand l'interface artiste sera prête
+      // window.location.href = "/artist/dashboard";
+    } else if (user.role === 'club') {
+      // À activer quand l'interface club sera prête
+      // window.location.href = "/club/dashboard";
+    } else if (user.role === 'admin') {
+      // À activer quand l'interface admin sera prête
+      // window.location.href = "/admin/dashboard";
+    }
+  }, [user]);
 
+  // Afficher un écran de chargement pendant la redirection
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-center mb-8 py-4 border-b border-border">
-          <div>
-            <h1 className="text-2xl font-bold">
-              <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">
-              Connecté en tant que <strong>{user.username}</strong> ({user.role})
-            </span>
-            <button
-              onClick={onLogout}
-              className="px-4 py-2 bg-destructive text-white rounded-md hover:bg-destructive/90"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </header>
-
-        <main>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="col-span-1 md:col-span-2">
-              <div className="bg-card p-6 rounded-lg border border-border">
-                <h2 className="text-xl font-semibold mb-4">
-                  Bienvenue sur Be bit.
-                </h2>
-                <p className="text-muted-foreground mb-4">
-                  Votre plateforme événementielle interactive.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                  <div className="p-4 bg-muted rounded-lg border border-border hover:bg-accent cursor-pointer"
-                       onClick={() => window.location.href = "/user/explorer"}>
-                    <h3 className="font-medium">Découvrir des événements</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Explorez des événements près de chez vous
-                    </p>
-                  </div>
-                  <div className="p-4 bg-muted rounded-lg border border-border hover:bg-accent cursor-pointer"
-                       onClick={() => window.location.href = "/user/events"}>
-                    <h3 className="font-medium">Mes événements</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Gérez vos sorties
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="bg-card p-6 rounded-lg border border-border">
-                <h3 className="text-lg font-semibold mb-3">Votre profil</h3>
-                <div className="py-2 border-t border-border">
-                  <p className="text-sm font-medium">Nom d'utilisateur</p>
-                  <p className="text-muted-foreground">{user.username}</p>
-                </div>
-                <div className="py-2 border-t border-border">
-                  <p className="text-sm font-medium">Rôle</p>
-                  <p className="text-muted-foreground capitalize">{user.role}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+      <div className="mb-8">
+        <h1 className="text-5xl font-bold">
+          <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2 text-center">Redirection en cours...</p>
+      </div>
+      <div className="relative w-24 h-24">
+        <div className="absolute inset-0 rounded-full border-4 border-muted"></div>
+        <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
       </div>
     </div>
   );
@@ -132,19 +94,37 @@ function App() {
     setLocation("/auth");
   };
 
-  // Afficher un indicateur de chargement
+  // Afficher un écran de chargement stylisé avec le nom Be bit
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="h-10 w-10 animate-spin text-primary">Chargement...</div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <div className="mb-8">
+          <h1 className="text-5xl font-bold">
+            <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 text-center">La plateforme événementielle</p>
+        </div>
+        <div className="relative w-24 h-24">
+          <div className="absolute inset-0 rounded-full border-4 border-muted"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
+        </div>
       </div>
     );
   }
 
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="h-10 w-10 animate-spin text-primary">Chargement...</div>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <div className="mb-8">
+          <h1 className="text-5xl font-bold">
+            <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 text-center">La plateforme événementielle</p>
+        </div>
+        <div className="relative w-24 h-24">
+          <div className="absolute inset-0 rounded-full border-4 border-muted"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-t-primary animate-spin"></div>
+        </div>
       </div>
     }>
       {user ? (
