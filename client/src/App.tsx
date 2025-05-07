@@ -16,7 +16,7 @@ const CreateEventPage = lazy(() => import("./pages/user/create-event-page"));
 const TableReservationPage = lazy(() => import("./pages/user/table-reservation"));
 
 // Chargement différé des pages club
-const ClubDashboardPage = lazy(() => import("./pages/club/simple-dashboard"));
+const ClubDashboardPage = lazy(() => import("./pages/club/basic-dashboard"));
 const ClubProfilePage = lazy(() => import("./pages/club/club-profile-page"));
 const ClubAttendeesPage = lazy(() => import("./pages/club/attendees-page"));
 const ClubFindArtistsPage = lazy(() => import("./pages/club/find-artists-page"));
@@ -34,10 +34,9 @@ function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
       // À activer quand l'interface artiste sera prête
       // window.location.href = "/artist/dashboard";
     } else if (user.role === 'club') {
-      window.location.href = "/club/dashboard";
+      window.location.replace("/club");
     } else if (user.role === 'admin') {
-      // À activer quand l'interface admin sera prête
-      // window.location.href = "/admin/dashboard";
+      window.location.replace("/admin/dashboard");
     }
   }, [user]);
 
@@ -97,20 +96,8 @@ function ClubRoutes() {
       <Route path="/club/dashboard">
         <ClubDashboardPage />
       </Route>
-      <Route path="/club/profile">
-        <ClubProfilePage />
-      </Route>
-      <Route path="/club/attendees">
-        <ClubAttendeesPage />
-      </Route>
-      <Route path="/club/find-artists">
-        <ClubFindArtistsPage />
-      </Route>
-      <Route path="/club/reservations">
-        <ClubReservationsPage />
-      </Route>
       <Route>
-        <NotFound />
+        <ClubDashboardPage />
       </Route>
     </Switch>
   );
