@@ -61,8 +61,9 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         },
         { 
           icon: (
-            <div className="relative bg-primary/10 rounded-md p-1 flex items-center justify-center w-7 h-7">
-              <Mic size={20} />
+            <div className="relative flex space-x-0 -mx-1.5">
+              <Mic size={24} className="text-primary" />
+              <Mic size={24} className="text-secondary" />
             </div>
           ), 
           label: "Artistes", 
@@ -169,8 +170,9 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       },
       { 
         icon: (
-          <div className="relative bg-primary/10 rounded-md p-1 flex items-center justify-center w-7 h-7">
-            <Mic size={20} />
+          <div className="relative flex space-x-0 -mx-1.5">
+            <Mic size={24} className="text-primary" />
+            <Mic size={24} className="text-secondary" />
           </div>
         ), 
         label: "Artistes", 
