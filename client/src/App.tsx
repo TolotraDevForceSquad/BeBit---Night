@@ -69,6 +69,10 @@ function App() {
               <CreateEventPage />
             </Route>
             
+            <Route path="/user/events/create">
+              <CreateEventPage />
+            </Route>
+            
             <Route path="/user/table-reservation">
               <UserLayout>
                 <TableReservationPage />

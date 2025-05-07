@@ -74,7 +74,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
             </div>
           ), 
           label: "Créer", 
-          href: "/user/create-event" 
+          href: "/user/events/create" 
         },
         { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
         { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
@@ -178,7 +178,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           </div>
         ), 
         label: "Créer", 
-        href: "/user/create-event" 
+        href: "/user/events/create" 
       },
       { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
