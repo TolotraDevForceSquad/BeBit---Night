@@ -48,8 +48,8 @@ export default function ResponsiveLayout({
       {isMobile && (
         <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm p-2 flex justify-between items-center">
           <div className="flex items-center">
-            <h1 className="font-heading font-bold text-lg">
-              <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
+            <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+              Be bit.
             </h1>
           </div>
           
@@ -88,6 +88,14 @@ export default function ResponsiveLayout({
         
         {/* Contenu principal */}
         <main className="flex-1 p-4">
+          {!isMobile && (
+            <div className="sticky top-0 z-10 -mt-4 -mx-4 px-4 pt-4 pb-3 bg-background/80 backdrop-blur-sm border-b border-border mb-4 flex items-center justify-center">
+              <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+                Be bit.
+              </h1>
+            </div>
+          )}
+          
           {/* En-tête desktop */}
           {!isMobile && headerContent && (
             <header className="mb-6">
