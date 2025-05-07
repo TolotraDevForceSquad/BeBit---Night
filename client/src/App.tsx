@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Link } from "wouter";
 import SimpleAuth from "./pages/simple-auth";
 import UserLayout from "./layouts/user-layout";
 import NotFound from "./pages/not-found";
@@ -10,6 +10,7 @@ import ProfilePage from "./pages/user/profile-page";
 import SearchArtistsPage from "./pages/user/search-artists-page";
 import CreateEventPage from "./pages/user/create-event-page";
 import TableReservationPage from "./pages/user/table-reservation";
+import ResponsiveLayout from "./layouts/ResponsiveLayout";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -77,6 +78,189 @@ function App() {
               <UserLayout>
                 <TableReservationPage />
               </UserLayout>
+            </Route>
+
+            {/* Routes artiste */}
+            <Route path="/artist">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Dashboard Artiste</h1>
+                  <p className="text-lg">Bienvenue sur votre espace artiste</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/artist/agenda">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Agenda</h1>
+                  <p className="text-lg">Gérez vos événements à venir</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/artist/invitations">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Invitations</h1>
+                  <p className="text-lg">Gérez vos invitations</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/artist/feedback">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Feedbacks</h1>
+                  <p className="text-lg">Consultez les avis de vos fans</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/artist/create-event">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Créer un événement</h1>
+                  <p className="text-lg">Créez un nouvel événement</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/artist/collaborations">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Collaborations</h1>
+                  <p className="text-lg">Gérez vos collaborations</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/artist/wallet">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Portefeuille</h1>
+                  <p className="text-lg">Gérez vos revenus</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+
+            {/* Routes club */}
+            <Route path="/club">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Dashboard Club</h1>
+                  <p className="text-lg">Gérez vos événements</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/club/find-artists">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Rechercher des artistes</h1>
+                  <p className="text-lg">Trouvez des artistes pour vos événements</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/club/invitations">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Invitations</h1>
+                  <p className="text-lg">Gérez vos invitations aux artistes</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/club/attendees">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Participants</h1>
+                  <p className="text-lg">Consultez la liste des participants</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/club/wallet">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Portefeuille</h1>
+                  <p className="text-lg">Gérez vos revenus</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/club/reservations">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Réservations de tables</h1>
+                  <p className="text-lg">Gérez les réservations de tables</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+
+            <Route path="/club/create-event">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Créer un événement</h1>
+                  <p className="text-lg">Créez un nouvel événement dans votre club</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+
+            {/* Routes admin */}
+            <Route path="/admin">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Dashboard Admin</h1>
+                  <p className="text-lg">Bienvenue sur le panneau d'administration</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/admin/artists">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Gestion des artistes</h1>
+                  <p className="text-lg">Gérez les profils d'artistes</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/admin/clubs">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Gestion des clubs</h1>
+                  <p className="text-lg">Gérez les profils de clubs</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/admin/events">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Gestion des événements</h1>
+                  <p className="text-lg">Gérez les événements de la plateforme</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/admin/moderation">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Modération</h1>
+                  <p className="text-lg">Modérez le contenu de la plateforme</p>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/admin/search">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Recherche globale</h1>
+                  <p className="text-lg">Recherchez dans toute la plateforme</p>
+                </div>
+              </ResponsiveLayout>
             </Route>
             
             {/* Page d'accueil - force la redirection vers explorer */}
