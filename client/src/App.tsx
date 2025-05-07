@@ -90,9 +90,9 @@ function App() {
             {window.location.pathname !== "/auth" && (
               <div className="flex items-center justify-center h-screen">
                 <div>Redirection vers la page d'authentification...</div>
-                {setTimeout(() => {
-                  window.location.href = "/auth";
-                }, 100)}
+                <span className="hidden">
+                  {window.location.href = "/auth"}
+                </span>
               </div>
             )}
           </Route>
