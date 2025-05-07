@@ -396,29 +396,64 @@ export default function UserExplorerPage() {
       
       {/* Desktop search and title */}
       {!isMobile && (
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Explorez les événements</h1>
-            <div className="flex items-center space-x-2">
-              <p className="text-muted-foreground">
-                Découvrez les meilleurs événements et artistes près de chez vous
-              </p>
-              <LocationDisplay 
-                displayMode="badge" 
-                onCitySelect={handleCityChange}
-                showSelector={true}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Explorez les événements</h1>
+              <div className="flex items-center space-x-2">
+                <p className="text-muted-foreground">
+                  Découvrez les meilleurs événements et artistes près de chez vous
+                </p>
+                <LocationDisplay 
+                  displayMode="badge" 
+                  onCitySelect={handleCityChange}
+                  showSelector={true}
+                />
+              </div>
+            </div>
+            
+            <div className="relative w-72">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Rechercher des événements..."
+                className="pl-9"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
           
-          <div className="relative w-72">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Rechercher des événements..."
-              className="pl-9"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          {/* Section Catégories et Artistes Tendance */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+            <div className="lg:col-span-3 bg-card rounded-lg p-4 border border-border">
+              <h3 className="font-medium mb-3">Catégories</h3>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <Button
+                    key={category}
+                    variant={activeCategory === category ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setActiveCategory(category)}
+                  >
+                    {category === "all" ? "Tous" : category}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="lg:col-span-2 bg-card rounded-lg p-4 border border-border">
+              <h3 className="font-medium mb-3">Artistes Tendance</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {["DJ Elektra", "MC Blaze", "Luna Ray", "Banda Roots"].map((artist) => (
+                  <div key={artist} className="flex items-center">
+                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mr-2">
+                      {artist.charAt(0)}
+                    </div>
+                    <span className="truncate">{artist}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
