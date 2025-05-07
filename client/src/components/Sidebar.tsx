@@ -56,6 +56,8 @@ export default function Sidebar({ activeItem }: SidebarProps) {
         { icon: <Image className="h-5 w-5" />, label: "Galerie", href: "/user/gallery" },
         { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/user/wallet" },
         { icon: <Star className="h-5 w-5" />, label: "Mes avis", href: "/user/reviews" },
+        { icon: <Search className="h-5 w-5" />, label: "Rechercher Artistes", href: "/user/search-artists" },
+        { icon: <Search className="h-5 w-5" />, label: "Rechercher Clubs", href: "/user/search-clubs" },
       ];
     }
     
@@ -101,6 +103,8 @@ export default function Sidebar({ activeItem }: SidebarProps) {
       { icon: <Image className="h-5 w-5" />, label: "Galerie", href: "/user/gallery" },
       { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/user/wallet" },
       { icon: <Star className="h-5 w-5" />, label: "Mes avis", href: "/user/reviews" },
+      { icon: <Search className="h-5 w-5" />, label: "Rechercher Artistes", href: "/user/search-artists" },
+      { icon: <Search className="h-5 w-5" />, label: "Rechercher Clubs", href: "/user/search-clubs" },
     ];
   };
   
