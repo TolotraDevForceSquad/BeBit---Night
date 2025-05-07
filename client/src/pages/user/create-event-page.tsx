@@ -1,26 +1,22 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { ArrowLeft, Calendar, MapPin, Clock, Users, Euro, Save, Plus, Image } from "lucide-react";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/date-picker";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Switch } from "@/components/ui/switch";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import ResponsiveLayout from "@/layouts/ResponsiveLayout";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { Link, useLocation } from "wouter";
+import { cn } from "@/lib/utils";
 
 // Type pour l'utilisateur authentifié
 type AuthUser = {
@@ -30,60 +26,49 @@ type AuthUser = {
   profileImage?: string;
 };
 
-// Type pour les options de clubs
-type ClubOption = {
-  id: number;
-  name: string;
-  location: string;
-  image?: string;
-};
-
-// Données fictives des clubs
-const mockClubs: ClubOption[] = [
-  {
-    id: 101,
-    name: "Club Oxygen",
-    location: "Paris, France",
-    image: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?q=80&w=1000"
-  },
-  {
-    id: 102,
-    name: "Le Loft",
-    location: "Lyon, France",
-    image: "https://images.unsplash.com/photo-1578760427650-9645a33f4e1b?q=80&w=1000"
-  },
-  {
-    id: 103,
-    name: "Warehouse",
-    location: "Marseille, France",
-    image: "https://images.unsplash.com/photo-1577201561968-fd58f12e8dcd?q=80&w=1000"
-  },
-  {
-    id: 104,
-    name: "Blue Note",
-    location: "Bordeaux, France",
-    image: "https://images.unsplash.com/photo-1563841930606-67e2bce48b78?q=80&w=1000"
+// Schéma de validation pour le formulaire de création d'événement
+const createEventSchema = z.object({
+  title: z.string().min(5, { message: "Le titre doit contenir au moins 5 caractères" }),
+  description: z.string().min(20, { message: "La description doit contenir au moins 20 caractères" }),
+  date: z.date({ required_error: "Veuillez sélectionner une date" }),
+  time: z.string({ required_error: "Veuillez sélectionner une heure" }),
+  category: z.string({ required_error: "Veuillez sélectionner une catégorie" }),
+  price: z.coerce.number().min(0, { message: "Le prix doit être positif ou zéro" }),
+  venueType: z.enum(["club", "other"], { required_error: "Veuillez sélectionner un type de lieu" }),
+  venueName: z.string().min(3, { message: "Le nom du lieu doit contenir au moins 3 caractères" }),
+  useCurrentLocation: z.boolean().default(true),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  customLocation: z.boolean().default(false),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+}).refine(data => {
+  // Si le type de lieu est "other", le nom du lieu est obligatoire
+  if (data.venueType === "other" && (!data.venueName || data.venueName.length < 3)) {
+    return false;
   }
-];
+  // Si useCurrentLocation est false, address et city sont obligatoires
+  if (!data.useCurrentLocation && (!data.address || !data.city)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Veuillez remplir tous les champs obligatoires",
+  path: ["venueName"], // Le champ qui recevra l'erreur
+});
+
+type CreateEventFormValues = z.infer<typeof createEventSchema>;
 
 export default function CreateEventPage() {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [clubs, setClubs] = useState<ClubOption[]>([]);
-  const [, navigate] = useLocation();
-  const { toast } = useToast();
-
-  // États du formulaire
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [time, setTime] = useState("20:00");
-  const [selectedClub, setSelectedClub] = useState<string>("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [maxParticipants, setMaxParticipants] = useState(10);
-  const [contribution, setContribution] = useState(0);
-  const [isPrivate, setIsPrivate] = useState(false);
+  const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [clubs, setClubs] = useState<{ id: number, name: string }[]>([]);
+  const [selectedVenueType, setSelectedVenueType] = useState<"club" | "other">("other");
+  
+  // Récupérer la géolocalisation de l'utilisateur
+  const { latitude, longitude, city, loading: geoLoading } = useGeolocation();
+  
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
     const authData = localStorage.getItem('auth_user');
@@ -93,260 +78,391 @@ export default function CreateEventPage() {
         setUser(userData);
       } catch (error) {
         console.error("Erreur lors de la lecture des données d'authentification:", error);
+        setLocation("/auth");
       }
+    } else {
+      setLocation("/auth");
     }
     
-    // Simuler un chargement des clubs
-    setClubs(mockClubs);
-  }, []);
-
-  // Formater les heures pour l'input time
-  const formatTimeOptions = () => {
-    const options = [];
-    for (let hour = 18; hour <= 23; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const formattedHour = hour.toString().padStart(2, '0');
-        const formattedMinute = minute.toString().padStart(2, '0');
-        options.push(`${formattedHour}:${formattedMinute}`);
+    // Charger les clubs disponibles (mock data pour cet exemple)
+    setClubs([
+      { id: 1, name: "Club Oxygen" },
+      { id: 2, name: "Loft 21" },
+      { id: 3, name: "Blue Note" },
+      { id: 4, name: "Le Bunker" },
+      { id: 5, name: "Warehouse" },
+    ]);
+  }, [setLocation]);
+  
+  // Définir les catégories d'événements
+  const categories = ["House", "Techno", "Hip-Hop", "Jazz", "Funk", "EDM", "Autre"];
+  
+  // Initialiser le formulaire
+  const form = useForm<CreateEventFormValues>({
+    resolver: zodResolver(createEventSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "",
+      price: 0,
+      venueType: "other",
+      venueName: "",
+      useCurrentLocation: true,
+      customLocation: false,
+    },
+  });
+  
+  // Mettre à jour les données de géolocalisation dans le formulaire
+  useEffect(() => {
+    if (latitude && longitude && city && form.getValues("useCurrentLocation")) {
+      form.setValue("latitude", latitude);
+      form.setValue("longitude", longitude);
+      form.setValue("city", city);
+    }
+  }, [latitude, longitude, city, form]);
+  
+  // Suivre le changement de type de lieu
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === "venueType") {
+        setSelectedVenueType(value.venueType as "club" | "other");
       }
-    }
-    for (let hour = 0; hour <= 6; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const formattedHour = hour.toString().padStart(2, '0');
-        const formattedMinute = minute.toString().padStart(2, '0');
-        options.push(`${formattedHour}:${formattedMinute}`);
-      }
-    }
-    return options;
-  };
-
-  // Soumettre le formulaire
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!title || !description || !date || !time || !selectedClub) {
-      toast({
-        title: "Formulaire incomplet",
-        description: "Veuillez remplir tous les champs obligatoires.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+  
+  const onSubmit = async (data: CreateEventFormValues) => {
     setIsSubmitting(true);
     
-    // Simuler l'envoi des données
+    // Construire le timestamp complet pour la date et l'heure
+    const dateTime = new Date(data.date);
+    const [hours, minutes] = data.time.split(':').map(Number);
+    dateTime.setHours(hours, minutes);
+    
+    // Construire l'objet d'événement à envoyer
+    const eventData = {
+      ...data,
+      date: dateTime.toISOString(),
+      // Ajoutez d'autres champs si nécessaire
+    };
+    
+    console.log("Données de l'événement à envoyer:", eventData);
+    
+    // Simuler l'envoi au serveur avec un délai
     setTimeout(() => {
-      // Ici, on enverrait normalement les données au serveur
-      
-      toast({
-        title: "Événement créé !",
-        description: "Votre sortie a été créée avec succès.",
-        variant: "default",
-      });
-      
       setIsSubmitting(false);
-      navigate("/user/events");
+      // Rediriger vers la page des événements avec un message de succès
+      alert("Événement créé avec succès!");
+      setLocation("/user/explorer");
     }, 1500);
   };
-
-  // Header content pour la mise en page
-  const headerContent = (
-    <div className="w-full flex items-center">
-      <Link to="/">
-        <Button variant="ghost" size="icon" className="mr-2">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-      </Link>
-      
-      <h1 className="font-semibold text-lg">Créer une sortie</h1>
-    </div>
-  );
-
+  
   return (
-    <ResponsiveLayout activeItem="explore" headerContent={headerContent}>
-      <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Créer une sortie</h1>
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Détails de la sortie</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Titre et Description */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Titre de la sortie *</Label>
-                  <Input
-                    id="title"
-                    placeholder="ex: Soirée techno entre amis"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Décrivez votre sortie en quelques mots..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    required
-                  />
-                </div>
-              </div>
+    <ResponsiveLayout activeItem="create_event">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Créer un événement</h1>
+        <p className="text-muted-foreground">
+          Organisez votre propre sortie ou événement et invitez vos amis
+        </p>
+      </div>
+      
+      <div className="max-w-2xl">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Titre et description */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titre de l'événement</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Soirée au club" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
-              {/* Date et Heure */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Date *</Label>
-                  <DatePicker date={date} setDate={setDate} />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="time">Heure *</Label>
-                  <Select value={time} onValueChange={setTime}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choisir une heure" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {formatTimeOptions().map((timeOption) => (
-                        <SelectItem key={timeOption} value={timeOption}>
-                          {timeOption}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Catégorie</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une catégorie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Décrivez votre événement en détail" 
+                      className="min-h-[120px]"
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Date et heure */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP", { locale: fr })
+                            ) : (
+                              <span>Sélectionner une date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          locale={fr}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
-              {/* Club */}
-              <div className="space-y-2">
-                <Label>Club / Lieu *</Label>
-                <Select value={selectedClub} onValueChange={setSelectedClub}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un club" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clubs.map((club) => (
-                      <SelectItem key={club.id} value={club.id.toString()}>
-                        {club.name} - {club.location}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {/* Image */}
-              <div className="space-y-2">
-                <Label htmlFor="image">Image de couverture (optionnelle)</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="image"
-                    placeholder="URL de l'image"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button type="button" variant="outline" className="flex-shrink-0">
-                    <Image className="h-4 w-4 mr-2" />
-                    Parcourir
-                  </Button>
-                </div>
-                {imageUrl && (
-                  <div className="mt-2 relative aspect-video rounded-md overflow-hidden">
-                    <img 
-                      src={imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = "https://placehold.co/600x400?text=Image+invalide";
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Heure</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            {/* Prix */}
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prix d'entrée (en Ariary)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      min="0" 
+                      step="1000"
+                      placeholder="0 pour gratuit" 
+                      {...field} 
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === "" ? "0" : value);
                       }}
                     />
-                  </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Type de lieu */}
+            <FormField
+              control={form.control}
+              name="venueType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type de lieu</FormLabel>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setSelectedVenueType(value as "club" | "other");
+                    }} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner un type de lieu" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="club">Club existant</SelectItem>
+                      <SelectItem value="other">Autre endroit</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Nom du lieu (conditionnel selon le type) */}
+            {selectedVenueType === "club" ? (
+              <FormField
+                control={form.control}
+                name="venueName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sélectionner un club</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un club" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {clubs.map((club) => (
+                          <SelectItem key={club.id} value={club.name}>
+                            {club.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-              
-              {/* Nombre max de participants */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="max-participants">Nombre maximum de participants</Label>
-                  <span className="text-sm font-medium">{maxParticipants}</span>
-                </div>
-                <Slider
-                  id="max-participants"
-                  min={2}
-                  max={50}
-                  step={1}
-                  value={[maxParticipants]}
-                  onValueChange={(values) => setMaxParticipants(values[0])}
-                />
-              </div>
-              
-              {/* Contribution */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="contribution">Contribution par personne</Label>
-                  <span className="text-sm font-medium">{contribution > 0 ? `${contribution} €` : "Gratuit"}</span>
-                </div>
-                <Slider
-                  id="contribution"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={[contribution]}
-                  onValueChange={(values) => setContribution(values[0])}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Cette somme sera collectée auprès des participants pour couvrir les frais (entrée, consommations, etc.)
-                </p>
-              </div>
-              
-              {/* Options */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="venueName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nom du lieu</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Chez moi, Plage de ..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
+            {/* Localisation */}
+            <FormField
+              control={form.control}
+              name="useCurrentLocation"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <Label htmlFor="private">Événement privé</Label>
-                    <p className="text-xs text-muted-foreground">
-                      Seules les personnes invitées pourront voir et rejoindre cet événement
-                    </p>
+                    <FormLabel className="text-base">Utiliser ma position actuelle</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      {city ? `Position détectée: ${city}` : "Détection de votre position..."}
+                    </div>
                   </div>
-                  <Switch
-                    id="private"
-                    checked={isPrivate}
-                    onCheckedChange={setIsPrivate}
-                  />
-                </div>
-              </div>
-              
-              {/* Boutons */}
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" type="button" onClick={() => navigate("/")}>
-                  Annuler
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
-                      Création en cours...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Créer la sortie
-                    </>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={geoLoading}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            
+            {/* Afficher les champs d'adresse si l'utilisateur ne veut pas utiliser sa position actuelle */}
+            {!form.watch("useCurrentLocation") && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse</FormLabel>
+                      <FormControl>
+                        <Input placeholder="21 rue de la Paix" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ville</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Paris" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+            
+            {/* Boutons */}
+            <div className="flex gap-4 pt-4">
+              <Button type="button" variant="outline" onClick={() => setLocation("/user/explorer")}>
+                Annuler
+              </Button>
+              
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Création en cours...
+                  </>
+                ) : (
+                  "Créer l'événement"
+                )}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </ResponsiveLayout>
   );
