@@ -195,25 +195,103 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
   return (
     <div className="flex items-center p-2 bg-background border-t border-border">
       {/* Navigation principale avec tous les boutons sur une ligne */}
-      <div className={`grid ${navigationItems.length <= 5 ? 'grid-cols-5' : 'grid-cols-7'} w-full gap-1`}>
-        {navigationItems.map((item, index) => (
+      <div className="grid grid-cols-6 w-full gap-1">
+        <Link 
+          href={navigationItems[0].href}
+          className="text-center"
+        >
+          <div 
+            className={`flex flex-col items-center py-2 rounded-lg ${
+              activeItem === navigationItems[0].label.toLowerCase()
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            {navigationItems[0].icon}
+            <span className="text-xs mt-1">{navigationItems[0].label}</span>
+          </div>
+        </Link>
+        
+        <Link 
+          href={navigationItems[1].href}
+          className="text-center"
+        >
+          <div 
+            className={`flex flex-col items-center py-2 rounded-lg ${
+              activeItem === navigationItems[1].label.toLowerCase()
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            {navigationItems[1].icon}
+            <span className="text-xs mt-1">{navigationItems[1].label}</span>
+          </div>
+        </Link>
+        
+        {/* Bouton Créer (style TikTok) */}
+        <Link 
+          href={navigationItems[2].href}
+          className="text-center relative"
+        >
+          <div className="flex flex-col items-center">
+            <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+          </div>
+        </Link>
+        
+        <Link 
+          href={navigationItems[3].href}
+          className="text-center"
+        >
+          <div 
+            className={`flex flex-col items-center py-2 rounded-lg ${
+              activeItem === navigationItems[3].label.toLowerCase()
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            {navigationItems[3].icon}
+            <span className="text-xs mt-1">{navigationItems[3].label}</span>
+          </div>
+        </Link>
+        
+        <Link 
+          href={navigationItems[4].href}
+          className="text-center"
+        >
+          <div 
+            className={`flex flex-col items-center py-2 rounded-lg ${
+              activeItem === navigationItems[4].label.toLowerCase()
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            {navigationItems[4].icon}
+            <span className="text-xs mt-1">{navigationItems[4].label}</span>
+          </div>
+        </Link>
+
+        {navigationItems[5] && (
           <Link 
-            key={index}
-            href={item.href}
+            href={navigationItems[5].href}
             className="text-center"
           >
             <div 
               className={`flex flex-col items-center py-2 rounded-lg ${
-                activeItem === item.label.toLowerCase()
+                activeItem === navigationItems[5].label.toLowerCase()
                   ? "text-primary"
                   : "text-muted-foreground"
               }`}
             >
-              {item.icon}
-              <span className="text-xs mt-1">{item.label}</span>
+              {navigationItems[5].icon}
+              <span className="text-xs mt-1">{navigationItems[5].label}</span>
             </div>
           </Link>
-        ))}
+        )}
       </div>
     </div>
   );
