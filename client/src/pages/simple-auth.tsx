@@ -7,6 +7,7 @@ export default function SimpleAuth() {
   
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Login attempt with:", username, password);
     setError("");
     
     // Simple authentication logic
@@ -17,28 +18,32 @@ export default function SimpleAuth() {
         role: 'user'
       }));
       
-      // Hard redirect to the user page
-      window.location.href = "/";
+      // Afficher un message de succès
+      alert("Connexion réussie en tant qu'utilisateur!");
+      window.location.reload();
     } else if (username === "dj_elektra" && password === "password123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: username,
         role: 'artist'
       }));
-      window.location.href = "/artist";
+      alert("Connexion réussie en tant qu'artiste!");
+      window.location.reload();
     } else if (username === "club_oxygen" && password === "password123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: username,
         role: 'club'
       }));
-      window.location.href = "/club";
+      alert("Connexion réussie en tant que club!");
+      window.location.reload();
     } else if (username === "admin" && password === "adminpass123") {
       localStorage.setItem('auth_user', JSON.stringify({
         username: username,
         role: 'admin'
       }));
-      window.location.href = "/admin";
+      alert("Connexion réussie en tant qu'admin!");
+      window.location.reload();
     } else {
-      setError("Invalid username or password");
+      setError("Identifiants invalides");
     }
   };
   
