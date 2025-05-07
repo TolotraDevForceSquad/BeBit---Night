@@ -28,20 +28,54 @@ function App() {
     <>
       {user ? (
         <Switch>
-          <Route path="/user">
+          <Route path="/" exact>
+            {/* Page d'accueil - redirige vers explorer */}
+            <div>Redirection vers explorer...</div>
+          </Route>
+          
+          {/* Correction: Routes utilisateur avec une seule couche */}
+          <Route path="/user/explorer">
             <UserLayout>
-              <Switch>
-                <Route path="/user/explorer" component={ExplorerPage} />
-                <Route path="/user/events" component={EventsPage} />
-                <Route path="/user/tickets" component={TicketsPage} />
-                <Route path="/user/profile" component={ProfilePage} />
-                <Route path="/user/search-artists" component={SearchArtistsPage} />
-                <Route path="/user/create-event" component={CreateEventPage} />
-                <Route path="/user/table-reservation" component={TableReservationPage} />
-                <Route component={NotFound} />
-              </Switch>
+              <ExplorerPage />
             </UserLayout>
           </Route>
+          
+          <Route path="/user/events">
+            <UserLayout>
+              <EventsPage />
+            </UserLayout>
+          </Route>
+          
+          <Route path="/user/tickets">
+            <UserLayout>
+              <TicketsPage />
+            </UserLayout>
+          </Route>
+          
+          <Route path="/user/profile">
+            <UserLayout>
+              <ProfilePage />
+            </UserLayout>
+          </Route>
+          
+          <Route path="/user/search-artists">
+            <UserLayout>
+              <SearchArtistsPage />
+            </UserLayout>
+          </Route>
+          
+          <Route path="/user/create-event">
+            <UserLayout>
+              <CreateEventPage />
+            </UserLayout>
+          </Route>
+          
+          <Route path="/user/table-reservation">
+            <UserLayout>
+              <TableReservationPage />
+            </UserLayout>
+          </Route>
+          
           <Route>
             <NotFound />
           </Route>
