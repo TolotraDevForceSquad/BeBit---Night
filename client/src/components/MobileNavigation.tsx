@@ -69,7 +69,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'artist') {
       return [
         { icon: <Home size={24} />, label: "Events", href: "/artist" },
-        { icon: <Calendar size={24} />, label: "Agenda", href: "/artist/agenda" },
+        { icon: <Search size={24} />, label: "Recherche", href: "/artist/find-clubs" },
         { 
           icon: (
             <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
@@ -82,7 +82,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           label: "Créer", 
           href: "/artist/create-event" 
         },
-        { icon: <Wallet size={24} />, label: "Wallet", href: "/artist/wallet" },
+        { icon: <Calendar size={24} />, label: "Agenda", href: "/artist/agenda" },
       ];
     }
     
