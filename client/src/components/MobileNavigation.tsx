@@ -48,6 +48,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         { icon: <PartyPopper size={24} />, label: "Sorties", href: "/user/events" },
         { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
+        { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
         { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
       ];
     }
@@ -90,6 +91,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       { icon: <PartyPopper size={24} />, label: "Sorties", href: "/user/events" },
       { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
+      { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
       { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
     ];
   };
