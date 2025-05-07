@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { format, isPast, isFuture } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, Calendar, Clock, MapPin, Users, Plus, Euro, Edit, Trash2, Eye, Share2 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, MapPin, Users, Plus, Euro, Edit, Trash2, Eye, Share2, Heart, X, Settings, Navigation } from "lucide-react";
 import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -459,11 +459,13 @@ export default function EventsPage() {
                   </div>
                 )}
                 
-                {/* Événements auxquels l'utilisateur participe */}
+                {/* Événements auxquels l'utilisateur participe - version Tinder */}
                 {filteredEvents.invitedEvents.length > 0 && (
                   <div className="space-y-4 mt-8">
                     <h2 className="font-semibold text-lg">Sorties auxquelles je participe</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    
+                    {/* Affichage mode grille (version traditionnelle) - visible seulement en desktop */}
+                    <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {filteredEvents.invitedEvents.map(invitation => (
                         <UserEventCard 
                           key={invitation.event.id} 
@@ -471,6 +473,120 @@ export default function EventsPage() {
                           isOrganizer={false}
                         />
                       ))}
+                    </div>
+                    
+                    {/* Affichage mode Tinder (swipe) - visible seulement sur mobile */}
+                    <div className="md:hidden">
+                      {/* Barre de progression */}
+                      <div className="flex mb-2">
+                        {filteredEvents.invitedEvents.slice(0, Math.min(5, filteredEvents.invitedEvents.length)).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`h-1 flex-1 rounded-full mx-0.5 ${
+                              i === 0 ? "bg-primary" : "bg-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      
+                      {/* Card principale avec boutons d'action */}
+                      <div className="relative h-[calc(100vh-380px)] mb-2">
+                        {filteredEvents.invitedEvents.length > 0 && (
+                          <div className="absolute inset-0 rounded-xl overflow-hidden border border-border">
+                            <div 
+                              className="w-full h-full bg-cover bg-center"
+                              style={{ 
+                                backgroundImage: `url(${filteredEvents.invitedEvents[0].event.imageUrl || 
+                                  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000"})`
+                              }}
+                            >
+                              {/* Dégradé pour rendre le texte lisible */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                              
+                              {/* Contenu de la carte */}
+                              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                                <h3 className="text-xl font-bold mb-1">{filteredEvents.invitedEvents[0].event.title}</h3>
+                                <div className="flex items-center mb-1">
+                                  <MapPin className="h-4 w-4 mr-1" />
+                                  <span className="text-sm">{filteredEvents.invitedEvents[0].event.clubName}, {filteredEvents.invitedEvents[0].event.clubLocation}</span>
+                                </div>
+                                <div className="flex items-center mb-2">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  <span className="text-sm">
+                                    {format(new Date(filteredEvents.invitedEvents[0].event.date), "EEEE d MMMM, HH'h'mm", { locale: fr })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center">
+                                    <Users className="h-4 w-4 mr-1" />
+                                    <span className="text-sm">
+                                      {filteredEvents.invitedEvents[0].event.currentParticipants}/{filteredEvents.invitedEvents[0].event.maxParticipants} participants
+                                    </span>
+                                  </div>
+                                  {filteredEvents.invitedEvents[0].event.contribution > 0 && (
+                                    <Badge className="bg-primary">
+                                      <Euro className="h-3 w-3 mr-1" />
+                                      {filteredEvents.invitedEvents[0].event.contribution} Ar
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Boutons d'action style Tinder */}
+                        <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-4 z-10">
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-orange-500 hover:bg-orange-50"
+                          >
+                            <Calendar className="h-6 w-6 text-orange-500" />
+                          </Button>
+                          
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-red-500 hover:bg-red-50"
+                          >
+                            <X className="h-8 w-8 text-red-500" />
+                          </Button>
+                          
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-green-500 hover:bg-green-50"
+                          >
+                            <Heart className="h-8 w-8 text-green-500" />
+                          </Button>
+                          
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-blue-500 hover:bg-blue-50"
+                          >
+                            <Share2 className="h-6 w-6 text-blue-500" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Informations supplémentaires */}
+                      <div className="bg-card rounded-lg p-3 border border-border">
+                        <h4 className="font-medium text-sm mb-2">Organisé par</h4>
+                        <div className="flex items-center">
+                          <Avatar className="h-8 w-8 mr-2">
+                            <AvatarImage 
+                              src={filteredEvents.invitedEvents[0].event.createdBy.profileImage} 
+                              alt={filteredEvents.invitedEvents[0].event.createdBy.username} 
+                            />
+                            <AvatarFallback>
+                              {filteredEvents.invitedEvents[0].event.createdBy.username.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium">{filteredEvents.invitedEvents[0].event.createdBy.username}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
