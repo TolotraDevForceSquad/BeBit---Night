@@ -70,6 +70,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       return [
         { icon: <Home size={24} />, label: "Events", href: "/artist" },
         { icon: <Calendar size={24} />, label: "Agenda", href: "/artist/agenda" },
+        { 
+          icon: (
+            <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+          ), 
+          label: "Créer", 
+          href: "/artist/create-event" 
+        },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/artist/wallet" },
         { icon: <User size={24} />, label: "Profil", href: "/artist/profile" },
         { icon: <Settings size={24} />, label: "Réglages", href: "/artist/settings" },
@@ -81,6 +93,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       return [
         { icon: <Home size={24} />, label: "Events", href: "/club" },
         { icon: <Search size={24} />, label: "Artistes", href: "/club/find-artists" },
+        { 
+          icon: (
+            <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+          ), 
+          label: "Créer", 
+          href: "/club/create-event" 
+        },
         { icon: <Users size={24} />, label: "Participants", href: "/club/attendees" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/club/wallet" },
         { icon: <Settings size={24} />, label: "Réglages", href: "/club/settings" },
@@ -135,38 +159,72 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
   const navigationItems = getNavigationItems();
   
   return (
-    <div className="flex justify-around items-center p-2 relative">
-      {navigationItems.slice(0, 4).map((item, index) => (
-        <Link 
-          key={item.href}
-          href={item.href}
-          className={`text-center ${item.label === "Créer" ? "absolute left-1/2 -translate-x-1/2 -top-4" : ""}`}
-        >
-          <div 
-            className={`flex flex-col items-center py-2 px-4 rounded-lg ${
-              activeItem === item.label.toLowerCase()
-                ? "text-primary"
-                : "text-muted-foreground"
-            }`}
+    <div className="flex flex-col">
+      <div className="flex justify-between items-center p-2 relative h-16">
+        <div className="flex justify-between w-full">
+          {navigationItems.slice(0, 2).map((item, index) => (
+            <Link 
+              key={item.href}
+              href={item.href}
+              className="text-center"
+            >
+              <div 
+                className={`flex flex-col items-center py-2 px-4 rounded-lg ${
+                  activeItem === item.label.toLowerCase()
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {item.icon}
+                <span className="text-xs mt-1">{item.label}</span>
+              </div>
+            </Link>
+          ))}
+        
+          {/* Bouton Créer (style TikTok) */}
+          <Link 
+            key={navigationItems[2].href}
+            href={navigationItems[2].href}
+            className="absolute left-1/2 -translate-x-1/2 -top-4 text-center"
           >
-            {item.icon}
-            <span className={`text-xs ${item.label === "Créer" ? "mt-2" : "mt-1"}`}>{item.label}</span>
-          </div>
+            <div className="flex flex-col items-center">
+              {navigationItems[2].icon}
+            </div>
+          </Link>
+          
+          {navigationItems.slice(3, 5).map((item, index) => (
+            <Link 
+              key={item.href}
+              href={item.href}
+              className="text-center"
+            >
+              <div 
+                className={`flex flex-col items-center py-2 px-4 rounded-lg ${
+                  activeItem === item.label.toLowerCase()
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {item.icon}
+                <span className="text-xs mt-1">{item.label}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        
+        {/* Bouton de déconnexion */}
+        <Link href="/logout" className="text-center absolute right-3">
+          <Button
+            variant="ghost"
+            className="flex flex-col items-center p-0 h-auto bg-destructive/10 rounded-lg"
+          >
+            <div className="py-2 px-4">
+              <LogOut size={24} className="text-destructive" />
+              <span className="text-xs mt-1 text-destructive font-medium">Déconnexion</span>
+            </div>
+          </Button>
         </Link>
-      ))}
-      
-      {/* Bouton de déconnexion */}
-      <Link href="/logout" className="text-center">
-        <Button
-          variant="ghost"
-          className="flex flex-col items-center p-0 h-auto bg-destructive/10 rounded-lg"
-        >
-          <div className="py-2 px-4">
-            <LogOut size={24} className="text-destructive" />
-            <span className="text-xs mt-1 text-destructive font-medium">Déconnexion</span>
-          </div>
-        </Button>
-      </Link>
+      </div>
     </div>
   );
 }
