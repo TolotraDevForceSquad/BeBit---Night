@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Switch } from "@/components/ui/switch";
 import { CalendarIcon, Loader2 } from "lucide-react";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
+import UserLayout from "@/layouts/user-layout";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
@@ -159,7 +159,12 @@ export default function CreateEventPage() {
   };
   
   return (
-    <ResponsiveLayout activeItem="create_event">
+    <UserLayout>
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border p-3 flex items-center justify-center mb-4">
+        <h1 className="font-bold text-xl bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+          Be bit.
+        </h1>
+      </div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Créer une sortie</h1>
         <p className="text-muted-foreground">
@@ -465,6 +470,6 @@ export default function CreateEventPage() {
           </form>
         </Form>
       </div>
-    </ResponsiveLayout>
+    </UserLayout>
   );
 }
