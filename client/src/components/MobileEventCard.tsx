@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { motion, PanInfo, useAnimation } from "framer-motion";
-import { Heart, Calendar, MapPin, Ticket, Info, Building } from "lucide-react";
+import { Heart, Calendar, MapPin, Ticket, Info, Building, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -227,22 +227,35 @@ export default function MobileEventCard({ event, onLike, onDislike }: MobileEven
         </div>
       </div>
       
-      {/* Instructions de swipe (visibles uniquement au début) */}
-      <div className="absolute top-1/2 left-0 right-0 flex justify-between px-4 pointer-events-none text-white/50">
+      {/* Instructions de swipe avec animation - Style TikTok */}
+      <motion.div 
+        className="absolute top-1/2 left-0 right-0 flex justify-between px-4 pointer-events-none text-white/50"
+        initial={{ opacity: 0.8 }}
+        animate={{ opacity: [0.8, 0.5, 0.8] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
         <div className="flex flex-col items-center">
-          <div className="h-10 w-10 rounded-full border border-white/50 flex items-center justify-center mb-2">
-            <Heart className="h-5 w-5" />
-          </div>
-          <span className="text-xs">Swipe droite</span>
+          <motion.div 
+            className="h-12 w-12 rounded-full border border-pink-500/50 backdrop-blur-sm bg-black/20 flex items-center justify-center mb-2"
+            animate={{ x: [0, 5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <Heart className="h-6 w-6 text-pink-500" />
+          </motion.div>
+          <span className="text-xs font-medium">J'aime</span>
         </div>
         
         <div className="flex flex-col items-center">
-          <div className="h-10 w-10 rounded-full border border-white/50 flex items-center justify-center mb-2">
-            <Heart className="h-5 w-5 rotate-180" />
-          </div>
-          <span className="text-xs">Swipe gauche</span>
+          <motion.div 
+            className="h-12 w-12 rounded-full border border-blue-500/50 backdrop-blur-sm bg-black/20 flex items-center justify-center mb-2"
+            animate={{ x: [0, -5, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          >
+            <X className="h-6 w-6 text-blue-500" />
+          </motion.div>
+          <span className="text-xs font-medium">Passer</span>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

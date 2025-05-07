@@ -171,7 +171,7 @@ export default function UserExplorerPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [maxDistance, setMaxDistance] = useState<number>(50); // Distance maximale en km
+  const [maxDistance, setMaxDistance] = useState<number>(25); // Distance maximale en km
   const [currentEventIndex, setCurrentEventIndex] = useState<number>(0);
 
   // Utiliser la géolocalisation
@@ -449,47 +449,57 @@ export default function UserExplorerPage() {
         <div className="space-y-4">
           {activeTab === "découvrir" && (
             <div className="flex flex-col">
-              {/* PARTIE 1: Catégories en haut */}
-              <div className="order-1 mb-3">
-                <div className="bg-card rounded-lg p-3 border border-border mb-3">
-                  <h3 className="font-medium text-sm mb-2">Catégories populaires</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.slice(0, 5).map((category) => (
-                      <Button
-                        key={category}
-                        variant={activeCategory === category ? "default" : "outline"}
-                        size="sm"
-                        className="text-xs h-7 px-3"
-                        onClick={() => setActiveCategory(category)}
-                      >
-                        {category === "all" ? "Tous" : category}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-card rounded-lg p-3 border border-border">
-                  <h3 className="font-medium text-sm mb-2">Artistes Tendance</h3>
-                  <div className="flex overflow-x-auto gap-3 pb-2 -mx-1 px-1 scrollbar-hide">
-                    {["DJ Elektra", "MC Blaze", "Luna Ray", "Tech Master", "Groove Queen"].map((artist) => (
-                      <div key={artist} className="flex flex-col items-center space-y-1 min-w-[80px]">
-                        <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center">
-                          {artist.charAt(0)}
-                        </div>
-                        <span className="text-xs text-center font-medium">{artist}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              {/* PARTIE 2: Event Card en dessous */}
-              <div className="order-2 mt-4">
+              {/* Partie principale: Card plein écran style TikTok/Tinder */}
+              <div className="mb-2 h-[calc(100vh-180px)]">
                 <MobileEventCard 
                   event={events[0]} 
                   onLike={() => console.log("Liked event", events[0].id)}
                   onDislike={() => console.log("Disliked event", events[0].id)}
                 />
+              </div>
+              
+              {/* Filtres style Tinder en bas */}
+              <div className="mt-3 mb-3">
+                <div className="flex justify-between items-center px-1">
+                  <h3 className="text-sm font-medium">Filtres</h3>
+                  <Button variant="ghost" size="sm" className="text-xs h-7 px-3 text-primary">
+                    Réinitialiser
+                  </Button>
+                </div>
+                
+                {/* Catégories en style chips */}
+                <div className="overflow-x-auto py-2 flex gap-2 no-scrollbar">
+                  {categories.map((category) => (
+                    <Button
+                      key={category}
+                      variant={activeCategory === category ? "default" : "outline"}
+                      size="sm"
+                      className={`text-xs rounded-full px-4 whitespace-nowrap ${
+                        activeCategory === category 
+                          ? "bg-gradient-to-r from-pink-500 to-purple-600 text-white border-none" 
+                          : "border-gray-300"
+                      }`}
+                      onClick={() => setActiveCategory(category)}
+                    >
+                      {category === "all" ? "Tous" : category}
+                    </Button>
+                  ))}
+                </div>
+                
+                {/* Curseur de distance */}
+                <div className="px-1 mt-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-muted-foreground">Distance max: {maxDistance} km</span>
+                    <Badge variant="outline" className="text-xs rounded-full">{city || "Votre position"}</Badge>
+                  </div>
+                  <Slider
+                    defaultValue={[maxDistance]}
+                    max={50} 
+                    step={5}
+                    onValueChange={(value) => setMaxDistance(value[0])}
+                    className="py-2"
+                  />
+                </div>
               </div>
             </div>
           )}
