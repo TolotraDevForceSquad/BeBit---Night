@@ -34,12 +34,7 @@ function App() {
         
         {user ? (
           <>
-            <Route path="/">
-              {/* Page d'accueil - redirige vers explorer */}
-              <div>Redirection vers explorer...</div>
-            </Route>
-            
-            {/* Correction: Routes utilisateur avec une seule couche */}
+            {/* Routes utilisateur protégées */}
             <Route path="/user/explorer">
               <UserLayout>
                 <ExplorerPage />
@@ -81,13 +76,24 @@ function App() {
                 <TableReservationPage />
               </UserLayout>
             </Route>
+            
+            {/* Page d'accueil - force la redirection vers explorer */}
+            <Route path="/">
+              <UserLayout>
+                <ExplorerPage />
+              </UserLayout>
+            </Route>
           </>
         ) : (
           // Redirection vers auth quand non connecté et pas sur /auth
-          <Route>
+          <Route path="/">
             {window.location.pathname !== "/auth" && (
-              window.location.href = "/auth",
-              <div>Redirection vers auth...</div>
+              <div className="flex items-center justify-center h-screen">
+                <div>Redirection vers la page d'authentification...</div>
+                {setTimeout(() => {
+                  window.location.href = "/auth";
+                }, 100)}
+              </div>
             )}
           </Route>
         )}
