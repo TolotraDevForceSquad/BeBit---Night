@@ -53,7 +53,11 @@ export default function Sidebar({ activeItem }: SidebarProps) {
         { icon: <Home className="h-5 w-5" />, label: "Explorer", href: "/" },
         // Suppression de "Créer Sortie" dans la version web comme demandé
         { icon: <PartyPopper className="h-5 w-5" />, label: "Mes Sorties", href: "/user/events" },
-        { icon: <Calendar className="h-5 w-5" />, label: "Invitations", href: "/user/invitations" },
+        { 
+          icon: <BellRing className="h-5 w-5" />, 
+          label: "Invitations", 
+          href: "/user/invitations" 
+        },
         { icon: <Image className="h-5 w-5" />, label: "Galerie", href: "/user/gallery" },
         { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/user/wallet" },
         { icon: <Star className="h-5 w-5" />, label: "Mes avis", href: "/user/reviews" },
@@ -101,7 +105,7 @@ export default function Sidebar({ activeItem }: SidebarProps) {
     return [
       { icon: <Home className="h-5 w-5" />, label: "Explorer", href: "/" },
       { icon: <PartyPopper className="h-5 w-5" />, label: "Mes Sorties", href: "/user/events" },
-      { icon: <Calendar className="h-5 w-5" />, label: "Invitations", href: "/user/invitations" },
+      { icon: <BellRing className="h-5 w-5" />, label: "Invitations", href: "/user/invitations" },
       { icon: <Image className="h-5 w-5" />, label: "Galerie", href: "/user/gallery" },
       { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/user/wallet" },
       { icon: <Star className="h-5 w-5" />, label: "Mes avis", href: "/user/reviews" },
