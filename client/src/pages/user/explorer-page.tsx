@@ -163,6 +163,7 @@ const mockEvents: Event[] = [
 ];
 
 export default function UserExplorerPage() {
+  // Utilisation du UserLayout sera gérée par le routeur dans App.tsx
   const [user, setUser] = useState<AuthUser | null>(null);
   const isMobile = useMobile();
   const [activeTab, setActiveTab] = useState("découvrir");
@@ -301,8 +302,6 @@ export default function UserExplorerPage() {
 
   return (
     <div className="pb-16">
-      {/* Mobile header - peut être supprimé car il est dans UserLayout */}
-      {/* {isMobile && headerContent} */}
       {/* Mobile search and filters */}
       {isMobile && (
         <div className="mb-4 space-y-4">
