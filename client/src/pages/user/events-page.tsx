@@ -447,7 +447,9 @@ export default function EventsPage() {
                 {filteredEvents.myEvents.length > 0 && (
                   <div className="space-y-4">
                     <h2 className="font-semibold text-lg">Sorties que j'organise</h2>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    
+                    {/* Affichage mode grille (version traditionnelle) - visible seulement en desktop */}
+                    <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {filteredEvents.myEvents.map(event => (
                         <UserEventCard 
                           key={event.id} 
@@ -456,6 +458,159 @@ export default function EventsPage() {
                           onDelete={() => handleDeleteEvent(event.id)}
                         />
                       ))}
+                    </div>
+
+                    {/* Affichage mode Tinder (swipe) - visible seulement sur mobile */}
+                    <div className="md:hidden">
+                      {/* Barre de progression */}
+                      <div className="flex mb-2">
+                        {filteredEvents.myEvents.slice(0, Math.min(5, filteredEvents.myEvents.length)).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`h-1 flex-1 rounded-full mx-0.5 ${
+                              i === currentEventIndex ? "bg-primary" : "bg-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      
+                      {/* Card principale avec boutons d'action */}
+                      <div className="relative h-[calc(100vh-380px)] mb-2">
+                        {filteredEvents.myEvents.length > 0 && (
+                          <div className="absolute inset-0 rounded-xl overflow-hidden border border-border">
+                            <div 
+                              className="w-full h-full bg-cover bg-center"
+                              style={{ 
+                                backgroundImage: `url(${filteredEvents.myEvents[currentEventIndex]?.imageUrl || 
+                                  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000"})`
+                              }}
+                            >
+                              {/* Badge Organisateur */}
+                              <div className="absolute top-3 left-3 bg-primary/80 text-white px-2 py-1 rounded-md text-xs font-semibold">
+                                Organisateur
+                              </div>
+                              
+                              {/* Dégradé pour rendre le texte lisible */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                              
+                              {/* Contenu de la carte */}
+                              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                                <h3 className="text-xl font-bold mb-1">{filteredEvents.myEvents[currentEventIndex]?.title}</h3>
+                                <div className="flex items-center mb-1">
+                                  <MapPin className="h-4 w-4 mr-1" />
+                                  <span className="text-sm">{filteredEvents.myEvents[currentEventIndex]?.clubName}, {filteredEvents.myEvents[currentEventIndex]?.clubLocation}</span>
+                                </div>
+                                <div className="flex items-center mb-2">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  <span className="text-sm">
+                                    {format(new Date(filteredEvents.myEvents[currentEventIndex]?.date), "EEEE d MMMM, HH'h'mm", { locale: fr })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="flex items-center">
+                                    <Users className="h-4 w-4 mr-1" />
+                                    <span className="text-sm">
+                                      {filteredEvents.myEvents[currentEventIndex]?.currentParticipants}/{filteredEvents.myEvents[currentEventIndex]?.maxParticipants} participants
+                                    </span>
+                                  </div>
+                                  {filteredEvents.myEvents[currentEventIndex]?.contribution > 0 && (
+                                    <Badge className="bg-primary">
+                                      <Euro className="h-3 w-3 mr-1" />
+                                      {filteredEvents.myEvents[currentEventIndex]?.contribution} Ar
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Boutons d'action style Tinder - adaptés pour mes sorties */}
+                        <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center space-x-4 z-10">
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-orange-500 hover:bg-orange-50"
+                            onClick={() => {
+                              if (currentEventIndex > 0) {
+                                setCurrentEventIndex(currentEventIndex - 1);
+                              }
+                            }}
+                          >
+                            <Calendar className="h-6 w-6 text-orange-500" />
+                          </Button>
+                          
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-blue-500 hover:bg-blue-50"
+                            onClick={() => {
+                              // Rediriger vers la page d'édition
+                              window.location.href = `/user/events/${filteredEvents.myEvents[currentEventIndex]?.id}/edit`;
+                            }}
+                          >
+                            <Edit className="h-8 w-8 text-blue-500" />
+                          </Button>
+                          
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-16 w-16 rounded-full p-0 bg-white shadow-lg border-2 border-green-500 hover:bg-green-50"
+                            onClick={() => {
+                              alert("Sortie partagée !");
+                              // Passer à l'événement suivant
+                              if (currentEventIndex < filteredEvents.myEvents.length - 1) {
+                                setCurrentEventIndex(currentEventIndex + 1);
+                              }
+                            }}
+                          >
+                            <Share2 className="h-8 w-8 text-green-500" />
+                          </Button>
+                          
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="h-14 w-14 rounded-full p-0 bg-white shadow-lg border-2 border-red-500 hover:bg-red-50"
+                            onClick={() => {
+                              // Confirmation de suppression
+                              if (confirm("Êtes-vous sûr de vouloir supprimer cette sortie ?")) {
+                                handleDeleteEvent(filteredEvents.myEvents[currentEventIndex]?.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-6 w-6 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {/* Informations supplémentaires */}
+                      <div className="bg-card rounded-lg p-3 border border-border">
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Détails de la sortie</h4>
+                          <p className="text-xs text-muted-foreground">
+                            {filteredEvents.myEvents[currentEventIndex]?.description}
+                          </p>
+                          
+                          {filteredEvents.myEvents[currentEventIndex]?.participants.length > 0 && (
+                            <div>
+                              <h5 className="text-xs font-medium mt-3 mb-1">Participants</h5>
+                              <div className="flex -space-x-2 overflow-hidden">
+                                {filteredEvents.myEvents[currentEventIndex]?.participants.slice(0, 5).map((participant) => (
+                                  <Avatar key={participant.id} className="h-6 w-6 border-2 border-background">
+                                    <AvatarImage src={participant.profileImage} alt={participant.username} />
+                                    <AvatarFallback>{participant.username.charAt(0).toUpperCase()}</AvatarFallback>
+                                  </Avatar>
+                                ))}
+                                {(filteredEvents.myEvents[currentEventIndex]?.participants.length || 0) > 5 && (
+                                  <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs border-2 border-background">
+                                    +{(filteredEvents.myEvents[currentEventIndex]?.participants.length || 0) - 5}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
