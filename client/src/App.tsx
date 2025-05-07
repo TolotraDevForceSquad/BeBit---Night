@@ -12,7 +12,7 @@ const TicketsPage = lazy(() => import("./pages/user/tickets-page"));
 const WalletPage = lazy(() => import("./pages/user/wallet-page"));
 const SearchArtistsPage = lazy(() => import("./pages/user/search-artists-page"));
 const CreateEventPage = lazy(() => import("./pages/user/create-event-page"));
-const TableReservationPage = lazy(() => import("./pages/user/table-reservation-page"));
+const TableReservationPage = lazy(() => import("./pages/user/table-reservation"));
 
 // Page d'accueil qui redirige vers /user/explorer
 function HomePage({ user, onLogout }: { user: any; onLogout: () => void }) {
