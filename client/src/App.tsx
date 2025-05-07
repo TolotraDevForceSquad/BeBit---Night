@@ -186,24 +186,36 @@ function App() {
         </div>
       </div>
     }>
-      {user ? (
-        <Switch>
-          <Route path="/">
-            <HomePage user={user} onLogout={handleLogout} />
-          </Route>
-          <Route path="/user/:rest*">
-            <UserRoutes />
-          </Route>
-          <Route path="/club/:rest*">
-            <ClubRoutes />
-          </Route>
-          <Route>
-            <NotFound />
-          </Route>
-        </Switch>
-      ) : (
-        <SimpleAuth />
-      )}
+      <Switch>
+        {user ? (
+          <>
+            <Route path="/auth">
+              <HomePage user={user} onLogout={handleLogout} />
+            </Route>
+            <Route path="/">
+              <HomePage user={user} onLogout={handleLogout} />
+            </Route>
+            <Route path="/user/:rest*">
+              <UserRoutes />
+            </Route>
+            <Route path="/club/:rest*">
+              <ClubRoutes />
+            </Route>
+            <Route>
+              <NotFound />
+            </Route>
+          </>
+        ) : (
+          <>
+            <Route path="/auth">
+              <SimpleAuth />
+            </Route>
+            <Route>
+              <SimpleAuth />
+            </Route>
+          </>
+        )}
+      </Switch>
     </Suspense>
   );
 }
