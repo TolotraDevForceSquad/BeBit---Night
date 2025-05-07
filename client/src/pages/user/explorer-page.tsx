@@ -642,8 +642,23 @@ export default function UserExplorerPage() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
+                                className="bg-primary/10 hover:bg-primary/20 border-primary"
                                 onClick={() => {
-                                  window.location.href = `/user/tickets?event=${events[currentEventIndex].id}`;
+                                  // Simuler une réservation directe
+                                  toast({
+                                    title: "Réservation confirmée!",
+                                    description: `Votre ticket pour "${events[currentEventIndex].title}" a été réservé`,
+                                    variant: "success",
+                                    duration: 3000,
+                                  });
+                                  
+                                  // Redirection alternative: stocker dans le localStorage et rediriger
+                                  localStorage.setItem('reserved_event', JSON.stringify(events[currentEventIndex]));
+                                  
+                                  // Après un délai pour voir le toast de confirmation
+                                  setTimeout(() => {
+                                    window.location.href = '/user/tickets';
+                                  }, 1000);
                                 }}
                               >
                                 Confirmer
