@@ -69,7 +69,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'artist') {
       return [
         { icon: <Home size={24} />, label: "Events", href: "/artist" },
-        { icon: <Search size={24} />, label: "Recherche", href: "/artist/find-clubs" },
+        { icon: <PartyPopper size={24} />, label: "Invitations", href: "/artist/invitations" },
         { 
           icon: (
             <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
@@ -83,6 +83,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/artist/create-event" 
         },
         { icon: <Calendar size={24} />, label: "Agenda", href: "/artist/agenda" },
+        { icon: <Search size={24} />, label: "Recherche", href: "/artist/find-clubs" },
       ];
     }
     
@@ -90,7 +91,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'club') {
       return [
         { icon: <Home size={24} />, label: "Events", href: "/club" },
-        { icon: <Search size={24} />, label: "Artistes", href: "/club/find-artists" },
+        { icon: <Users size={24} />, label: "Réservations", href: "/club/reservations" },
         { 
           icon: (
             <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
@@ -103,7 +104,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           label: "Créer", 
           href: "/club/create-event" 
         },
-        { icon: <Users size={24} />, label: "Participants", href: "/club/attendees" },
+        { icon: <Calendar size={24} />, label: "Participants", href: "/club/attendees" },
+        { icon: <Search size={24} />, label: "Artistes", href: "/club/find-artists" },
       ];
     }
     
@@ -111,7 +113,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     if (user?.role === 'admin') {
       return [
         { icon: <Home size={24} />, label: "Dashboard", href: "/admin" },
-        { icon: <Calendar size={24} />, label: "Events", href: "/admin/events" },
+        { icon: <Search size={24} />, label: "Recherche", href: "/admin/search" },
         { 
           icon: (
             <div className="rounded-full w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background">
@@ -124,6 +126,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           label: "Actions", 
           href: "/admin/actions" 
         },
+        { icon: <Calendar size={24} />, label: "Events", href: "/admin/events" },
         { icon: <User size={24} />, label: "Users", href: "/admin/users" },
       ];
     }
@@ -168,7 +171,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
   return (
     <div className="flex items-center p-2 bg-background border-t border-border">
       {/* Navigation principale avec tous les boutons sur une ligne */}
-      <div className="grid grid-cols-4 w-full gap-1">
+      <div className="grid grid-cols-5 w-full gap-1">
         <Link 
           href={navigationItems[0].href}
           className="text-center"
@@ -231,6 +234,24 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
             <span className="text-xs mt-1">{navigationItems[3].label}</span>
           </div>
         </Link>
+        
+        {navigationItems[4] && (
+          <Link 
+            href={navigationItems[4].href}
+            className="text-center"
+          >
+            <div 
+              className={`flex flex-col items-center py-2 rounded-lg ${
+                activeItem === navigationItems[4].label.toLowerCase()
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {navigationItems[4].icon}
+              <span className="text-xs mt-1">{navigationItems[4].label}</span>
+            </div>
+          </Link>
+        )}
       </div>
     </div>
   );
