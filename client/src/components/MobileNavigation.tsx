@@ -77,8 +77,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/user/create-event" 
         },
         { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
-        { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
         { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
+        { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
       ];
     }
     
@@ -181,8 +181,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         href: "/user/create-event" 
       },
       { icon: <Ticket size={24} />, label: "Tickets", href: "/user/tickets" },
-      { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
       { icon: <User size={24} />, label: "Profil", href: "/user/profile" },
+      { icon: <UtensilsCrossed size={24} />, label: "Tables", href: "/user/table-reservation" },
     ];
   };
   
