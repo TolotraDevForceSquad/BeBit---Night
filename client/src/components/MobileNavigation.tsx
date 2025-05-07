@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
   Home, Search, Calendar, Wallet,
-  Settings, User, PartyPopper, Users, LogOut, CalendarPlus
+  Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus
 } from "lucide-react";
 import {
   Sheet,
@@ -46,7 +46,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
       return [
         { icon: <Home size={24} />, label: "Explorer", href: "/swipe" },
         { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
-        { icon: <Calendar size={24} />, label: "Créer", href: "/user/events/create" },
+        { 
+          icon: (
+            <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+          ), 
+          label: "Créer", 
+          href: "/user/events/create" 
+        },
         { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
         { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
         { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
@@ -90,7 +101,18 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     return [
       { icon: <Home size={24} />, label: "Explorer", href: "/" },
       { icon: <PartyPopper size={24} />, label: "Mes Sorties", href: "/user/events" },
-      { icon: <Calendar size={24} />, label: "Créer", href: "/user/events/create" },
+      { 
+        icon: (
+          <div className="relative rounded-full w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center border-4 border-background -mt-5">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </div>
+        ), 
+        label: "Créer", 
+        href: "/user/events/create" 
+      },
       { icon: <Calendar size={24} />, label: "Tickets", href: "/user/tickets" },
       { icon: <Wallet size={24} />, label: "Wallet", href: "/user/wallet" },
       { icon: <Search size={24} />, label: "Recherche", href: "/user/search-artists" },
@@ -113,12 +135,12 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
   const navigationItems = getNavigationItems();
   
   return (
-    <div className="flex justify-around items-center p-2">
-      {navigationItems.slice(0, 4).map((item) => (
+    <div className="flex justify-around items-center p-2 relative">
+      {navigationItems.slice(0, 4).map((item, index) => (
         <Link 
           key={item.href}
           href={item.href}
-          className="text-center"
+          className={`text-center ${item.label === "Créer" ? "absolute left-1/2 -translate-x-1/2 -top-4" : ""}`}
         >
           <div 
             className={`flex flex-col items-center py-2 px-4 rounded-lg ${
@@ -128,7 +150,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
             }`}
           >
             {item.icon}
-            <span className="text-xs mt-1">{item.label}</span>
+            <span className={`text-xs ${item.label === "Créer" ? "mt-2" : "mt-1"}`}>{item.label}</span>
           </div>
         </Link>
       ))}
