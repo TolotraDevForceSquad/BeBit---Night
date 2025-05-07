@@ -67,7 +67,7 @@ const reservationFormSchema = z.object({
   tableArea: z.string({
     required_error: "Veuillez choisir une zone.",
   }),
-  guestCount: z.string().transform((val) => parseInt(val, 10)).refine((val) => val > 0, {
+  guestCount: z.coerce.number().min(1, {
     message: "Le nombre de personnes doit être supérieur à 0.",
   }),
   name: z.string().min(2, {
@@ -108,7 +108,7 @@ export function TableReservationForm({
       date: undefined,
       time: "",
       tableArea: "",
-      guestCount: "",
+      guestCount: 1,
       name: "",
       email: "",
       phone: "",
@@ -122,15 +122,14 @@ export function TableReservationForm({
   
   // Obtenir le nombre d'invités
   const guestCount = form.watch("guestCount");
-  const guestCountNum = guestCount ? parseInt(guestCount, 10) : 0;
   
   // Calculer le prix estimé
   const calculateEstimatedPrice = (): number => {
-    if (!selectedTableArea || !guestCountNum) return 0;
+    if (!selectedTableArea || !guestCount) return 0;
     
     // Prix de base de la zone + supplément par personne au-delà du minimum
     let price = selectedTableArea.basePrice;
-    const extraGuests = Math.max(0, guestCountNum - selectedTableArea.minCapacity);
+    const extraGuests = Math.max(0, guestCount - selectedTableArea.minCapacity);
     const extraCost = extraGuests * 5000; // 5 000 Ar par personne supplémentaire
     
     return price + extraCost;
@@ -327,10 +326,10 @@ export function TableReservationForm({
                       />
                     </div>
                   </FormControl>
-                  {selectedTableArea && parseInt(guestCount || "0", 10) > 0 && (
+                  {selectedTableArea && guestCount > 0 && (
                     <FormDescription>
                       Cette zone accepte entre {selectedTableArea.minCapacity} et {selectedTableArea.maxCapacity} personnes.
-                      {parseInt(guestCount, 10) > selectedTableArea.minCapacity && (
+                      {guestCount > selectedTableArea.minCapacity && (
                         <span> Un supplément de 5 000 Ar par personne s'applique au-delà de {selectedTableArea.minCapacity} personnes.</span>
                       )}
                     </FormDescription>
@@ -341,7 +340,7 @@ export function TableReservationForm({
             />
             
             {/* Prix estimé */}
-            {selectedTableArea && guestCountNum > 0 && guestCountNum >= selectedTableArea.minCapacity && guestCountNum <= selectedTableArea.maxCapacity && (
+            {selectedTableArea && guestCount > 0 && guestCount >= selectedTableArea.minCapacity && guestCount <= selectedTableArea.maxCapacity && (
               <div className="bg-primary/10 p-4 rounded-md">
                 <h4 className="font-medium mb-1">Prix estimé</h4>
                 <div className="space-y-1 text-sm">
@@ -352,11 +351,11 @@ export function TableReservationForm({
                     </span>
                   </div>
                   
-                  {guestCountNum > selectedTableArea.minCapacity && (
+                  {guestCount > selectedTableArea.minCapacity && (
                     <div className="flex justify-between">
-                      <span>Supplément ({guestCountNum - selectedTableArea.minCapacity} pers. × 5 000 Ar)</span>
+                      <span>Supplément ({guestCount - selectedTableArea.minCapacity} pers. × 5 000 Ar)</span>
                       <span>
-                        {new Intl.NumberFormat('fr-MG', { style: 'currency', currency: 'MGA' }).format((guestCountNum - selectedTableArea.minCapacity) * 5000).replace('MGA', 'Ar')}
+                        {new Intl.NumberFormat('fr-MG', { style: 'currency', currency: 'MGA' }).format((guestCount - selectedTableArea.minCapacity) * 5000).replace('MGA', 'Ar')}
                       </span>
                     </div>
                   )}
