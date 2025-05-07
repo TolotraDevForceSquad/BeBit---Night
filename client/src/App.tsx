@@ -4,6 +4,7 @@ import SimpleAuth from "./pages/simple-auth";
 import UserLayout from "./layouts/user-layout";
 import NotFound from "./pages/not-found";
 import { useMobile } from "./hooks/use-mobile";
+import { useAuth } from "./hooks/use-auth";
 
 // Chargement différé des pages principales
 const ExplorerPage = lazy(() => import("./pages/user/explorer-page"));
@@ -82,17 +83,51 @@ function UserRoutes() {
   );
 }
 
+// Composant de chargement
+function LoadingScreen() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+      <div className="mb-8">
+        <h1 className="text-5xl font-bold">
+          <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2 text-center">La plateforme événementielle</p>
+      </div>
+      <div className="flex space-x-2 h-16">
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.2s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.3s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.4s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.5s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.6s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.7s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.8s] h-full rounded-t-lg"></div>
+        <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.9s] h-full rounded-t-lg"></div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
-  const [user, setUser] = useState<any>(null);
+  const [localUser, setLocalUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useLocation();
+  
+  // Essayer d'utiliser le hook useAuth pour l'authentification via API
+  let apiAuth;
+  
+  try {
+    apiAuth = useAuth();
+  } catch (error) {
+    // Si useAuth échoue, on continuera avec l'authentification locale
+    console.log("Utilisation de l'authentification locale uniquement");
+  }
 
   // Récupérer les données utilisateur du localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('auth_user');
     if (storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        setLocalUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Erreur lors de la lecture des données utilisateur:", error);
       }
@@ -103,55 +138,20 @@ function App() {
   // Gérer la déconnexion
   const handleLogout = () => {
     localStorage.removeItem('auth_user');
-    setUser(null);
+    setLocalUser(null);
     setLocation("/auth");
   };
 
-  // Afficher un écran de chargement stylisé avec le nom Be bit et animation musicale
+  // Afficher un écran de chargement pendant l'initialisation
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <div className="mb-8">
-          <h1 className="text-5xl font-bold">
-            <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-2 text-center">La plateforme événementielle</p>
-        </div>
-        <div className="flex space-x-2 h-16">
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.2s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.3s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.4s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.5s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.6s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.7s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.8s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.9s] h-full rounded-t-lg"></div>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
+  // Déterminer l'utilisateur à utiliser (API ou localStorage)
+  const user = apiAuth?.user || localUser;
+
   return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <div className="mb-8">
-          <h1 className="text-5xl font-bold">
-            <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-2 text-center">La plateforme événementielle</p>
-        </div>
-        <div className="flex space-x-2 h-16">
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.2s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.3s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.4s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.5s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.6s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-secondary animate-[bounce_1s_infinite_0.7s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.8s] h-full rounded-t-lg"></div>
-          <div className="w-3 bg-primary animate-[bounce_1s_infinite_0.9s] h-full rounded-t-lg"></div>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<LoadingScreen />}>
       {user ? (
         <Switch>
           <Route path="/">
