@@ -1,46 +1,53 @@
 import { useState } from "react";
+import PartyLoader from "@/components/PartyLoader";
 
 export default function SimpleAuth() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Login attempt with:", username, password);
     setError("");
+    setIsLoading(true);
     
-    // Simple authentication logic
-    if (username === "user1" && password === "password123") {
-      // Store user data in localStorage
-      localStorage.setItem('auth_user', JSON.stringify({
-        username: username,
-        role: 'user'
-      }));
-      
-      // Redirection directe vers la page explorer
-      window.location.href = "/user/explorer";
-    } else if (username === "dj_elektra" && password === "password123") {
-      localStorage.setItem('auth_user', JSON.stringify({
-        username: username,
-        role: 'artist'
-      }));
-      window.location.href = "/user/explorer";
-    } else if (username === "club_oxygen" && password === "password123") {
-      localStorage.setItem('auth_user', JSON.stringify({
-        username: username,
-        role: 'club'
-      }));
-      window.location.href = "/user/explorer";
-    } else if (username === "admin" && password === "adminpass123") {
-      localStorage.setItem('auth_user', JSON.stringify({
-        username: username,
-        role: 'admin'
-      }));
-      window.location.href = "/user/explorer";
-    } else {
-      setError("Identifiants invalides");
-    }
+    // Simuler un délai pour voir l'animation de chargement
+    setTimeout(() => {
+      // Simple authentication logic
+      if (username === "user1" && password === "password123") {
+        // Store user data in localStorage
+        localStorage.setItem('auth_user', JSON.stringify({
+          username: username,
+          role: 'user'
+        }));
+        
+        // Redirection directe vers la page explorer
+        window.location.href = "/user/explorer";
+      } else if (username === "dj_elektra" && password === "password123") {
+        localStorage.setItem('auth_user', JSON.stringify({
+          username: username,
+          role: 'artist'
+        }));
+        window.location.href = "/user/explorer";
+      } else if (username === "club_oxygen" && password === "password123") {
+        localStorage.setItem('auth_user', JSON.stringify({
+          username: username,
+          role: 'club'
+        }));
+        window.location.href = "/user/explorer";
+      } else if (username === "admin" && password === "adminpass123") {
+        localStorage.setItem('auth_user', JSON.stringify({
+          username: username,
+          role: 'admin'
+        }));
+        window.location.href = "/user/explorer";
+      } else {
+        setError("Identifiants invalides");
+        setIsLoading(false);
+      }
+    }, 1500);
   };
   
   return (
