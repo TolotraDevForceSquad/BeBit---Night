@@ -16,6 +16,7 @@ import GalleryPage from "./pages/user/gallery-page";
 import WalletPage from "./pages/user/wallet-page";
 import ReviewsPage from "./pages/user/reviews-page";
 import SettingsPage from "./pages/settings-page";
+import LogoutPage from "./pages/logout-page";
 import ClubProfilePage from "./pages/user/club-profile-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
 
@@ -125,6 +126,10 @@ function App() {
             
             <Route path="/user/club-profile">
               <ClubProfilePage />
+            </Route>
+            
+            <Route path="/logout">
+              <LogoutPage />
             </Route>
 
             {/* Routes artiste */}
