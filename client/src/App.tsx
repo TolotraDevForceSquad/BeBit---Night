@@ -24,6 +24,7 @@ import ModerationPage from "./pages/admin/moderation-page";
 import AdminDashboardPage from "./pages/admin/dashboard-page";
 import ArtistsManagementPage from "./pages/admin/artists-management-page";
 import EventsManagementPage from "./pages/admin/events-management-page";
+import AdminSettingsPage from "./pages/admin/settings-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -300,6 +301,10 @@ function App() {
                       <p className="text-lg">Recherchez dans toute la plateforme</p>
                     </div>
                   </ResponsiveLayout>
+                </Route>
+                
+                <Route path="/admin/settings">
+                  <AdminSettingsPage />
                 </Route>
               </>
             )}
