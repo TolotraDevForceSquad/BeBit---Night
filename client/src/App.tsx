@@ -88,9 +88,7 @@ function App() {
             </Route>
             
             <Route path="/user/table-reservation">
-              <UserLayout>
-                <TableReservationPage />
-              </UserLayout>
+              <TableReservationPage />
             </Route>
             
             <Route path="/user/invitations">
