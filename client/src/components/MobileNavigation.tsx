@@ -60,7 +60,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/user/events" 
         },
         { 
-          icon: <Headphones size={24} className="text-pink-500" />, 
+          icon: <Mic size={24} className="text-pink-500" />, 
           label: "Artistes", 
           href: "/user/search-artists" 
         },
@@ -175,7 +175,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
         href: "/user/events" 
       },
       { 
-        icon: <Headphones size={24} className="text-pink-500" />, 
+        icon: <Mic size={24} className="text-pink-500" />, 
         label: "Artistes", 
         href: "/user/search-artists" 
       },
