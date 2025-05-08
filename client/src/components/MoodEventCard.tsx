@@ -101,16 +101,13 @@ export default function MoodEventCard({
           opacity: 0,
           rotate: 30,
           transition: { duration: 0.3 }
-        }).then(() => {
-          // Afficher un feedback visuel
-          toast({
-            title: "J'aime",
-            description: `Vous avez aimé "${event.title}"`,
-            duration: 2000
-          });
-          // Déclencher l'action
-          onLike && onLike();
         });
+        
+        // Déclencher l'action après un court délai (important pour l'animation)
+        setTimeout(() => {
+          // Déclencher l'action immédiatement
+          onLike && onLike();
+        }, 100);
       } else {
         // Swipe à gauche (dislike)
         controls.start({
@@ -118,16 +115,13 @@ export default function MoodEventCard({
           opacity: 0,
           rotate: -30,
           transition: { duration: 0.3 }
-        }).then(() => {
-          // Afficher un feedback visuel
-          toast({
-            title: "Passer",
-            description: `Vous avez passé "${event.title}"`,
-            duration: 2000
-          });
-          // Déclencher l'action
-          onDislike && onDislike();
         });
+        
+        // Déclencher l'action après un court délai (important pour l'animation)
+        setTimeout(() => {
+          // Déclencher l'action immédiatement
+          onDislike && onDislike();
+        }, 100);
       }
     } else {
       // Retour à la position initiale si le swipe n'est pas assez prononcé
@@ -160,9 +154,11 @@ export default function MoodEventCard({
       opacity: 0,
       rotate: 30,
       transition: { duration: 0.3 }
-    }).then(() => {
-      onLike && onLike();
     });
+    // Appeler directement la callback après un court délai
+    setTimeout(() => {
+      onLike && onLike();
+    }, 100);
   };
   
   const handleManualDislike = () => {
@@ -172,9 +168,11 @@ export default function MoodEventCard({
       opacity: 0,
       rotate: -30,
       transition: { duration: 0.3 }
-    }).then(() => {
-      onDislike && onDislike();
     });
+    // Appeler directement la callback après un court délai
+    setTimeout(() => {
+      onDislike && onDislike();
+    }, 100);
   };
 
   // Formater la date
