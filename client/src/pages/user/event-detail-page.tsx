@@ -16,6 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -367,9 +368,7 @@ export default function EventDetailPage() {
   if (isLoading) {
     return (
       <ResponsiveLayout activeItem="explore" headerContent={headerContent}>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-        </div>
+        <LoadingSpinner message="Chargement des détails de l'événement..." />
       </ResponsiveLayout>
     );
   }
