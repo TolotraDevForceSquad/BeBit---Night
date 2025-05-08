@@ -23,6 +23,7 @@ import ResponsiveLayout from "./layouts/ResponsiveLayout";
 import ModerationPage from "./pages/admin/moderation-page";
 import AdminDashboardPage from "./pages/admin/dashboard-page";
 import ArtistsManagementPage from "./pages/admin/artists-management-page";
+import EventsManagementPage from "./pages/admin/events-management-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -285,12 +286,7 @@ function App() {
                 </Route>
                 
                 <Route path="/admin/events">
-                  <ResponsiveLayout>
-                    <div className="p-8">
-                      <h1 className="text-3xl font-bold mb-6">Gestion des événements</h1>
-                      <p className="text-lg">Gérez les événements de la plateforme</p>
-                    </div>
-                  </ResponsiveLayout>
+                  <EventsManagementPage />
                 </Route>
                 
                 <Route path="/admin/moderation">
