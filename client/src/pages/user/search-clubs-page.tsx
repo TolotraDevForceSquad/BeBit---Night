@@ -165,8 +165,8 @@ function ClubCard({ club }: { club: Club }) {
           variant="default" 
           className="w-full"
           onClick={() => {
-            window.alert(`La page de profil pour ${club.name} sera bientôt disponible !`);
-            console.log("Bouton 'Voir le profil' cliqué pour:", club.name);
+            console.log("Redirection vers le profil du club:", club.name);
+            window.location.href = `/user/club-profile?id=${club.id}`;
           }}
         >
           Voir le profil
