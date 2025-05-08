@@ -20,6 +20,7 @@ import LogoutPage from "./pages/logout-page";
 import LandingPage from "./pages/landing-page";
 import ClubProfilePage from "./pages/user/club-profile-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
+import ModerationPage from "./pages/admin/moderation-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -300,10 +301,7 @@ function App() {
             
             <Route path="/admin/moderation">
               <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Modération</h1>
-                  <p className="text-lg">Modérez le contenu de la plateforme</p>
-                </div>
+                <ModerationPage />
               </ResponsiveLayout>
             </Route>
             
