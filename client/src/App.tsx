@@ -22,6 +22,7 @@ import ClubProfilePage from "./pages/user/club-profile-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
 import ModerationPage from "./pages/admin/moderation-page";
 import AdminDashboardPage from "./pages/admin/dashboard-page";
+import ArtistsManagementPage from "./pages/admin/artists-management-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -271,12 +272,7 @@ function App() {
                 </Route>
                 
                 <Route path="/admin/artists">
-                  <ResponsiveLayout>
-                    <div className="p-8">
-                      <h1 className="text-3xl font-bold mb-6">Gestion des artistes</h1>
-                      <p className="text-lg">Gérez les profils d'artistes</p>
-                    </div>
-                  </ResponsiveLayout>
+                  <ArtistsManagementPage />
                 </Route>
                 
                 <Route path="/admin/clubs">
