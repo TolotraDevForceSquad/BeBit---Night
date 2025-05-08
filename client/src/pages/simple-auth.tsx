@@ -52,6 +52,14 @@ export default function SimpleAuth() {
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      {isLoading ? (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="w-full max-w-lg">
+            <PartyLoader />
+          </div>
+        </div>
+      ) : null}
+    
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">
@@ -98,9 +106,16 @@ export default function SimpleAuth() {
             
             <button
               type="submit"
-              className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors"
+              className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary/90 transition-colors relative"
+              disabled={isLoading}
             >
-              Sign In
+              {isLoading ? (
+                <span className="flex items-center justify-center">
+                  <span className="animate-pulse">Connexion en cours...</span>
+                </span>
+              ) : (
+                "Sign In"
+              )}
             </button>
           </form>
           
