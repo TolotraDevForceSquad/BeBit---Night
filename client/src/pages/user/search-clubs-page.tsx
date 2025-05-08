@@ -164,7 +164,10 @@ function ClubCard({ club }: { club: Club }) {
         <Button 
           variant="default" 
           className="w-full"
-          onClick={() => alert(`La page de profil pour ${club.name} sera bientôt disponible !`)}
+          onClick={() => {
+            window.alert(`La page de profil pour ${club.name} sera bientôt disponible !`);
+            console.log("Bouton 'Voir le profil' cliqué pour:", club.name);
+          }}
         >
           Voir le profil
         </Button>
