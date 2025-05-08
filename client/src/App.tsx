@@ -115,10 +115,8 @@ function App() {
               </UserLayout>
             </Route>
             
-            <Route path="/settings">
-              <UserLayout>
-                <SettingsPage />
-              </UserLayout>
+            <Route path="/user/settings">
+              <SettingsPage />
             </Route>
             
             <Route path="/user/club-profile">
