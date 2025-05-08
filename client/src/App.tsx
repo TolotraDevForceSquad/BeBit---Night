@@ -17,6 +17,7 @@ import WalletPage from "./pages/user/wallet-page";
 import ReviewsPage from "./pages/user/reviews-page";
 import SettingsPage from "./pages/settings-page";
 import LogoutPage from "./pages/logout-page";
+import LandingPage from "./pages/landing-page";
 import ClubProfilePage from "./pages/user/club-profile-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
 
@@ -323,17 +324,13 @@ function App() {
             </Route>
           </>
         ) : (
-          // Redirection vers auth quand non connecté et pas sur /auth
-          <Route path="/">
-            {window.location.pathname !== "/auth" && (
-              <div className="flex items-center justify-center h-screen">
-                <div>Redirection vers la page d'authentification...</div>
-                <span className="hidden">
-                  {window.location.href = "/auth"}
-                </span>
-              </div>
-            )}
-          </Route>
+          // Pour les utilisateurs non connectés
+          <>
+            {/* Page d'accueil vitrine */}
+            <Route path="/">
+              <LandingPage />
+            </Route>
+          </>
         )}
         
         {/* 404 quand aucune autre route ne correspond */}
