@@ -28,7 +28,7 @@ export default function LandingPage() {
             <Link href="/auth">Connexion</Link>
           </Button>
           <Button asChild>
-            <Link href="/auth">S'inscrire</Link>
+            <Link href="/auth?tab=register">S'inscrire</Link>
           </Button>
         </div>
       </header>
@@ -48,7 +48,7 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="h-14 px-8 text-lg">
-              <Link href="/auth">Rejoindre la communauté</Link>
+              <Link href="/auth?tab=register">Rejoindre la communauté</Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="h-14 px-8 text-lg">
               <Link href="#how-it-works">
@@ -186,7 +186,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <Button variant="outline" className="mt-auto" asChild>
-                <Link href="/auth">Rejoindre</Link>
+                <Link href="/auth?tab=register">Rejoindre</Link>
               </Button>
             </div>
 
@@ -214,7 +214,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <Button variant="outline" className="mt-auto" asChild>
-                <Link href="/auth">Rejoindre</Link>
+                <Link href="/auth?tab=register">Rejoindre</Link>
               </Button>
             </div>
 
@@ -242,7 +242,7 @@ export default function LandingPage() {
                 </li>
               </ul>
               <Button variant="outline" className="mt-auto" asChild>
-                <Link href="/auth">Rejoindre</Link>
+                <Link href="/auth?tab=register">Rejoindre</Link>
               </Button>
             </div>
           </div>
@@ -259,7 +259,7 @@ export default function LandingPage() {
             Rejoins la communauté Be bit. dès maintenant et révolutionne ta vie nocturne.
           </p>
           <Button size="lg" className="h-14 px-8 text-lg" asChild>
-            <Link href="/auth">Créer un compte gratuitement</Link>
+            <Link href="/auth?tab=register">Créer un compte gratuitement</Link>
           </Button>
         </div>
       </section>
@@ -280,7 +280,7 @@ export default function LandingPage() {
               <Link href="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
                 Connexion
               </Link>
-              <Link href="/auth" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/auth?tab=register" className="text-muted-foreground hover:text-foreground transition-colors">
                 Inscription
               </Link>
               <Link href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
