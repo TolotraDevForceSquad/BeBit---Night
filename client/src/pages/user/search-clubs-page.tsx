@@ -161,7 +161,11 @@ function ClubCard({ club }: { club: Club }) {
       </CardContent>
       
       <CardFooter className="border-t pt-4">
-        <Button variant="default" className="w-full">
+        <Button 
+          variant="default" 
+          className="w-full"
+          onClick={() => alert(`La page de profil pour ${club.name} sera bientôt disponible !`)}
+        >
           Voir le profil
         </Button>
       </CardFooter>
