@@ -487,30 +487,58 @@ export default function UserExplorerPage() {
                   <div className="relative h-[calc(100vh-220px)] mb-2">
                     <MoodEventCard 
                       event={events[currentEventIndex]} 
+                      className="swipeable-card"
                       onLike={() => {
                         // Animation puis passage à l'événement suivant
                         if (currentEventIndex < events.length - 1) {
+                          toast({
+                            title: "J'aime",
+                            description: `Vous avez aimé "${events[currentEventIndex].title}"`,
+                            duration: 2000
+                          });
                           setCurrentEventIndex(currentEventIndex + 1);
                         } else {
                           // Plus d'événements, afficher un message
-                          alert("Vous avez parcouru tous les événements disponibles!");
+                          toast({
+                            title: "Fin des événements",
+                            description: "Vous avez parcouru tous les événements disponibles",
+                            duration: 3000
+                          });
                         }
                       }}
                       onDislike={() => {
                         // Animation puis passage à l'événement suivant
                         if (currentEventIndex < events.length - 1) {
+                          toast({
+                            title: "Passer",
+                            description: `Vous avez passé "${events[currentEventIndex].title}"`,
+                            duration: 2000
+                          });
                           setCurrentEventIndex(currentEventIndex + 1);
                         } else {
                           // Plus d'événements, afficher un message
-                          alert("Vous avez parcouru tous les événements disponibles!");
+                          toast({
+                            title: "Fin des événements",
+                            description: "Vous avez parcouru tous les événements disponibles",
+                            duration: 3000
+                          });
                         }
                       }}
                       onSuperLike={() => {
                         // Animation spéciale puis passage à l'événement suivant
                         if (currentEventIndex < events.length - 1) {
+                          toast({
+                            title: "Super Like!",
+                            description: `Vous avez super-liké "${events[currentEventIndex].title}"`,
+                            duration: 2000
+                          });
                           setCurrentEventIndex(currentEventIndex + 1);
                         } else {
-                          alert("Vous avez parcouru tous les événements disponibles!");
+                          toast({
+                            title: "Fin des événements",
+                            description: "Vous avez parcouru tous les événements disponibles",
+                            duration: 3000
+                          });
                         }
                       }}
                     />

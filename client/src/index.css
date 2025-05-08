@@ -122,6 +122,21 @@
   .touch-feedback {
     @apply transition-opacity active:opacity-70;
   }
+  
+  .touch-none {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  .swipeable-card {
+    touch-action: pan-y;
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
 }
 
 .scrollbar-hide::-webkit-scrollbar {

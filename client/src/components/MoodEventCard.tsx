@@ -1,11 +1,12 @@
-import React from 'react';
-import { motion, PanInfo } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, PanInfo, useMotionValue, useTransform, useAnimation } from 'framer-motion';
 import { CalendarDays, MapPin, Clock, Heart, X, ArrowLeft, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EventMood, getMoodClassName } from '@/lib/mood-utils';
+import { useToast } from "@/hooks/use-toast";
 
 interface Event {
   id: number;
@@ -48,16 +49,96 @@ export default function MoodEventCard({
   className = "",
   innerRef
 }: MoodEventCardProps) {
-  const [dragDirection, setDragDirection] = React.useState<'left' | 'right' | null>(null);
+  const { toast } = useToast();
+  const [swiped, setSwiped] = useState(false);
+  const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
   const cardRef = React.useRef<HTMLDivElement>(null);
+  
+  // Utiliser des valeurs de motion avancées pour les animations
+  const x = useMotionValue(0);
+  const controls = useAnimation();
+  const rotate = useTransform(x, [-300, 300], [-30, 30]);
+  const opacity = useTransform(x, [-300, -150, 0, 150, 300], [0, 1, 1, 1, 0]);
+  
+  // Calculer les indicateurs visuels en fonction de la position du swipe
+  const likeOpacity = useTransform(x, [0, 150], [0, 1]);
+  const dislikeOpacity = useTransform(x, [-150, 0], [1, 0]);
+
+  // Optimiser le touch pour appareils mobiles
+  useEffect(() => {
+    const currentRef = cardRef.current;
+    if (!currentRef) return;
+    
+    // Désactiver l'événement touchmove par défaut pour éviter les problèmes de scroll
+    const preventScrolling = (e: TouchEvent) => {
+      if (swiped) return;
+      e.preventDefault();
+    };
+    
+    currentRef.addEventListener('touchmove', preventScrolling, { passive: false });
+    
+    return () => {
+      currentRef.removeEventListener('touchmove', preventScrolling);
+    };
+  }, [swiped]);
 
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const threshold = 100;
-    if (info.offset.x > threshold && onLike) {
-      onLike();
-    } else if (info.offset.x < -threshold && onDislike) {
-      onDislike();
+    const velocity = Math.abs(info.velocity.x);
+    const isSwipeFast = velocity > 800;
+    
+    // Détermine si le swipe doit être considéré comme complet
+    const shouldSwipe = Math.abs(info.offset.x) > threshold || isSwipeFast;
+    
+    if (shouldSwipe) {
+      setSwiped(true);
+      
+      // Animer la carte en fonction de la direction du swipe
+      if (info.offset.x > 0) {
+        // Swipe à droite (like)
+        controls.start({
+          x: 500,
+          opacity: 0,
+          rotate: 30,
+          transition: { duration: 0.3 }
+        }).then(() => {
+          // Afficher un feedback visuel
+          toast({
+            title: "J'aime",
+            description: `Vous avez aimé "${event.title}"`,
+            duration: 2000
+          });
+          // Déclencher l'action
+          onLike && onLike();
+        });
+      } else {
+        // Swipe à gauche (dislike)
+        controls.start({
+          x: -500,
+          opacity: 0,
+          rotate: -30,
+          transition: { duration: 0.3 }
+        }).then(() => {
+          // Afficher un feedback visuel
+          toast({
+            title: "Passer",
+            description: `Vous avez passé "${event.title}"`,
+            duration: 2000
+          });
+          // Déclencher l'action
+          onDislike && onDislike();
+        });
+      }
+    } else {
+      // Retour à la position initiale si le swipe n'est pas assez prononcé
+      controls.start({
+        x: 0,
+        opacity: 1,
+        rotate: 0,
+        transition: { type: "spring", stiffness: 300, damping: 20 }
+      });
     }
+    
     setDragDirection(null);
   };
 
@@ -70,6 +151,31 @@ export default function MoodEventCard({
       setDragDirection(null);
     }
   };
+  
+  // Fonction pour swiper manuellement avec les boutons
+  const handleManualLike = () => {
+    setSwiped(true);
+    controls.start({
+      x: 500,
+      opacity: 0,
+      rotate: 30,
+      transition: { duration: 0.3 }
+    }).then(() => {
+      onLike && onLike();
+    });
+  };
+  
+  const handleManualDislike = () => {
+    setSwiped(true);
+    controls.start({
+      x: -500,
+      opacity: 0,
+      rotate: -30,
+      transition: { duration: 0.3 }
+    }).then(() => {
+      onDislike && onDislike();
+    });
+  };
 
   // Formater la date
   const eventDate = new Date(event.date);
@@ -81,17 +187,21 @@ export default function MoodEventCard({
 
   return (
     <motion.div 
-      className={`${moodClassName} rounded-2xl overflow-hidden shadow-lg h-[calc(100vh-160px)] relative ${className}`}
+      className={`${moodClassName} rounded-2xl overflow-hidden shadow-lg h-[calc(100vh-160px)] relative ${className} touch-none`}
       ref={innerRef || cardRef}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.9}
       onDragEnd={handleDragEnd}
       onDrag={handleDrag}
+      animate={controls}
       style={{ 
-        x: 0,
-        transition: "all 0.3s ease-out"
+        x,
+        rotate,
+        opacity,
+        touchAction: "none",
       }}
-      whileDrag={{ scale: 0.98 }}
+      whileTap={{ scale: 0.98 }}
     >
       {/* Calque de recouvrement avec l'ambiance */}
       <div className="mood-overlay"></div>
@@ -107,6 +217,21 @@ export default function MoodEventCard({
       
       {/* Dégradé du bas pour que le texte soit lisible */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent via-black/40" />
+      
+      {/* Indicateurs de like/dislike superposés */}
+      <motion.div 
+        className="absolute top-10 right-5 rotate-12 border-4 border-green-500 rounded-lg px-5 py-2 z-20"
+        style={{ opacity: likeOpacity }}
+      >
+        <span className="text-green-500 font-bold text-2xl">J'AIME</span>
+      </motion.div>
+      
+      <motion.div 
+        className="absolute top-10 left-5 -rotate-12 border-4 border-red-500 rounded-lg px-5 py-2 z-20"
+        style={{ opacity: dislikeOpacity }}
+      >
+        <span className="text-red-500 font-bold text-2xl">PASSER</span>
+      </motion.div>
       
       {/* Contenu de la carte */}
       <div className="absolute inset-0 flex flex-col p-4 mood-content">
@@ -163,7 +288,7 @@ export default function MoodEventCard({
                 variant="outline" 
                 size="icon" 
                 className="rounded-full bg-black/30 border-white/20 text-white hover:bg-red-500/80" 
-                onClick={onDislike}
+                onClick={handleManualDislike}
               >
                 <X className="h-6 w-6" />
               </Button>
@@ -183,7 +308,7 @@ export default function MoodEventCard({
                 variant="outline" 
                 size="icon" 
                 className="rounded-full bg-black/30 border-white/20 text-white hover:bg-green-500/80" 
-                onClick={onLike}
+                onClick={handleManualLike}
               >
                 <Heart className="h-6 w-6" />
               </Button>
@@ -192,18 +317,35 @@ export default function MoodEventCard({
         </div>
       </div>
       
-      {/* Indicateurs de direction du swipe */}
-      {dragDirection === 'right' && (
-        <div className="absolute top-1/2 right-8 transform -translate-y-1/2 bg-green-500/80 text-white font-bold text-2xl p-4 rounded-full z-20">
-          <Heart className="h-8 w-8" />
-        </div>
-      )}
-      
-      {dragDirection === 'left' && (
-        <div className="absolute top-1/2 left-8 transform -translate-y-1/2 bg-red-500/80 text-white font-bold text-2xl p-4 rounded-full z-20">
-          <X className="h-8 w-8" />
-        </div>
-      )}
+      {/* Instructions de swipe avec animation - Style TikTok */}
+      <motion.div 
+        className="absolute top-1/2 left-0 right-0 flex justify-between px-8 pointer-events-none text-white/70"
+        initial={{ opacity: 0.8 }}
+        animate={{ opacity: [0.8, 0.5, 0.8] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        <motion.div 
+          className="flex flex-col items-center"
+          animate={{ x: [0, -10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <div className="h-12 w-12 rounded-full border-2 border-red-500/50 backdrop-blur-sm bg-black/20 flex items-center justify-center mb-2">
+            <X className="h-6 w-6 text-red-500" />
+          </div>
+          <span className="text-xs font-medium">Swipe gauche</span>
+        </motion.div>
+        
+        <motion.div 
+          className="flex flex-col items-center"
+          animate={{ x: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <div className="h-12 w-12 rounded-full border-2 border-green-500/50 backdrop-blur-sm bg-black/20 flex items-center justify-center mb-2">
+            <Heart className="h-6 w-6 text-green-500" />
+          </div>
+          <span className="text-xs font-medium">Swipe droite</span>
+        </motion.div>
+      </motion.div>
     </motion.div>
   );
 }
