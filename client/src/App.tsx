@@ -302,9 +302,7 @@ function App() {
                 </Route>
                 
                 <Route path="/admin/moderation">
-                  <ResponsiveLayout>
-                    <ModerationPage />
-                  </ResponsiveLayout>
+                  <ModerationPage />
                 </Route>
                 
                 <Route path="/admin/search">
