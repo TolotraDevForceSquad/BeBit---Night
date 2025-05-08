@@ -15,6 +15,7 @@ import InvitationsPage from "./pages/user/invitations-page";
 import GalleryPage from "./pages/user/gallery-page";
 import WalletPage from "./pages/user/wallet-page";
 import ReviewsPage from "./pages/user/reviews-page";
+import SettingsPage from "./pages/settings-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
 
 // Version simplifiée sans chargement d'animation pour débloquer
@@ -112,6 +113,12 @@ function App() {
             <Route path="/user/reviews">
               <UserLayout>
                 <ReviewsPage />
+              </UserLayout>
+            </Route>
+            
+            <Route path="/settings">
+              <UserLayout>
+                <SettingsPage />
               </UserLayout>
             </Route>
 
