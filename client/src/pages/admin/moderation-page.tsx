@@ -9,6 +9,7 @@ import ResponsiveLayout from "@/layouts/ResponsiveLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Card, CardContent, CardDescription, 
@@ -418,9 +419,7 @@ export default function ModerationPage() {
   if (isLoading) {
     return (
       <ResponsiveLayout headerContent={headerContent} activeItem="modération">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
+        <LoadingSpinner message="Chargement de la modération..." />
       </ResponsiveLayout>
     );
   }
