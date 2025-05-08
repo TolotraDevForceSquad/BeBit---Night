@@ -60,8 +60,8 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           href: "/user/events" 
         },
         { 
-          icon: <Mic size={24} className="text-pink-500" />, 
-          label: "Artistes", 
+          icon: <Radio size={24} className="text-pink-500" />, 
+          label: "Mes Artistes", 
           href: "/user/search-artists" 
         },
         { 
