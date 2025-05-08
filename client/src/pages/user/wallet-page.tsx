@@ -514,10 +514,11 @@ export default function WalletPage() {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-8">
+        <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="overview">Aperçu</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="payment-methods">Méthodes de paiement</TabsTrigger>
+          <TabsTrigger value="tickets">Mes tickets</TabsTrigger>
         </TabsList>
         
         {/* Aperçu du portefeuille */}
@@ -945,6 +946,76 @@ export default function WalletPage() {
                 <li>Vous serez toujours notifié par e-mail lors d'une activité inhabituelle.</li>
               </ul>
             </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Mes tickets */}
+        <TabsContent value="tickets" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Mes tickets</CardTitle>
+              <CardDescription>
+                Accédez à tous vos tickets pour les événements à venir
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {transactions
+                  .filter(tx => tx.category === "ticket" && tx.status === "completed")
+                  .map(transaction => (
+                    <div
+                      key={transaction.id}
+                      className="p-4 rounded-md border flex flex-col sm:flex-row gap-4"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Ticket className="h-5 w-5 text-primary" />
+                          <h3 className="font-medium">{transaction.relatedTo?.name || "Événement"}</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Acheté le {format(new Date(transaction.date), "d MMMM yyyy", { locale: fr })}
+                        </p>
+                        <div className="flex items-center gap-1 mt-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">
+                            {format(new Date(transaction.date), "EEEE d MMMM", { locale: fr })}
+                          </span>
+                        </div>
+                        <div className="mt-2">
+                          <Badge className="bg-primary/20 text-primary hover:bg-primary/30 transition-colors">
+                            #{transaction.id}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:items-end gap-2 mt-2 sm:mt-0">
+                        <div className="font-semibold">
+                          {transaction.amount.toLocaleString()} {walletData.currency}
+                        </div>
+                        <Button size="sm" className="gap-2">
+                          <Ticket className="h-4 w-4" />
+                          <span>Voir le ticket</span>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  
+                {transactions.filter(tx => tx.category === "ticket" && tx.status === "completed").length === 0 && (
+                  <div className="text-center py-10">
+                    <h3 className="text-lg font-medium">Aucun ticket trouvé</h3>
+                    <p className="text-muted-foreground mt-1">
+                      Vous n'avez pas encore acheté de tickets pour des événements.
+                    </p>
+                    <Button className="mt-4" variant="outline">
+                      Explorer les événements
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button variant="outline">Historique des tickets</Button>
+              <Button variant="ghost">Voir tous les événements</Button>
+            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
