@@ -119,6 +119,10 @@ function App() {
               <SettingsPage />
             </Route>
             
+            <Route path="/settings">
+              <SettingsPage />
+            </Route>
+            
             <Route path="/user/club-profile">
               <ClubProfilePage />
             </Route>
