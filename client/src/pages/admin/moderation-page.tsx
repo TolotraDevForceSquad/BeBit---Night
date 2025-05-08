@@ -305,6 +305,105 @@ export default function ModerationPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedUserReport, setSelectedUserReport] = useState<UserReport | null>(null);
   const [selectedEventReport, setSelectedEventReport] = useState<EventReport | null>(null);
+  
+  // Type pour les demandes d'artistes/clubs
+  type ApplicationStatus = "pending" | "approved" | "rejected" | "review";
+  
+  type UserApplication = {
+    id: number;
+    userId: number;
+    username: string;
+    email: string;
+    applicationType: "artist" | "club";
+    userImage?: string;
+    name: string;
+    dateSubmitted: string;
+    description: string;
+    location: string;
+    phoneNumber: string;
+    socialLinks: { platform: string; url: string }[];
+    status: ApplicationStatus;
+    notes?: string;
+  };
+  
+  // Données de démonstration pour les demandes d'artistes/clubs
+  const mockUserApplications: UserApplication[] = [
+    {
+      id: 1,
+      userId: 201,
+      username: "dj_techno",
+      email: "dj_techno@email.com",
+      applicationType: "artist",
+      userImage: "https://images.unsplash.com/photo-1592334873219-42275059d13c?w=80&h=80&fit=crop",
+      name: "DJ TechnoBeats",
+      dateSubmitted: "2023-11-15T08:30:00",
+      description: "DJ Techno avec 5 ans d'expérience, spécialisé dans les musiques électroniques.",
+      location: "Antananarivo, Madagascar",
+      phoneNumber: "+261 34 12 34 567",
+      socialLinks: [
+        { platform: "instagram", url: "instagram.com/dj_technobeats" },
+        { platform: "soundcloud", url: "soundcloud.com/dj_technobeats" }
+      ],
+      status: "pending"
+    },
+    {
+      id: 2,
+      userId: 202,
+      username: "club_euphoria",
+      email: "contact@clubeuphoria.com",
+      applicationType: "club",
+      userImage: "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=80&h=80&fit=crop",
+      name: "Club Euphoria",
+      dateSubmitted: "2023-11-20T14:22:00",
+      description: "Club de nuit moderne au cœur d'Antananarivo avec une capacité de 300 personnes.",
+      location: "Antananarivo, Madagascar",
+      phoneNumber: "+261 34 98 76 543",
+      socialLinks: [
+        { platform: "instagram", url: "instagram.com/clubeuphoria" },
+        { platform: "facebook", url: "facebook.com/clubeuphoria" }
+      ],
+      status: "pending"
+    },
+    {
+      id: 3,
+      userId: 203,
+      username: "vocalartist",
+      email: "vocal@email.com",
+      applicationType: "artist",
+      name: "Vocal Star",
+      dateSubmitted: "2023-11-18T10:15:00",
+      description: "Artiste vocal avec une large gamme de genres.",
+      location: "Toamasina, Madagascar",
+      phoneNumber: "+261 33 11 22 333",
+      socialLinks: [
+        { platform: "youtube", url: "youtube.com/vocalstar" }
+      ],
+      status: "review"
+    },
+    {
+      id: 4,
+      userId: 204,
+      username: "retropub",
+      email: "info@retropub.com",
+      applicationType: "club",
+      userImage: "https://images.unsplash.com/photo-1541057591728-77510a9ea77f?w=80&h=80&fit=crop",
+      name: "Retro Pub",
+      dateSubmitted: "2023-11-16T09:40:00",
+      description: "Pub à thème rétro avec musique live tous les weekends.",
+      location: "Antananarivo, Madagascar",
+      phoneNumber: "+261 32 55 66 777",
+      socialLinks: [
+        { platform: "instagram", url: "instagram.com/retropub" },
+        { platform: "twitter", url: "twitter.com/retropub" }
+      ],
+      status: "approved"
+    }
+  ];
+  
+  const [userApplications, setUserApplications] = useState<UserApplication[]>([]);
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [applicationStatusFilter, setApplicationStatusFilter] = useState<string>("all");
+  const [selectedApplication, setSelectedApplication] = useState<UserApplication | null>(null);
 
   // Simuler le chargement des données
   useEffect(() => {
@@ -312,6 +411,7 @@ export default function ModerationPage() {
       setUserReports(mockUserReports);
       setEventReports(mockEventReports);
       setPendingItems(mockPendingItems);
+      setUserApplications(mockUserApplications);
       setIsLoading(false);
     }, 800);
     
@@ -357,6 +457,24 @@ export default function ModerationPage() {
     
     return matchesSearch && matchesType;
   });
+  
+  // Filtrer les demandes d'utilisateurs (artistes/clubs)
+  const filteredUserApplications = userApplications.filter(app => {
+    const matchesSearch = searchQuery 
+      ? app.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.name.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    
+    const matchesRole = roleFilter === "all" 
+      ? true 
+      : app.applicationType === roleFilter;
+      
+    const matchesStatus = applicationStatusFilter === "all"
+      ? true
+      : app.status === applicationStatusFilter;
+    
+    return matchesSearch && matchesRole && matchesStatus;
+  });
 
   // Gérer l'action de suspension d'un utilisateur
   const handleSuspendUser = (userId: number) => {
@@ -392,6 +510,42 @@ export default function ModerationPage() {
   const handleRejectPending = (id: number) => {
     // Implémentation à venir (API call, etc.)
     setPendingItems(prev => prev.filter(item => item.id !== id));
+  };
+  
+  // Gérer l'approbation d'une demande d'artiste/club
+  const handleApproveApplication = (id: number) => {
+    // Implémentation à venir (API call, etc.)
+    setUserApplications(prev => 
+      prev.map(app => 
+        app.id === id 
+          ? { ...app, status: "approved" } 
+          : app
+      )
+    );
+  };
+  
+  // Gérer la mise en attente d'une demande d'artiste/club
+  const handleReviewApplication = (id: number) => {
+    // Implémentation à venir (API call, etc.)
+    setUserApplications(prev => 
+      prev.map(app => 
+        app.id === id 
+          ? { ...app, status: "review" } 
+          : app
+      )
+    );
+  };
+  
+  // Gérer le rejet d'une demande d'artiste/club
+  const handleRejectApplication = (id: number) => {
+    // Implémentation à venir (API call, etc.)
+    setUserApplications(prev => 
+      prev.map(app => 
+        app.id === id 
+          ? { ...app, status: "rejected" } 
+          : app
+      )
+    );
   };
 
   // Contenu de l'en-tête
@@ -531,12 +685,15 @@ export default function ModerationPage() {
         
         {/* Contenu des onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-2">
+          <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="reports">
               Signalements
             </TabsTrigger>
             <TabsTrigger value="approvals">
               Approbations en attente ({pendingItems.length})
+            </TabsTrigger>
+            <TabsTrigger value="users">
+              Espace Utilisateur
             </TabsTrigger>
           </TabsList>
           
