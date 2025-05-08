@@ -9,8 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2 } from "lucide-react";
 import { UserRole } from "@shared/schema";
+import PartyLoader from "@/components/PartyLoader";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Le nom d'utilisateur est requis"),
@@ -39,6 +39,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
+  const [isLoading, setIsLoading] = useState(false);
   
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -71,7 +72,11 @@ export default function AuthPage() {
   // Handle login submission
   const onLoginSubmit = (data: LoginFormValues) => {
     console.log("Login attempt:", data.username);
-    // Simuler une connexion réussie avec redirection directe
+    setIsLoading(true);
+    
+    // Simuler un délai pour voir l'animation de chargement
+    setTimeout(() => {
+      // Simuler une connexion réussie avec redirection directe
     if (data.username === "user1" && data.password === "password123") {
       // Stocker dans localStorage pour simulation d'authentification
       localStorage.setItem('auth_user', JSON.stringify({
@@ -106,12 +111,18 @@ export default function AuthPage() {
     
     // Afficher un message d'erreur pour les identifiants incorrects
     alert("Identifiants incorrects. Veuillez réessayer.");
+    setIsLoading(false);
+    }, 1500);
   };
 
   // Handle register submission
   const onRegisterSubmit = (data: RegisterFormValues) => {
     console.log("Register attempt:", data);
-    // Stocker dans localStorage pour simulation d'authentification
+    setIsLoading(true);
+    
+    // Simuler un délai pour voir l'animation de chargement
+    setTimeout(() => {
+      // Stocker dans localStorage pour simulation d'authentification
     localStorage.setItem('auth_user', JSON.stringify({
       username: data.username,
       email: data.email,
@@ -128,6 +139,7 @@ export default function AuthPage() {
     } else {
       window.location.href = "/";
     }
+    }, 1500);
   };
   
   // Si une redirection est définie, effectuer la redirection
@@ -137,6 +149,14 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex flex-col animate-fade-in">
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="w-full max-w-lg">
+            <PartyLoader />
+          </div>
+        </div>
+      )}
+      
       {/* Header with logo */}
       <header className="px-6 py-4 flex justify-between items-center">
         <div className="flex items-center">
@@ -288,9 +308,15 @@ export default function AuthPage() {
                   <Button 
                     type="submit" 
                     className="w-full py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition duration-200"
+                    disabled={isLoading}
                   >
-                    
-                    Se connecter
+                    {isLoading ? (
+                      <span className="flex items-center justify-center">
+                        <span className="animate-pulse">Connexion en cours...</span>
+                      </span>
+                    ) : (
+                      "Se connecter"
+                    )}
                   </Button>
                   
                   <div className="relative flex items-center justify-center mt-6">
@@ -498,8 +524,15 @@ export default function AuthPage() {
                   <Button 
                     type="submit" 
                     className="w-full py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition duration-200"
+                    disabled={isLoading}
                   >
-                    S'inscrire
+                    {isLoading ? (
+                      <span className="flex items-center justify-center">
+                        <span className="animate-pulse">Inscription en cours...</span>
+                      </span>
+                    ) : (
+                      "S'inscrire"
+                    )}
                   </Button>
                 </form>
               </Form>
