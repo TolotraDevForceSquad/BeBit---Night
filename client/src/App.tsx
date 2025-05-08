@@ -21,6 +21,7 @@ import LandingPage from "./pages/landing-page";
 import ClubProfilePage from "./pages/user/club-profile-page";
 import ResponsiveLayout from "./layouts/ResponsiveLayout";
 import ModerationPage from "./pages/admin/moderation-page";
+import AdminDashboardPage from "./pages/admin/dashboard-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -266,12 +267,7 @@ function App() {
             {user.role === 'admin' && (
               <>
                 <Route path="/admin">
-                  <ResponsiveLayout>
-                    <div className="p-8">
-                      <h1 className="text-3xl font-bold mb-6">Dashboard Admin</h1>
-                      <p className="text-lg">Bienvenue sur le panneau d'administration</p>
-                    </div>
-                  </ResponsiveLayout>
+                  <AdminDashboardPage />
                 </Route>
                 
                 <Route path="/admin/artists">
