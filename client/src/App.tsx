@@ -25,6 +25,7 @@ import AdminDashboardPage from "./pages/admin/dashboard-page";
 import ArtistsManagementPage from "./pages/admin/artists-management-page";
 import EventsManagementPage from "./pages/admin/events-management-page";
 import AdminSettingsPage from "./pages/admin/settings-page";
+import ClubsManagementPage from "./pages/admin/clubs-management-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -278,12 +279,7 @@ function App() {
                 </Route>
                 
                 <Route path="/admin/clubs">
-                  <ResponsiveLayout>
-                    <div className="p-8">
-                      <h1 className="text-3xl font-bold mb-6">Gestion des clubs</h1>
-                      <p className="text-lg">Gérez les profils de clubs</p>
-                    </div>
-                  </ResponsiveLayout>
+                  <ClubsManagementPage />
                 </Route>
                 
                 <Route path="/admin/events">
