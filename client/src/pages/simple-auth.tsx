@@ -60,7 +60,7 @@ export default function SimpleAuth() {
           username: loginUsername,
           role: 'admin'
         }));
-        window.location.href = "/user/explorer";
+        window.location.href = "/admin/moderation";
       } else {
         setError("Identifiants invalides");
         setIsLoading(false);

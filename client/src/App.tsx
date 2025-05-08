@@ -262,57 +262,68 @@ function App() {
               </ResponsiveLayout>
             </Route>
 
-            {/* Routes admin */}
-            <Route path="/admin">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Dashboard Admin</h1>
-                  <p className="text-lg">Bienvenue sur le panneau d'administration</p>
-                </div>
-              </ResponsiveLayout>
-            </Route>
+            {/* Routes admin - protégées pour le rôle admin uniquement */}
+            {user.role === 'admin' && (
+              <>
+                <Route path="/admin">
+                  <ResponsiveLayout>
+                    <div className="p-8">
+                      <h1 className="text-3xl font-bold mb-6">Dashboard Admin</h1>
+                      <p className="text-lg">Bienvenue sur le panneau d'administration</p>
+                    </div>
+                  </ResponsiveLayout>
+                </Route>
+                
+                <Route path="/admin/artists">
+                  <ResponsiveLayout>
+                    <div className="p-8">
+                      <h1 className="text-3xl font-bold mb-6">Gestion des artistes</h1>
+                      <p className="text-lg">Gérez les profils d'artistes</p>
+                    </div>
+                  </ResponsiveLayout>
+                </Route>
+                
+                <Route path="/admin/clubs">
+                  <ResponsiveLayout>
+                    <div className="p-8">
+                      <h1 className="text-3xl font-bold mb-6">Gestion des clubs</h1>
+                      <p className="text-lg">Gérez les profils de clubs</p>
+                    </div>
+                  </ResponsiveLayout>
+                </Route>
+                
+                <Route path="/admin/events">
+                  <ResponsiveLayout>
+                    <div className="p-8">
+                      <h1 className="text-3xl font-bold mb-6">Gestion des événements</h1>
+                      <p className="text-lg">Gérez les événements de la plateforme</p>
+                    </div>
+                  </ResponsiveLayout>
+                </Route>
+                
+                <Route path="/admin/moderation">
+                  <ResponsiveLayout>
+                    <ModerationPage />
+                  </ResponsiveLayout>
+                </Route>
+                
+                <Route path="/admin/search">
+                  <ResponsiveLayout>
+                    <div className="p-8">
+                      <h1 className="text-3xl font-bold mb-6">Recherche globale</h1>
+                      <p className="text-lg">Recherchez dans toute la plateforme</p>
+                    </div>
+                  </ResponsiveLayout>
+                </Route>
+              </>
+            )}
             
-            <Route path="/admin/artists">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Gestion des artistes</h1>
-                  <p className="text-lg">Gérez les profils d'artistes</p>
-                </div>
-              </ResponsiveLayout>
-            </Route>
-            
-            <Route path="/admin/clubs">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Gestion des clubs</h1>
-                  <p className="text-lg">Gérez les profils de clubs</p>
-                </div>
-              </ResponsiveLayout>
-            </Route>
-            
-            <Route path="/admin/events">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Gestion des événements</h1>
-                  <p className="text-lg">Gérez les événements de la plateforme</p>
-                </div>
-              </ResponsiveLayout>
-            </Route>
-            
-            <Route path="/admin/moderation">
-              <ResponsiveLayout>
-                <ModerationPage />
-              </ResponsiveLayout>
-            </Route>
-            
-            <Route path="/admin/search">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Recherche globale</h1>
-                  <p className="text-lg">Recherchez dans toute la plateforme</p>
-                </div>
-              </ResponsiveLayout>
-            </Route>
+            {/* Protection pour les routes admin si l'utilisateur n'est pas admin */}
+            {user.role !== 'admin' && (
+              <Route path="/admin/:rest*">
+                <NotFound />
+              </Route>
+            )}
             
             {/* Page d'accueil - force la redirection vers explorer */}
             <Route path="/">
