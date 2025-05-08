@@ -149,6 +149,12 @@ const clubTables: Record<number, TableArea[]> = {
 };
 
 export default function TableReservationPage() {
+  // Récupérer les paramètres d'URL
+  const queryParams = new URLSearchParams(window.location.search);
+  const urlClubId = queryParams.get('clubId');
+  const urlClubName = queryParams.get('clubName');
+  
+  // États pour le formulaire
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [showReservationForm, setShowReservationForm] = useState(false);
   const [selectedTableArea, setSelectedTableArea] = useState<TableArea | null>(null);
@@ -156,6 +162,26 @@ export default function TableReservationPage() {
   const [reservationTime, setReservationTime] = useState('');
   const [guestCount, setGuestCount] = useState('4');
   const [specialRequests, setSpecialRequests] = useState('');
+  
+  // Pré-sélectionner le club si spécifié dans l'URL
+  React.useEffect(() => {
+    if (urlClubId) {
+      const clubId = parseInt(urlClubId);
+      const club = mockClubs.find(c => c.id === clubId);
+      
+      if (club && clubTables[clubId] && clubTables[clubId].length > 0) {
+        console.log("Club pré-sélectionné depuis l'URL:", club.name);
+        
+        // Si le club a des tables disponibles, sélectionner la première
+        const firstTableArea = clubTables[clubId][0];
+        
+        // Ouvrir directement le formulaire de réservation
+        setSelectedClub(club);
+        setSelectedTableArea(firstTableArea);
+        setShowReservationForm(true);
+      }
+    }
+  }, [urlClubId]);
 
   const handleReservation = (clubId: number, tableAreaId: string) => {
     const club = mockClubs.find(c => c.id === clubId);

@@ -345,7 +345,14 @@ export default function ClubProfilePage() {
                     La réservation de table vous garantit un espace dédié.
                   </p>
                   
-                  <Button size="lg" className="w-full sm:w-auto">
+                  <Button 
+                    size="lg" 
+                    className="w-full sm:w-auto"
+                    onClick={() => {
+                      console.log("Redirection vers la page de réservation de table pour:", club.name);
+                      window.location.href = `/user/table-reservation?clubId=${club.id}&clubName=${encodeURIComponent(club.name)}`;
+                    }}
+                  >
                     Réserver une table
                   </Button>
                 </div>
