@@ -1076,6 +1076,315 @@ export default function ModerationPage() {
               </CardContent>
             </Card>
           </TabsContent>
+          
+          {/* Onglet Espace Utilisateur */}
+          <TabsContent value="users" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center">
+                  <Music className="h-5 w-5 mr-2" />
+                  <Building className="h-5 w-5 mr-2" />
+                  Gestion des Artistes et Clubs
+                </CardTitle>
+                <CardDescription>
+                  Gestion des demandes d'inscription des artistes et clubs
+                </CardDescription>
+                
+                <div className="flex flex-col md:flex-row gap-4 mt-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Input
+                      placeholder="Rechercher par nom ou utilisateur..."
+                      className="pl-9"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Select value={roleFilter} onValueChange={setRoleFilter}>
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Tous les types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les types</SelectItem>
+                        <SelectItem value="artist">Artiste</SelectItem>
+                        <SelectItem value="club">Club</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Select value={applicationStatusFilter} onValueChange={setApplicationStatusFilter}>
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Tous les statuts" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="review">En révision</SelectItem>
+                        <SelectItem value="approved">Approuvé</SelectItem>
+                        <SelectItem value="rejected">Rejeté</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Utilisateur</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Nom artistique/établissement</TableHead>
+                      <TableHead>Date de soumission</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUserApplications.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                          Aucune demande correspondant aux critères
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredUserApplications.map(application => (
+                        <TableRow key={application.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center">
+                              <Avatar className="h-8 w-8 mr-2">
+                                <AvatarImage src={application.userImage} alt={application.username} />
+                                <AvatarFallback>{application.username.charAt(0).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p>@{application.username}</p>
+                                <p className="text-xs text-muted-foreground">{application.email}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={
+                              application.applicationType === "artist" 
+                              ? "bg-purple-500/10 text-purple-500 flex gap-1 items-center" 
+                              : "bg-blue-500/10 text-blue-500 flex gap-1 items-center"
+                            }>
+                              {application.applicationType === "artist" 
+                                ? <Music className="h-3 w-3" /> 
+                                : <Building className="h-3 w-3" />}
+                              {application.applicationType === "artist" ? "Artiste" : "Club"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{application.name}</TableCell>
+                          <TableCell>
+                            {format(new Date(application.dateSubmitted), "dd/MM/yyyy", { locale: fr })}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={
+                              application.status === "approved" ? "bg-green-500/10 text-green-500 border-green-500/25" : 
+                              application.status === "pending" ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/25" :
+                              application.status === "review" ? "bg-blue-500/10 text-blue-500 border-blue-500/25" :
+                              "bg-red-500/10 text-red-500 border-red-500/25"
+                            }>
+                              {application.status === "approved" ? "Approuvé" : 
+                               application.status === "pending" ? "En attente" :
+                               application.status === "review" ? "En révision" : "Rejeté"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex gap-2 justify-end">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => setSelectedApplication(application)}
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Détails
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Demande de {selectedApplication?.applicationType === "artist" ? "l'artiste" : "l'établissement"}</DialogTitle>
+                                    <DialogDescription>
+                                      Détails de la demande pour {selectedApplication?.name}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  
+                                  {selectedApplication && (
+                                    <div className="space-y-4 my-4">
+                                      <div className="flex items-center gap-4">
+                                        <Avatar className="h-20 w-20">
+                                          <AvatarImage src={selectedApplication.userImage} alt={selectedApplication.name} />
+                                          <AvatarFallback className="text-lg">{selectedApplication.name.charAt(0).toUpperCase()}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                          <h3 className="text-xl font-bold">{selectedApplication.name}</h3>
+                                          <p className="text-muted-foreground">@{selectedApplication.username}</p>
+                                          <Badge className={
+                                            selectedApplication.applicationType === "artist" 
+                                            ? "bg-purple-500/10 text-purple-500 mt-2" 
+                                            : "bg-blue-500/10 text-blue-500 mt-2"
+                                          }>
+                                            {selectedApplication.applicationType === "artist" ? "Artiste" : "Club"}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                                        <div>
+                                          <p className="text-sm font-medium text-muted-foreground">Email</p>
+                                          <p>{selectedApplication.email}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-muted-foreground">Téléphone</p>
+                                          <p>{selectedApplication.phoneNumber}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-muted-foreground">Localisation</p>
+                                          <p>{selectedApplication.location}</p>
+                                        </div>
+                                        <div>
+                                          <p className="text-sm font-medium text-muted-foreground">Date de soumission</p>
+                                          <p>{format(new Date(selectedApplication.dateSubmitted), "dd MMMM yyyy", { locale: fr })}</p>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="border-t pt-4">
+                                        <p className="text-sm font-medium text-muted-foreground mb-2">Description</p>
+                                        <p className="text-sm">{selectedApplication.description}</p>
+                                      </div>
+                                      
+                                      {selectedApplication.socialLinks.length > 0 && (
+                                        <div className="border-t pt-4">
+                                          <p className="text-sm font-medium text-muted-foreground mb-2">Réseaux sociaux</p>
+                                          <div className="flex flex-wrap gap-2">
+                                            {selectedApplication.socialLinks.map((link, index) => (
+                                              <Badge key={index} variant="outline" className="flex gap-1 items-center">
+                                                {link.platform === "instagram" && <span className="text-pink-500">Instagram</span>}
+                                                {link.platform === "facebook" && <span className="text-blue-500">Facebook</span>}
+                                                {link.platform === "twitter" && <span className="text-sky-500">Twitter</span>}
+                                                {link.platform === "soundcloud" && <span className="text-orange-500">SoundCloud</span>}
+                                                {link.platform === "youtube" && <span className="text-red-500">YouTube</span>}
+                                                <a href={`https://${link.url}`} target="_blank" rel="noopener noreferrer" className="text-xs underline ml-1">
+                                                  {link.url}
+                                                </a>
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                      
+                                      <div className="border-t pt-4">
+                                        <p className="text-sm font-medium text-muted-foreground mb-2">Statut actuel</p>
+                                        <Badge className={
+                                          selectedApplication.status === "approved" ? "bg-green-500/10 text-green-500" : 
+                                          selectedApplication.status === "pending" ? "bg-yellow-500/10 text-yellow-500" :
+                                          selectedApplication.status === "review" ? "bg-blue-500/10 text-blue-500" :
+                                          "bg-red-500/10 text-red-500"
+                                        }>
+                                          {selectedApplication.status === "approved" ? "Approuvé" : 
+                                           selectedApplication.status === "pending" ? "En attente" :
+                                           selectedApplication.status === "review" ? "En révision" : "Rejeté"}
+                                        </Badge>
+                                      </div>
+                                      
+                                      {selectedApplication.notes && (
+                                        <div className="border-t pt-4">
+                                          <p className="text-sm font-medium text-muted-foreground mb-2">Notes</p>
+                                          <p className="text-sm">{selectedApplication.notes}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                  
+                                  <DialogFooter className="gap-2 flex-wrap">
+                                    {selectedApplication && selectedApplication.status !== "approved" && (
+                                      <Button 
+                                        onClick={() => {
+                                          if (selectedApplication) {
+                                            handleApproveApplication(selectedApplication.id);
+                                          }
+                                        }}
+                                        className="bg-green-600 hover:bg-green-700"
+                                      >
+                                        <Check className="h-4 w-4 mr-1" />
+                                        Approuver
+                                      </Button>
+                                    )}
+                                    
+                                    {selectedApplication && selectedApplication.status !== "review" && (
+                                      <Button 
+                                        variant="outline"
+                                        onClick={() => {
+                                          if (selectedApplication) {
+                                            handleReviewApplication(selectedApplication.id);
+                                          }
+                                        }}
+                                      >
+                                        <Clock className="h-4 w-4 mr-1" />
+                                        Mettre en révision
+                                      </Button>
+                                    )}
+                                    
+                                    {selectedApplication && selectedApplication.status !== "rejected" && (
+                                      <Button 
+                                        variant="destructive"
+                                        onClick={() => {
+                                          if (selectedApplication) {
+                                            handleRejectApplication(selectedApplication.id);
+                                          }
+                                        }}
+                                      >
+                                        <XCircle className="h-4 w-4 mr-1" />
+                                        Rejeter
+                                      </Button>
+                                    )}
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                              
+                              {application.status === "pending" && (
+                                <>
+                                  <Button 
+                                    variant="default" 
+                                    size="sm"
+                                    onClick={() => handleApproveApplication(application.id)}
+                                  >
+                                    <Check className="h-4 w-4 mr-1" />
+                                    Approuver
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleReviewApplication(application.id)}
+                                  >
+                                    <Clock className="h-4 w-4 mr-1" />
+                                    En révision
+                                  </Button>
+                                </>
+                              )}
+                              
+                              {application.status === "review" && (
+                                <Button 
+                                  variant="default" 
+                                  size="sm"
+                                  onClick={() => handleApproveApplication(application.id)}
+                                >
+                                  <Check className="h-4 w-4 mr-1" />
+                                  Approuver
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </ResponsiveLayout>
