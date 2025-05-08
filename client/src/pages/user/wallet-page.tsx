@@ -212,7 +212,7 @@ export default function WalletPage() {
   // Filtrer et trier les transactions
   const filteredTransactions = transactions
     .filter(tx => filterStatus.length === 0 || filterStatus.includes(tx.status))
-    .filter(tx => !filterCategory || tx.category === filterCategory)
+    .filter(tx => !filterCategory || filterCategory === "all" || tx.category === filterCategory)
     .sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
@@ -750,7 +750,7 @@ export default function WalletPage() {
                       <SelectValue placeholder="Toutes les catégories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Toutes les catégories</SelectItem>
+                      <SelectItem value="all">Toutes les catégories</SelectItem>
                       <SelectItem value="ticket">Achat de ticket</SelectItem>
                       <SelectItem value="deposit">Dépôt</SelectItem>
                       <SelectItem value="withdrawal">Retrait</SelectItem>
