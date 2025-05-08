@@ -10,6 +10,7 @@ export default function SimpleAuth() {
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPhone, setRegisterPhone] = useState("");
   const [registerRole, setRegisterRole] = useState("user");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -70,12 +71,18 @@ export default function SimpleAuth() {
   
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Register attempt with:", registerUsername, registerPassword, registerEmail, registerRole);
+    console.log("Register attempt with:", registerUsername, registerPassword, registerEmail, registerRole, registerPhone);
     setError("");
     
     // Vérification du mot de passe de confirmation
     if (registerPassword !== registerConfirmPassword) {
       setError("Les mots de passe ne correspondent pas");
+      return;
+    }
+    
+    // Vérification du numéro de téléphone pour les artistes et clubs
+    if ((registerRole === "artist" || registerRole === "club") && !registerPhone) {
+      setError("Le numéro de téléphone est obligatoire pour les comptes artiste et club");
       return;
     }
     
@@ -85,13 +92,24 @@ export default function SimpleAuth() {
     setTimeout(() => {
       // Dans un vrai cas d'utilisation, vous envoyez ces données à votre API
       // Ici, on simule juste une inscription réussie
-      localStorage.setItem('auth_user', JSON.stringify({
-        username: registerUsername,
-        role: registerRole
-      }));
       
-      // Redirection
-      window.location.href = "/user/explorer";
+      // Créer un objet utilisateur avec les données pertinentes
+      const userData = {
+        username: registerUsername,
+        email: registerEmail,
+        role: registerRole,
+        phone: registerPhone || null // null pour les utilisateurs normaux
+      };
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+      
+      // Redirection selon le type de compte
+      if (registerRole === "admin") {
+        window.location.href = "/admin/moderation";
+      } else {
+        window.location.href = "/user/explorer";
+      }
     }, 1500);
   };
   
@@ -207,7 +225,7 @@ export default function SimpleAuth() {
         />
       </div>
       
-      <div className="mb-6">
+      <div className="mb-4">
         <label className="block text-sm font-medium mb-1" htmlFor="register-role">
           Type de compte
         </label>
@@ -223,6 +241,27 @@ export default function SimpleAuth() {
           <option value="club">Club / Établissement</option>
         </select>
       </div>
+      
+      {/* Champ de téléphone pour les artistes et clubs */}
+      {(registerRole === "artist" || registerRole === "club") && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-1" htmlFor="register-phone">
+            Numéro de téléphone
+          </label>
+          <input
+            id="register-phone"
+            type="tel"
+            value={registerPhone}
+            onChange={(e) => setRegisterPhone(e.target.value)}
+            className="w-full p-2 border border-border rounded-md bg-muted"
+            placeholder="+261 xx xx xxx xx"
+            required={registerRole === "artist" || registerRole === "club"}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Nécessaire pour la vérification de votre compte {registerRole === "artist" ? "d'artiste" : "de club"}
+          </p>
+        </div>
+      )}
       
       <button
         type="submit"
