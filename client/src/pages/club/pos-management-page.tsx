@@ -63,7 +63,7 @@ const POSManagementPage = () => {
   });
 
   // Obtenir les localisations uniques pour le filtre
-  const uniqueLocations = [...new Set(posDevices.map(device => device.location))];
+  const uniqueLocations = Array.from(new Set(posDevices.map(device => device.location)));
 
   return (
     <ResponsiveLayout>
