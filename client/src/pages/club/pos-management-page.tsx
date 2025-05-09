@@ -7,7 +7,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { useToast } from "../../hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Search, PlusCircle, Terminal, UserPlus, FileCog, Settings, Package, History, Smartphone, Banknote, User, CreditCard, Trash, Clipboard } from 'lucide-react';
+import { Search, PlusCircle, Terminal, UserPlus, FileCog, Settings, Package, History, Smartphone, Banknote, User, CreditCard, Trash, ClipboardList } from 'lucide-react';
 import { Button } from "../../components/ui/button";
 import POSManagementModal, { POSDevice } from '../../components/POSManagementModal';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
@@ -187,7 +187,7 @@ const POSManagementPage = () => {
           <div className="flex space-x-2">
             <Button variant="outline" asChild>
               <a href="/club/pos-catalog">
-                <Clipboard className="mr-2 h-4 w-4" />
+                <ClipboardList className="mr-2 h-4 w-4" />
                 Gérer le catalogue produits
               </a>
             </Button>

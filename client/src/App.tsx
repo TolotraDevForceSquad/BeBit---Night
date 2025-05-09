@@ -27,6 +27,7 @@ import EventsManagementPage from "./pages/admin/events-management-page";
 import AdminSettingsPage from "./pages/admin/settings-page";
 import ClubsManagementPage from "./pages/admin/clubs-management-page";
 import POSManagementPage from "./pages/club/pos-management-page";
+import POSCatalogPage from "./pages/club/pos-catalog-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -287,6 +288,10 @@ function App() {
             
             <Route path="/club/pos">
               <POSManagementPage />
+            </Route>
+            
+            <Route path="/club/pos-catalog">
+              <POSCatalogPage />
             </Route>
 
             <Route path="/club/create-event">

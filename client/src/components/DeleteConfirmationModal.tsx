@@ -1,14 +1,13 @@
 import React from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogDescription 
+} from "./ui/dialog";
+import { Button } from "./ui/button";
 import { Loader2 } from "lucide-react";
 
 interface DeleteConfirmationModalProps {
@@ -20,39 +19,34 @@ interface DeleteConfirmationModalProps {
   isLoading?: boolean;
 }
 
-const DeleteConfirmationModal = ({
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
   title,
   description,
   isLoading = false
-}: DeleteConfirmationModalProps) => {
+}) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
             {description}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Annuler</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              onConfirm();
-            }}
-            disabled={isLoading}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+            Annuler
+          </Button>
+          <Button variant="destructive" onClick={onConfirm} disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Supprimer
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
