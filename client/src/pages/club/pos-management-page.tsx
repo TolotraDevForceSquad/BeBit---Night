@@ -7,7 +7,8 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { useToast } from "../../hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Search, PlusCircle, Terminal, UserPlus, FileCog, Settings, Package, History, Smartphone, Banknote, User, CreditCard, Trash } from 'lucide-react';
+import { Search, PlusCircle, Terminal, UserPlus, FileCog, Settings, Package, History, Smartphone, Banknote, User, CreditCard, Trash, Clipboard } from 'lucide-react';
+import { Button } from "../../components/ui/button";
 import POSManagementModal, { POSDevice } from '../../components/POSManagementModal';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
 
@@ -182,6 +183,14 @@ const POSManagementPage = () => {
           <div>
             <h1 className="text-3xl font-bold">Gestion des points de vente</h1>
             <p className="text-muted-foreground">Gérez vos terminaux POS, les utilisateurs et suivez vos ventes</p>
+          </div>
+          <div className="flex space-x-2">
+            <Button variant="outline" asChild>
+              <a href="/club/pos-catalog">
+                <Clipboard className="mr-2 h-4 w-4" />
+                Gérer le catalogue produits
+              </a>
+            </Button>
           </div>
         </div>
 
