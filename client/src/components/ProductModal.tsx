@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogFooter,
   DialogDescription
 } from "./ui/dialog";
 import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
-import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Button } from "./ui/button";
+import { Loader2, AlertCircle, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
-import { ProductCategory } from "./ProductCategoryModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { ProductCategory } from './ProductCategoryModal';
 
 // Type pour les produits
 export interface Product {
   id: number;
   name: string;
-  description?: string;
+  description: string;
   price: number;
   categoryId: number;
   categoryName?: string;
   isAvailable: boolean;
-  imageUrl?: string;
+  imageUrl: string;
 }
 
 interface ProductModalProps {
@@ -37,10 +37,10 @@ interface ProductModalProps {
   categories: ProductCategory[];
 }
 
-const ProductModal = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
+const ProductModal = ({
+  isOpen,
+  onClose,
+  onSave,
   editingProduct,
   categories
 }: ProductModalProps) => {
@@ -49,8 +49,9 @@ const ProductModal = ({
     name: '',
     description: '',
     price: 0,
-    categoryId: 0,
+    categoryId: categories.length > 0 ? categories[0].id : 0,
     isAvailable: true,
+    imageUrl: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +71,7 @@ const ProductModal = ({
         price: 0,
         categoryId: categories.length > 0 ? categories[0].id : 0,
         isAvailable: true,
+        imageUrl: ''
       });
     }
   }, [editingProduct, categories]);
@@ -79,53 +81,71 @@ const ProductModal = ({
     
     // Validation
     if (!product.name.trim()) {
-      setError("Veuillez entrer un nom pour le produit.");
+      setError('Le nom du produit est requis.');
       return;
     }
     
     if (product.price <= 0) {
-      setError("Le prix doit être supérieur à zéro.");
+      setError('Le prix doit être supérieur à zéro.');
       return;
     }
     
-    if (product.categoryId === 0 && categories.length > 0) {
-      setError("Veuillez sélectionner une catégorie.");
+    if (!product.categoryId) {
+      setError('Veuillez sélectionner une catégorie.');
       return;
     }
     
     setIsLoading(true);
     setError(null);
     
+    // Trouver le nom de la catégorie
+    const category = categories.find(c => c.id === product.categoryId);
+    
     // Simuler une requête API
     setTimeout(() => {
-      const category = categories.find(c => c.id === product.categoryId);
-      const productWithCategoryName = {
+      onSave({
         ...product,
         categoryName: category?.name || ''
-      };
-      
-      onSave(productWithCategoryName);
+      });
       setIsLoading(false);
       onClose();
     }, 500);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setProduct(prev => ({
       ...prev,
-      [name]: name === 'price' ? parseFloat(value) || 0 : value
+      [name]: name === 'price' ? (value ? parseFloat(value) : 0) : value
+    }));
+  };
+
+  const handleSwitchChange = (checked: boolean) => {
+    setProduct(prev => ({
+      ...prev,
+      isAvailable: checked
+    }));
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setProduct(prev => ({
+      ...prev,
+      categoryId: parseInt(value)
     }));
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{editingProduct ? 'Modifier le produit' : 'Ajouter un produit'}</DialogTitle>
+          <DialogTitle>
+            {editingProduct ? 'Modifier le produit' : 'Ajouter un produit'}
+          </DialogTitle>
           <DialogDescription>
-            {editingProduct 
-              ? 'Modifiez les détails du produit.' 
+            {editingProduct
+              ? 'Modifiez les détails du produit.'
               : 'Ajoutez un nouveau produit à votre catalogue.'}
           </DialogDescription>
         </DialogHeader>
@@ -140,32 +160,38 @@ const ProductModal = ({
           
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">Nom</Label>
+              <Label htmlFor="name" className="text-right">
+                Nom
+              </Label>
               <Input
                 id="name"
                 name="name"
                 value={product.name}
                 onChange={handleChange}
                 className="col-span-3"
-                placeholder="Ex: Coca-Cola, Burger, etc."
+                placeholder="Nom du produit"
               />
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">Description</Label>
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
               <Textarea
                 id="description"
                 name="description"
-                value={product.description || ''}
+                value={product.description}
                 onChange={handleChange}
                 className="col-span-3"
-                placeholder="Description du produit (optionnel)"
+                placeholder="Description du produit..."
                 rows={3}
               />
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-right">Prix (Ar)</Label>
+              <Label htmlFor="price" className="text-right">
+                Prix (Ar)
+              </Label>
               <Input
                 id="price"
                 name="price"
@@ -173,62 +199,87 @@ const ProductModal = ({
                 value={product.price}
                 onChange={handleChange}
                 className="col-span-3"
-                placeholder="Ex: 5000"
                 min="0"
                 step="500"
               />
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="category" className="text-right">Catégorie</Label>
-              {categories.length > 0 ? (
-                <Select 
-                  value={product.categoryId.toString()} 
-                  onValueChange={(val) => setProduct(prev => ({ ...prev, categoryId: parseInt(val) }))}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Sélectionnez une catégorie" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="col-span-3 text-sm text-muted-foreground">
-                  Aucune catégorie disponible. Veuillez d'abord créer une catégorie.
-                </div>
-              )}
+              <Label htmlFor="category" className="text-right">
+                Catégorie
+              </Label>
+              <Select
+                value={product.categoryId.toString()}
+                onValueChange={handleCategoryChange}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Sélectionnez une catégorie" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem
+                      key={category.id}
+                      value={category.id.toString()}
+                      disabled={!category.isActive}
+                    >
+                      {category.name} {!category.isActive && '(inactive)'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="isAvailable" className="text-right">Disponible</Label>
+              <Label htmlFor="isAvailable" className="text-right">
+                Disponible
+              </Label>
               <div className="flex items-center space-x-2 col-span-3">
                 <Switch
                   id="isAvailable"
                   checked={product.isAvailable}
-                  onCheckedChange={(checked) => setProduct(prev => ({ ...prev, isAvailable: checked }))}
+                  onCheckedChange={handleSwitchChange}
                 />
                 <Label htmlFor="isAvailable" className="cursor-pointer">
-                  {product.isAvailable ? 'Produit disponible' : 'Produit indisponible'}
+                  {product.isAvailable ? 'Oui' : 'Non'}
                 </Label>
               </div>
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="imageUrl" className="text-right">Image URL</Label>
-              <Input
-                id="imageUrl"
-                name="imageUrl"
-                value={product.imageUrl || ''}
-                onChange={handleChange}
-                className="col-span-3"
-                placeholder="URL de l'image (optionnel)"
-              />
+              <Label htmlFor="imageUrl" className="text-right">
+                Image URL
+              </Label>
+              <div className="col-span-3 flex gap-2">
+                <Input
+                  id="imageUrl"
+                  name="imageUrl"
+                  value={product.imageUrl}
+                  onChange={handleChange}
+                  placeholder="URL de l'image (optionnel)"
+                />
+                {/* <Button type="button" variant="outline" size="icon" className="flex-shrink-0">
+                  <Upload className="h-4 w-4" />
+                </Button> */}
+              </div>
             </div>
+            
+            {product.imageUrl && (
+              <div className="grid grid-cols-4 gap-4">
+                <div className="text-right text-sm text-muted-foreground self-start pt-1">
+                  Aperçu
+                </div>
+                <div className="col-span-3 rounded-md overflow-hidden border border-input w-20 h-20">
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' viewBox=\'0 0 100 100\'%3e%3cpath fill=\'%23ccc\' d=\'M50 0a50 50 0 1 1 0 100A50 50 0 0 1 50 0zm-1 18c-1.82 0-3.53.5-5 1.35-2.86 1.72-4.8 4.86-4.8 8.44 0 5.4 4.4 9.8 9.8 9.8 5.4 0 9.8-4.4 9.8-9.8s-4.4-9.8-9.8-9.8zm0 44c-13.33 0-25 3.34-25 10v8h50v-8c0-6.66-11.67-10-25-10z\'/%3e%3c/svg%3e';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
           <DialogFooter>

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogFooter,
   DialogDescription
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 // Type pour les tables
 export interface POSTable {
@@ -25,16 +25,6 @@ export interface POSTable {
   currentOrderId?: number;
 }
 
-// Type pour les zones/sections
-const tableAreas = [
-  'Terrasse', 
-  'Intérieur', 
-  'VIP', 
-  'Bar',
-  'Lounge',
-  'Piste de danse'
-];
-
 interface TableManagementModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -42,40 +32,43 @@ interface TableManagementModalProps {
   editingTable: POSTable | null;
 }
 
-const TableManagementModal = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
-  editingTable 
+const TableManagementModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  editingTable
 }: TableManagementModalProps) => {
   const [table, setTable] = useState<POSTable>({
     id: 0,
     name: '',
     number: undefined,
-    area: tableAreas[0],
-    capacity: 4,
-    status: 'available',
-    currentOrderId: undefined
+    area: 'Intérieur',
+    capacity: 2,
+    status: 'available'
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const areaOptions = [
+    'Intérieur',
+    'Terrasse',
+    'VIP',
+    'Bar'
+  ];
+
   // Initialiser le formulaire lorsqu'on édite une table existante
   useEffect(() => {
     if (editingTable) {
-      setTable({
-        ...editingTable
-      });
+      setTable(editingTable);
     } else {
       // Réinitialiser pour une nouvelle table
       setTable({
         id: Date.now(),
         name: '',
         number: undefined,
-        area: tableAreas[0],
-        capacity: 4,
-        status: 'available',
-        currentOrderId: undefined
+        area: 'Intérieur',
+        capacity: 2,
+        status: 'available'
       });
     }
   }, [editingTable]);
@@ -84,14 +77,14 @@ const TableManagementModal = ({
     e.preventDefault();
     
     // Validation
-    if (!table.name.trim() && !table.number) {
-      setError("Veuillez entrer un nom ou un numéro pour la table.");
+    if (!table.name.trim()) {
+      setError('Le nom de la table est requis.');
       return;
     }
     
-    // Si le nom n'est pas rempli mais qu'il y a un numéro, générer un nom par défaut
-    if (!table.name.trim() && table.number) {
-      table.name = `Table ${table.number}`;
+    if (table.capacity <= 0) {
+      setError('La capacité doit être supérieure à zéro.');
+      return;
     }
     
     setIsLoading(true);
@@ -105,11 +98,33 @@ const TableManagementModal = ({
     }, 500);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { name, value } = e.target;
+    
+    if (name === 'capacity') {
+      setTable(prev => ({
+        ...prev,
+        capacity: value ? parseInt(value) : 0
+      }));
+    } else if (name === 'number') {
+      setTable(prev => ({
+        ...prev,
+        number: value ? parseInt(value) : undefined
+      }));
+    } else {
+      setTable(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleAreaChange = (value: string) => {
     setTable(prev => ({
       ...prev,
-      [name]: name === 'number' || name === 'capacity' ? parseInt(value) || undefined : value
+      area: value
     }));
   };
 
@@ -117,11 +132,13 @@ const TableManagementModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{editingTable ? 'Modifier la table' : 'Ajouter une table'}</DialogTitle>
+          <DialogTitle>
+            {editingTable ? 'Modifier la table' : 'Ajouter une table'}
+          </DialogTitle>
           <DialogDescription>
-            {editingTable 
-              ? 'Modifiez les détails de la table.' 
-              : 'Créez une nouvelle table dans votre établissement.'}
+            {editingTable
+              ? 'Modifiez les détails de la table.'
+              : 'Ajoutez une nouvelle table à votre établissement.'}
           </DialogDescription>
         </DialogHeader>
         
@@ -135,41 +152,48 @@ const TableManagementModal = ({
           
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">Nom</Label>
+              <Label htmlFor="name" className="text-right">
+                Nom
+              </Label>
               <Input
                 id="name"
                 name="name"
                 value={table.name}
                 onChange={handleChange}
                 className="col-span-3"
-                placeholder="Ex: VIP Gold, Table Fenêtre, etc."
+                placeholder="Ex: Table centrale, Comptoir, etc."
               />
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="number" className="text-right">Numéro</Label>
+              <Label htmlFor="number" className="text-right">
+                Numéro
+              </Label>
               <Input
                 id="number"
                 name="number"
                 type="number"
-                value={table.number || ''}
+                value={table.number === undefined ? '' : table.number}
                 onChange={handleChange}
                 className="col-span-3"
-                placeholder="Ex: 1, 2, 3, etc."
+                placeholder="Optionnel"
+                min="1"
               />
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="area" className="text-right">Zone</Label>
-              <Select 
-                value={table.area} 
-                onValueChange={(val) => setTable(prev => ({ ...prev, area: val }))}
+              <Label htmlFor="area" className="text-right">
+                Zone
+              </Label>
+              <Select
+                value={table.area}
+                onValueChange={handleAreaChange}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Sélectionnez une zone" />
                 </SelectTrigger>
                 <SelectContent>
-                  {tableAreas.map(area => (
+                  {areaOptions.map(area => (
                     <SelectItem key={area} value={area}>
                       {area}
                     </SelectItem>
@@ -179,7 +203,9 @@ const TableManagementModal = ({
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="capacity" className="text-right">Capacité</Label>
+              <Label htmlFor="capacity" className="text-right">
+                Capacité
+              </Label>
               <Input
                 id="capacity"
                 name="capacity"
@@ -187,30 +213,33 @@ const TableManagementModal = ({
                 value={table.capacity}
                 onChange={handleChange}
                 className="col-span-3"
-                placeholder="Ex: 4, 6, 8, etc."
                 min="1"
+                max="20"
+                placeholder="Nombre de places"
               />
             </div>
             
             {editingTable && (
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">Statut</Label>
-                <Select 
-                  value={table.status} 
-                  onValueChange={(val) => setTable(prev => ({ 
-                    ...prev, 
-                    status: val as 'available' | 'occupied' | 'reserved'
-                  }))}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Sélectionnez un statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="available">Disponible</SelectItem>
-                    <SelectItem value="occupied">Occupée</SelectItem>
-                    <SelectItem value="reserved">Réservée</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="text-right text-sm text-muted-foreground">
+                  Statut
+                </div>
+                <div className="col-span-3">
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    table.status === 'available' ? 'bg-green-100 text-green-800' :
+                    table.status === 'reserved' ? 'bg-orange-100 text-orange-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {table.status === 'available' ? 'Disponible' :
+                     table.status === 'reserved' ? 'Réservée' :
+                     'Occupée'}
+                  </span>
+                  {table.currentOrderId && (
+                    <span className="text-xs text-muted-foreground ml-2">
+                      Commande #{table.currentOrderId}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>
