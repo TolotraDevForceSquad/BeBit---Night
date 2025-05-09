@@ -29,6 +29,7 @@ import ClubsManagementPage from "./pages/admin/clubs-management-page";
 import POSManagementPage from "./pages/club/pos-management-page";
 import POSCatalogPage from "./pages/club/pos-catalog-page";
 import POSTablesPage from "./pages/club/pos-tables-page";
+import POSLoginPage from "./pages/club/pos-login-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -217,8 +218,19 @@ function App() {
                     <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = "/club/pos"}>
                       <h2 className="text-xl font-semibold mb-2">Gestion des points de vente</h2>
                       <p className="text-muted-foreground mb-4">Gérez vos terminaux POS, les utilisateurs et suivez vos ventes</p>
-                      <div className="bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-md text-center">
-                        Accéder aux POS
+                      <div className="flex space-x-2">
+                        <div className="bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-md text-center flex-1" onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = "/club/pos";
+                        }}>
+                          Administration
+                        </div>
+                        <div className="bg-orange-500 text-white hover:bg-orange-600 py-2 px-4 rounded-md text-center flex-1" onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = "/club/pos-login";
+                        }}>
+                          Se connecter
+                        </div>
                       </div>
                     </div>
                     
@@ -297,6 +309,10 @@ function App() {
             
             <Route path="/club/pos-tables">
               <POSTablesPage />
+            </Route>
+            
+            <Route path="/club/pos-login">
+              <POSLoginPage />
             </Route>
 
             <Route path="/club/create-event">
