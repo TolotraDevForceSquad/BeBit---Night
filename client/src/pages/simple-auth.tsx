@@ -49,13 +49,13 @@ export default function SimpleAuth() {
           username: loginUsername,
           role: 'artist'
         }));
-        window.location.href = "/user/explorer";
+        window.location.href = "/artist";
       } else if (loginUsername === "club_oxygen" && loginPassword === "password123") {
         localStorage.setItem('auth_user', JSON.stringify({
           username: loginUsername,
           role: 'club'
         }));
-        window.location.href = "/user/explorer";
+        window.location.href = "/club";
       } else if (loginUsername === "admin" && loginPassword === "adminpass123") {
         localStorage.setItem('auth_user', JSON.stringify({
           username: loginUsername,
@@ -107,6 +107,10 @@ export default function SimpleAuth() {
       // Redirection selon le type de compte
       if (registerRole === "admin") {
         window.location.href = "/admin/moderation";
+      } else if (registerRole === "club") {
+        window.location.href = "/club";
+      } else if (registerRole === "artist") {
+        window.location.href = "/artist";
       } else {
         window.location.href = "/user/explorer";
       }

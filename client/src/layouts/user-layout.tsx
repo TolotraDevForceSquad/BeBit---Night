@@ -39,9 +39,11 @@ export default function UserLayout({ children }: UserLayoutProps) {
     
     try {
       const userData = JSON.parse(user);
-      if (userData.role !== 'user') {
-        console.error('Accès non autorisé: rôle utilisateur requis');
-        window.location.href = "/auth";
+      // On permet l'accès à tous les types de compte (user, club, artist)
+      // Seul admin est géré différemment
+      if (userData.role === 'admin') {
+        // Rediriger l'admin vers son dashboard
+        window.location.href = "/admin";
         return null;
       }
       return userData;
