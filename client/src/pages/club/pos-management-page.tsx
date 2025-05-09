@@ -93,10 +93,18 @@ const POSManagementPage = () => {
     
     // Simule une requête API pour changer le statut
     setTimeout(() => {
-      const newStatus = device.status === "online" ? "offline" : "online";
-      const updatedDevices = devices.map(d => 
-        d.id === device.id ? { ...d, status: newStatus } : d
-      );
+      const newStatus = device.status === "online" ? "offline" as const : "online" as const;
+      
+      // Création d'un nouvel array strictement typé
+      const updatedDevices: POSDevice[] = devices.map(d => {
+        if (d.id === device.id) {
+          return { 
+            ...d, 
+            status: newStatus 
+          };
+        }
+        return d;
+      });
       
       setDevices(updatedDevices);
       setIsLoading(false);
@@ -121,7 +129,7 @@ const POSManagementPage = () => {
     
     // Simule une requête API pour supprimer l'appareil
     setTimeout(() => {
-      const updatedDevices = devices.filter(d => d.id !== deviceToDelete.id);
+      const updatedDevices: POSDevice[] = devices.filter(d => d.id !== deviceToDelete.id);
       setDevices(updatedDevices);
       setIsLoading(false);
       setIsDeleteModalOpen(false);
@@ -141,7 +149,7 @@ const POSManagementPage = () => {
     
     // Simule une requête API pour ajouter/mettre à jour l'appareil
     setTimeout(() => {
-      let updatedDevices;
+      let updatedDevices: POSDevice[];
       const isNew = !devices.some(d => d.id === device.id);
       
       if (isNew) {
