@@ -26,6 +26,7 @@ import ArtistsManagementPage from "./pages/admin/artists-management-page";
 import EventsManagementPage from "./pages/admin/events-management-page";
 import AdminSettingsPage from "./pages/admin/settings-page";
 import ClubsManagementPage from "./pages/admin/clubs-management-page";
+import POSManagementPage from "./pages/club/pos-management-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -208,7 +209,33 @@ function App() {
               <ResponsiveLayout>
                 <div className="p-8">
                   <h1 className="text-3xl font-bold mb-6">Dashboard Club</h1>
-                  <p className="text-lg">Gérez vos événements</p>
+                  <p className="text-lg">Gérez vos événements et votre établissement</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border">
+                      <h2 className="text-xl font-semibold mb-2">Gestion des points de vente</h2>
+                      <p className="text-muted-foreground mb-4">Gérez vos terminaux POS, les utilisateurs et suivez vos ventes</p>
+                      <Button onClick={() => window.location.href = "/club/pos"}>
+                        Accéder aux POS
+                      </Button>
+                    </div>
+                    
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border">
+                      <h2 className="text-xl font-semibold mb-2">Créer un événement</h2>
+                      <p className="text-muted-foreground mb-4">Planifiez et publiez un nouvel événement dans votre club</p>
+                      <Button variant="outline" onClick={() => window.location.href = "/club/create-event"}>
+                        Nouvel événement
+                      </Button>
+                    </div>
+                    
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border">
+                      <h2 className="text-xl font-semibold mb-2">Réservations de tables</h2>
+                      <p className="text-muted-foreground mb-4">Consultez et gérez les réservations de tables</p>
+                      <Button variant="outline" onClick={() => window.location.href = "/club/reservations"}>
+                        Gérer les réservations
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </ResponsiveLayout>
             </Route>
@@ -256,6 +283,10 @@ function App() {
                   <p className="text-lg">Gérez les réservations de tables</p>
                 </div>
               </ResponsiveLayout>
+            </Route>
+            
+            <Route path="/club/pos">
+              <POSManagementPage />
             </Route>
 
             <Route path="/club/create-event">
