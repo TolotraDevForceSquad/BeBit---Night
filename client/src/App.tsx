@@ -212,28 +212,28 @@ function App() {
                   <p className="text-lg">Gérez vos événements et votre établissement</p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border">
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = "/club/pos"}>
                       <h2 className="text-xl font-semibold mb-2">Gestion des points de vente</h2>
                       <p className="text-muted-foreground mb-4">Gérez vos terminaux POS, les utilisateurs et suivez vos ventes</p>
-                      <Button onClick={() => window.location.href = "/club/pos"}>
+                      <div className="bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-md text-center">
                         Accéder aux POS
-                      </Button>
+                      </div>
                     </div>
                     
-                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border">
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = "/club/create-event"}>
                       <h2 className="text-xl font-semibold mb-2">Créer un événement</h2>
                       <p className="text-muted-foreground mb-4">Planifiez et publiez un nouvel événement dans votre club</p>
-                      <Button variant="outline" onClick={() => window.location.href = "/club/create-event"}>
+                      <div className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 px-4 rounded-md text-center">
                         Nouvel événement
-                      </Button>
+                      </div>
                     </div>
                     
-                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border">
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = "/club/reservations"}>
                       <h2 className="text-xl font-semibold mb-2">Réservations de tables</h2>
                       <p className="text-muted-foreground mb-4">Consultez et gérez les réservations de tables</p>
-                      <Button variant="outline" onClick={() => window.location.href = "/club/reservations"}>
+                      <div className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 px-4 rounded-md text-center">
                         Gérer les réservations
-                      </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
