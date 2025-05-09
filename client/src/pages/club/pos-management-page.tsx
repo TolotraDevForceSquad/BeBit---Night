@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import ResponsiveLayout from '../../layouts/ResponsiveLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { useToast } from "../../hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Search, PlusCircle, Terminal, UserPlus, FileCog, Settings, Package, History, Smartphone, Banknote, User, CreditCard } from 'lucide-react';
+import { Search, PlusCircle, Terminal, UserPlus, FileCog, Settings, Package, History, Smartphone, Banknote, User, CreditCard, Trash } from 'lucide-react';
+import POSManagementModal, { POSDevice } from '../../components/POSManagementModal';
+import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
 
 // Données fictives pour les appareils POS
-const posDevices = [
+const posDevices: POSDevice[] = [
   { id: 1, name: "POS Principal", location: "Entrée", status: "online", lastActive: "Il y a 5 minutes", sales: 152000 },
   { id: 2, name: "POS Bar", location: "Bar central", status: "online", lastActive: "Il y a 2 minutes", sales: 98500 },
   { id: 3, name: "POS VIP", location: "Lounge VIP", status: "online", lastActive: "Il y a 8 minutes", sales: 235000 },
@@ -47,13 +50,22 @@ const paymentMethodsData = [
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
 const POSManagementPage = () => {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
-
+  
+  // États pour les modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editingDevice, setEditingDevice] = useState<POSDevice | null>(null);
+  const [deviceToDelete, setDeviceToDelete] = useState<POSDevice | null>(null);
+  const [devices, setDevices] = useState<POSDevice[]>(posDevices);
+  const [isLoading, setIsLoading] = useState(false);
+  
   // Filtrer les appareils POS en fonction des filtres
-  const filteredDevices = posDevices.filter(device => {
+  const filteredDevices = devices.filter(device => {
     const matchesSearch = device.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           device.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || device.status === statusFilter;
@@ -63,7 +75,97 @@ const POSManagementPage = () => {
   });
 
   // Obtenir les localisations uniques pour le filtre
-  const uniqueLocations = Array.from(new Set(posDevices.map(device => device.location)));
+  const uniqueLocations = Array.from(new Set(devices.map(device => device.location)));
+  
+  // Gestion des actions sur les terminaux POS
+  const handleAddDevice = useCallback(() => {
+    setEditingDevice(null);
+    setIsAddModalOpen(true);
+  }, []);
+  
+  const handleEditDevice = useCallback((device: POSDevice) => {
+    setEditingDevice(device);
+    setIsAddModalOpen(true);
+  }, []);
+  
+  const handleToggleDeviceStatus = useCallback((device: POSDevice) => {
+    setIsLoading(true);
+    
+    // Simule une requête API pour changer le statut
+    setTimeout(() => {
+      const newStatus = device.status === "online" ? "offline" : "online";
+      const updatedDevices = devices.map(d => 
+        d.id === device.id ? { ...d, status: newStatus } : d
+      );
+      
+      setDevices(updatedDevices);
+      setIsLoading(false);
+      
+      toast({
+        title: `Terminal ${newStatus === "online" ? "activé" : "désactivé"}`,
+        description: `Le terminal "${device.name}" a été ${newStatus === "online" ? "activé" : "désactivé"} avec succès.`,
+        variant: newStatus === "online" ? "default" : "destructive",
+      });
+    }, 500);
+  }, [devices, toast]);
+  
+  const handleDeleteDevice = useCallback((device: POSDevice) => {
+    setDeviceToDelete(device);
+    setIsDeleteModalOpen(true);
+  }, []);
+  
+  const confirmDeleteDevice = useCallback(() => {
+    if (!deviceToDelete) return;
+    
+    setIsLoading(true);
+    
+    // Simule une requête API pour supprimer l'appareil
+    setTimeout(() => {
+      const updatedDevices = devices.filter(d => d.id !== deviceToDelete.id);
+      setDevices(updatedDevices);
+      setIsLoading(false);
+      setIsDeleteModalOpen(false);
+      
+      toast({
+        title: "Terminal supprimé",
+        description: `Le terminal "${deviceToDelete.name}" a été supprimé avec succès.`,
+        variant: "default",
+      });
+      
+      setDeviceToDelete(null);
+    }, 500);
+  }, [deviceToDelete, devices, toast]);
+  
+  const handleSaveDevice = useCallback((device: POSDevice) => {
+    setIsLoading(true);
+    
+    // Simule une requête API pour ajouter/mettre à jour l'appareil
+    setTimeout(() => {
+      let updatedDevices;
+      const isNew = !devices.some(d => d.id === device.id);
+      
+      if (isNew) {
+        // Ajout d'un nouvel appareil
+        updatedDevices = [...devices, device];
+        toast({
+          title: "Terminal ajouté",
+          description: `Le terminal "${device.name}" a été ajouté avec succès.`,
+          variant: "default",
+        });
+      } else {
+        // Mise à jour d'un appareil existant
+        updatedDevices = devices.map(d => d.id === device.id ? device : d);
+        toast({
+          title: "Terminal mis à jour",
+          description: `Le terminal "${device.name}" a été mis à jour avec succès.`,
+          variant: "default",
+        });
+      }
+      
+      setDevices(updatedDevices);
+      setIsLoading(false);
+    }, 500);
+  }, [devices, toast]);
 
   return (
     <ResponsiveLayout>
@@ -186,7 +288,10 @@ const POSManagementPage = () => {
                     <CardDescription>Gérez vos appareils de point de vente</CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 bg-primary text-primary-foreground hover:bg-primary/90">
+                    <button 
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 bg-primary text-primary-foreground hover:bg-primary/90"
+                      onClick={() => handleAddDevice()}
+                    >
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Ajouter un terminal
                     </button>
@@ -268,17 +373,26 @@ const POSManagementPage = () => {
                             <td className="p-4 align-middle">{device.sales.toLocaleString()} Ar</td>
                             <td className="p-4 align-middle">
                               <div className="flex space-x-2">
-                                <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0">
+                                <button 
+                                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
+                                  onClick={() => handleEditDevice(device)}
+                                >
+                                  <Settings className="h-4 w-4" />
+                                  <span className="sr-only">Modifier</span>
+                                </button>
+                                <button 
+                                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0"
+                                  onClick={() => handleToggleDeviceStatus(device)}
+                                >
                                   <Terminal className="h-4 w-4" />
-                                  <span className="sr-only">Configurer</span>
+                                  <span className="sr-only">Activer/Désactiver</span>
                                 </button>
-                                <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0">
-                                  <UserPlus className="h-4 w-4" />
-                                  <span className="sr-only">Affecter</span>
-                                </button>
-                                <button className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0">
-                                  <FileCog className="h-4 w-4" />
-                                  <span className="sr-only">Historique</span>
+                                <button 
+                                  className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 w-8 p-0"
+                                  onClick={() => handleDeleteDevice(device)}
+                                >
+                                  <Trash className="h-4 w-4" />
+                                  <span className="sr-only">Supprimer</span>
                                 </button>
                               </div>
                             </td>
@@ -516,6 +630,25 @@ const POSManagementPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Modal pour l'ajout/modification de terminaux POS */}
+      <POSManagementModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleSaveDevice}
+        editingDevice={editingDevice}
+        locations={uniqueLocations}
+      />
+      
+      {/* Modal de confirmation de suppression */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDeleteDevice}
+        title="Supprimer le terminal"
+        description={`Êtes-vous sûr de vouloir supprimer le terminal "${deviceToDelete?.name}" ? Cette action est irréversible.`}
+        isLoading={isLoading}
+      />
     </ResponsiveLayout>
   );
 };
