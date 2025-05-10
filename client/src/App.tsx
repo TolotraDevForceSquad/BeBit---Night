@@ -30,6 +30,7 @@ import POSManagementPage from "./pages/club/pos-management-page";
 import POSCatalogPage from "./pages/club/pos-catalog-page";
 import POSTablesPage from "./pages/club/pos-tables-page";
 import POSLoginPage from "./pages/club/pos-login-page";
+import POSKitchenPage from "./pages/club/pos-kitchen-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -325,6 +326,15 @@ function App() {
             
             <Route path="/club/pos-login">
               <POSLoginPage />
+            </Route>
+            
+            <Route path="/club/pos-kitchen">
+              <POSKitchenPage />
+            </Route>
+            
+            {/* Alias pour faciliter l'accès */}
+            <Route path="/club/kitchen">
+              <POSKitchenPage />
             </Route>
 
             <Route path="/club/create-event">

@@ -1,7 +1,17 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useMobile } from "../hooks/use-mobile";
+import { Link, useLocation } from "wouter";
 import { Button } from "../components/ui/button";
-import { LogOut, ShieldAlert, Terminal, Clock } from "lucide-react";
+import { 
+  LogOut, 
+  ShieldAlert, 
+  Terminal, 
+  Clock, 
+  Home as HomeIcon, 
+  ListOrdered as ListOrderedIcon,
+  LayoutGrid as LayoutGridIcon,
+  Utensils as UtensilsIcon
+} from "lucide-react";
 
 interface POSLayoutProps {
   children: ReactNode;
@@ -15,6 +25,7 @@ export default function POSLayout({
   showHeader = true
 }: POSLayoutProps) {
   const isMobile = useMobile();
+  const [location] = useLocation();
   const [user, setUser] = useState<any>(null);
   const [posSession, setPosSession] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState<string>("");
