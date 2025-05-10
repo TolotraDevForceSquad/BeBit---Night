@@ -32,6 +32,8 @@ import POSTablesPage from "./pages/club/pos-tables-page";
 import POSLoginPage from "./pages/club/pos-login-page";
 import POSKitchenPage from "./pages/club/pos-kitchen-page";
 import POSHistoryPage from "./pages/club/pos-history-page";
+import BIDashboardPage from "./pages/club/bi-dashboard-page";
+import FindArtistsPage from "./pages/club/find-artists-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -216,6 +218,21 @@ function App() {
                   <h1 className="text-3xl font-bold mb-6">Dashboard Club</h1>
                   <p className="text-lg">Gérez vos événements et votre établissement</p>
                   
+                  <div className="bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-950 dark:to-violet-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800 mb-8">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                      <div>
+                        <h2 className="text-xl font-semibold text-blue-800 dark:text-blue-300">Business Intelligence avancée</h2>
+                        <p className="text-blue-700 dark:text-blue-400 mt-1">Accédez à des statistiques détaillées, des prévisions et des recommandations d'optimisation</p>
+                      </div>
+                      <Link 
+                        href="/club/bi-dashboard" 
+                        className="mt-3 md:mt-0 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-6 py-2 rounded-md font-medium"
+                      >
+                        Consulter les analyses
+                      </Link>
+                    </div>
+                  </div>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                     <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow">
                       <h2 className="text-xl font-semibold mb-2">Gestion des points de vente</h2>
@@ -272,12 +289,7 @@ function App() {
             </Route>
             
             <Route path="/club/find-artists">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Rechercher des artistes</h1>
-                  <p className="text-lg">Trouvez des artistes pour vos événements</p>
-                </div>
-              </ResponsiveLayout>
+              <FindArtistsPage />
             </Route>
             
             <Route path="/club/invitations">
@@ -363,6 +375,10 @@ function App() {
             {/* Alias pour faciliter l'accès */}
             <Route path="/club/history">
               <POSHistoryPage />
+            </Route>
+            
+            <Route path="/club/bi-dashboard">
+              <BIDashboardPage />
             </Route>
 
             <Route path="/club/create-event">

@@ -1,499 +1,550 @@
-import React, { useState } from "react";
-import { Search, Filter, Star, Music, Clock, Map, MapPin, Coins } from "lucide-react";
-import ClubLayout from "../../layouts/club-layout";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { fr } from 'date-fns/locale';
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Badge } from "../../components/ui/badge";
+import { Switch } from "../../components/ui/switch";
+import { Slider } from "../../components/ui/slider";
+import { Separator } from "../../components/ui/separator";
+import ResponsiveLayout from "../../layouts/ResponsiveLayout";
+import { useToast } from "../../hooks/use-toast";
+import {
+  Search,
+  Star,
+  Mail,
+  Calendar,
+  Users,
+  Music,
+  Mic,
+  Headphones,
+  Award,
+  Disc,
+  Bookmark,
+  MapPin,
+  Globe,
+  Flame,
+  Filter,
+  Clock,
+  Heart
+} from 'lucide-react';
 
-// Types
-type Artist = {
+// Types pour les artistes
+interface Artist {
   id: number;
   name: string;
-  genre: string;
+  avatarUrl: string;
   rating: number;
-  profileImage: string;
+  genres: string[];
   location: string;
-  bio: string;
+  experience: number;
   fee: number;
-  bookings: number;
-  performances: Performance[];
-};
+  bio: string;
+  specialties: string[];
+  socialFollowers: number;
+  availability: boolean;
+  followers: number;
+  featured: boolean;
+  verified: boolean;
+  performances: number;
+  portfolio: {
+    image: string;
+    title: string;
+  }[];
+}
 
-type Performance = {
-  id: number;
-  title: string;
-  venue: string;
-  date: string;
-  image: string;
-};
-
-const mockArtists: Artist[] = [
+// Données fictives pour les artistes
+const artistsData: Artist[] = [
   {
     id: 1,
     name: "DJ Elektra",
-    genre: "Électronique",
+    avatarUrl: "https://randomuser.me/api/portraits/women/44.jpg",
     rating: 4.8,
-    profileImage: "https://images.unsplash.com/photo-1520483601560-389dff434fdf?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjN8fGNsdWIlMjBkanhcXHxlbnwwfHwwfHx8Mg%3D%3D",
-    location: "Antananarivo",
-    bio: "DJ professionnel avec plus de 5 ans d'expérience dans les clubs et festivals. Spécialiste en house et techno.",
-    fee: 250000,
-    bookings: 28,
-    performances: [
-      {
-        id: 101,
-        title: "Summer Night Fever",
-        venue: "Club Oxygen",
-        date: "2025-02-15",
-        image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZWxlY3Ryb25pYyUyMG11c2ljfGVufDB8fDB8fHwy"
-      },
-      {
-        id: 102,
-        title: "Electric Dreams",
-        venue: "Festival MFM",
-        date: "2024-12-20",
-        image: "https://images.unsplash.com/photo-1642114021434-cc31ac421656?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTl8fG5pZ2h0Y2x1YnxlbnwwfHwwfHx8Mg%3D%3D"
-      }
+    genres: ["House", "Techno", "EDM"],
+    location: "Paris",
+    experience: 7,
+    fee: 120000,
+    bio: "DJ Elektra crée des sets électrisants qui font vibrer les foules. Spécialiste de la house et de la techno, elle a joué dans les meilleurs clubs d'Europe.",
+    specialties: ["Live Mixing", "Crowd Engagement"],
+    socialFollowers: 45000,
+    availability: true,
+    followers: 28500,
+    featured: true,
+    verified: true,
+    performances: 210,
+    portfolio: [
+      { image: "https://images.unsplash.com/photo-1516223725307-6f76b9ec8742", title: "Festival Électronique 2023" },
+      { image: "https://images.unsplash.com/photo-1571397133301-3f1b6ae86085", title: "Club Underground" }
     ]
   },
   {
     id: 2,
-    name: "Ambiance Masters",
-    genre: "Variété",
+    name: "Sax Master",
+    avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
     rating: 4.6,
-    profileImage: "https://images.unsplash.com/photo-1587825045005-c59de205cf7a?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTM3fHxiYW5kfGVufDB8fDB8fHwy",
-    location: "Toamasina",
-    bio: "Groupe de variété avec un large répertoire international et malgache. Parfait pour les ambiances festives.",
-    fee: 180000,
-    bookings: 42,
-    performances: [
-      {
-        id: 201,
-        title: "Soirée Gala",
-        venue: "Hôtel Carlton",
-        date: "2025-01-25",
-        image: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGxpdmUlMjBiYW5kfGVufDB8fDB8fHwy"
-      }
+    genres: ["Jazz", "Funk", "Soul"],
+    location: "Lyon",
+    experience: 12,
+    fee: 95000,
+    bio: "Saxophoniste virtuose avec plus de 12 ans d'expérience, créant une ambiance sophistiquée pour votre événement. Parfait pour les soirées jazz et lounge.",
+    specialties: ["Improvisation", "Live Collaborations"],
+    socialFollowers: 22000,
+    availability: true,
+    followers: 15600,
+    featured: false,
+    verified: true,
+    performances: 340,
+    portfolio: [
+      { image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae", title: "Jazz Club Melody" },
+      { image: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c", title: "Festival de Jazz" }
     ]
   },
   {
     id: 3,
-    name: "Lazah Bros",
-    genre: "Hip-Hop",
-    rating: 4.7,
-    profileImage: "https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjR8fGhpcCUyMGhvcCUyMGFydGlzdHxlbnwwfHwwfHx8Mg%3D%3D",
-    location: "Antananarivo",
-    bio: "Duo de rap avec des productions originales et des remix populaires. Énergie garantie sur scène.",
-    fee: 220000,
-    bookings: 36,
-    performances: [
-      {
-        id: 301,
-        title: "Hip-Hop Night",
-        venue: "Urban Space",
-        date: "2025-03-05",
-        image: "https://images.unsplash.com/photo-1544616326-a041468f4ad0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDB8fGhpcCUyMGhvcHxlbnwwfHwwfHx8Mg%3D%3D"
-      },
-      {
-        id: 302,
-        title: "Street Culture Festival",
-        venue: "Place de l'Indépendance",
-        date: "2024-12-15",
-        image: "https://images.unsplash.com/photo-1537172518061-cb3f33022035?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGhpcCUyMGhvcHxlbnwwfHwwfHx8Mg%3D%3D"
-      }
+    name: "Melodic Vibes",
+    avatarUrl: "https://randomuser.me/api/portraits/women/68.jpg",
+    rating: 4.9,
+    genres: ["Pop", "R&B", "Acoustic"],
+    location: "Marseille",
+    experience: 5,
+    fee: 85000,
+    bio: "Chanteuse à la voix envoûtante, parfaite pour créer une ambiance chaleureuse et émotionnelle. Son répertoire varié s'adapte à tous types d'événements.",
+    specialties: ["Vocals", "Acoustic Guitar"],
+    socialFollowers: 38000,
+    availability: false,
+    followers: 42300,
+    featured: true,
+    verified: true,
+    performances: 180,
+    portfolio: [
+      { image: "https://images.unsplash.com/photo-1460723237783-e82e7e6f2535", title: "Concert Live" },
+      { image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819", title: "Soirée Acoustique" }
     ]
   },
   {
     id: 4,
-    name: "Zana Jazz Quartet",
-    genre: "Jazz",
-    rating: 4.9,
-    profileImage: "https://images.unsplash.com/photo-1574791325739-3060fa18b75d?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGphenolMjBiYW5kfGVufDB8fDB8fHwy",
-    location: "Antsiranana",
-    bio: "Quartet de jazz fusion mêlant influences traditionnelles malgaches et jazz contemporain.",
-    fee: 300000,
-    bookings: 22,
-    performances: [
-      {
-        id: 401,
-        title: "Jazz & Soul Evening",
-        venue: "Le Louvre",
-        date: "2025-02-28",
-        image: "https://images.unsplash.com/photo-1576096876569-5dcd9a84389a?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGphenolMjBtdXNpY3xlbnwwfHwwfHx8Mg%3D%3D"
-      }
+    name: "Beat Collective",
+    avatarUrl: "https://randomuser.me/api/portraits/men/75.jpg",
+    rating: 4.7,
+    genres: ["Hip-Hop", "Trap", "Reggaeton"],
+    location: "Nice",
+    experience: 6,
+    fee: 110000,
+    bio: "Groupe de trois DJ spécialistes des rythmes urbains. Leur énergie contagieuse et leur maîtrise des transitions sont parfaites pour les soirées endiablées.",
+    specialties: ["Scratch", "Mashups"],
+    socialFollowers: 62000,
+    availability: true,
+    followers: 54100,
+    featured: false,
+    verified: true,
+    performances: 220,
+    portfolio: [
+      { image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a", title: "Festival Urbain" },
+      { image: "https://images.unsplash.com/photo-1563841930606-67e2bce48b78", title: "Club Night" }
     ]
   },
   {
     id: 5,
-    name: "DJ Salama",
-    genre: "Afro House",
+    name: "Electric Strings",
+    avatarUrl: "https://randomuser.me/api/portraits/women/22.jpg",
     rating: 4.5,
-    profileImage: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjB8fGFmcmljYW4lMjBkanhcXHxlbnwwfHwwfHx8Mg%3D%3D",
-    location: "Mahajanga",
-    bio: "DJ mêlant rythmes africains et house moderne. Crée une ambiance unique et dansante pour tous types d'événements.",
-    fee: 200000,
-    bookings: 31,
-    performances: [
-      {
-        id: 501,
-        title: "Afro Beach Party",
-        venue: "Mahajanga Beach",
-        date: "2025-01-10",
-        image: "https://images.unsplash.com/photo-1531568209242-78aa174b4a68?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fGFmcmljYW4lMjBkanhcXHxlbnwwfHwwfHx8Mg%3D%3D"
-      },
-      {
-        id: 502,
-        title: "Sunset Sessions",
-        venue: "La Terrasse",
-        date: "2024-12-28",
-        image: "https://images.unsplash.com/photo-1517457210348-703079e57d4b?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDR8fHN1bnNldCUyMGRqfGVufDB8fDB8fHwy"
-      }
+    genres: ["Classical", "Electronic", "Fusion"],
+    location: "Bordeaux",
+    experience: 8,
+    fee: 130000,
+    bio: "Violoniste innovante fusionnant musique classique et électronique. Son approche unique crée une expérience sonore inoubliable pour des événements sophistiqués.",
+    specialties: ["Violin Loop", "Electronic Fusion"],
+    socialFollowers: 29000,
+    availability: true,
+    followers: 18700,
+    featured: false,
+    verified: true,
+    performances: 160,
+    portfolio: [
+      { image: "https://images.unsplash.com/photo-1465821185615-20b3c2fbf41b", title: "Fusion Électronique" },
+      { image: "https://images.unsplash.com/photo-1514119412350-e174d90d280e", title: "Concert Privé" }
     ]
   }
 ];
 
-export default function FindArtistsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [genreFilter, setGenreFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [artists, setArtists] = useState(mockArtists);
-  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
-  const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
-  const [bookingMessage, setBookingMessage] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Filtrer les artistes en fonction des critères de recherche
-  const filteredArtists = artists.filter(artist => {
-    const matchesSearch = artist.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          artist.genre.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGenre = genreFilter === "all" || artist.genre === genreFilter;
-    const matchesLocation = locationFilter === "all" || artist.location === locationFilter;
-    
-    return matchesSearch && matchesGenre && matchesLocation;
+// Formatage monétaire
+const formatCurrency = (value: number) => {
+  return (value/100).toLocaleString('fr-FR', {
+    style: 'currency',
+    currency: 'MGA',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   });
+};
 
-  // Obtenir les valeurs uniques pour les filtres
-  const genres = Array.from(new Set(artists.map(artist => artist.genre)));
-  const locations = Array.from(new Set(artists.map(artist => artist.location)));
-
-  const handleViewArtist = (artist: Artist) => {
-    setSelectedArtist(artist);
-  };
-
-  const handleBookArtist = (artistId: number) => {
-    const artist = artists.find(a => a.id === artistId);
-    if (artist) {
-      setSelectedArtist(artist);
-      setIsDialogOpen(true);
+const FindArtistsPage = () => {
+  const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [genreFilter, setGenreFilter] = useState('all');
+  const [priceRange, setPriceRange] = useState([50000, 150000]);
+  const [availabilityFilter, setAvailabilityFilter] = useState(false);
+  const [ratingFilter, setRatingFilter] = useState(0);
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [savedArtists, setSavedArtists] = useState<number[]>([]);
+  
+  // Filtrer les artistes selon les critères
+  const filteredArtists = artistsData.filter(artist => {
+    const matchesSearch = artist.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          artist.bio.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          artist.genres.some(g => g.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesGenre = genreFilter === 'all' || artist.genres.includes(genreFilter);
+    const matchesPrice = artist.fee >= priceRange[0] && artist.fee <= priceRange[1];
+    const matchesAvailability = !availabilityFilter || artist.availability;
+    const matchesRating = artist.rating >= ratingFilter;
+    const matchesLocation = locationFilter === 'all' || artist.location === locationFilter;
+    
+    return matchesSearch && matchesGenre && matchesPrice && 
+           matchesAvailability && matchesRating && matchesLocation;
+  });
+  
+  // Enregistrer/supprimer un artiste des favoris
+  const toggleSaveArtist = (id: number) => {
+    if (savedArtists.includes(id)) {
+      setSavedArtists(savedArtists.filter(artistId => artistId !== id));
+      toast({
+        title: "Artiste retiré des favoris",
+        description: "L'artiste a été retiré de votre liste de favoris",
+      });
+    } else {
+      setSavedArtists([...savedArtists, id]);
+      toast({
+        title: "Artiste ajouté aux favoris",
+        description: "L'artiste a été ajouté à votre liste de favoris",
+      });
     }
   };
-
-  const handleSubmitBooking = () => {
-    if (!selectedArtist || !bookingDate) return;
-    
-    console.log({
-      artistId: selectedArtist.id,
-      artistName: selectedArtist.name,
-      date: bookingDate,
-      message: bookingMessage
+  
+  // Envoyer une invitation à un artiste
+  const inviteArtist = (artistName: string) => {
+    toast({
+      title: "Invitation envoyée",
+      description: `Votre invitation a été envoyée à ${artistName}`,
+      variant: "default",
     });
-    
-    alert(`Demande de réservation envoyée à ${selectedArtist.name} pour le ${format(bookingDate, 'dd/MM/yyyy')}`);
-    setIsDialogOpen(false);
-    setBookingDate(undefined);
-    setBookingMessage("");
   };
-
+  
   return (
-    <ClubLayout>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6">Rechercher des Artistes</h1>
-        
-        {/* Barre de recherche */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Rechercher un artiste par nom ou genre..."
-            className="pl-10 pr-4 py-2"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        
-        {/* Filtres */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <Select value={genreFilter} onValueChange={setGenreFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Genre musical" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les genres</SelectItem>
-                {genres.map(genre => (
-                  <SelectItem key={genre} value={genre}>{genre}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <ResponsiveLayout>
+      <div className="p-8">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">Rechercher des artistes</h1>
+            <p className="text-lg text-muted-foreground mt-1">Trouvez des talents pour vos événements</p>
           </div>
           
-          <div className="flex-1">
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Localisation" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes les villes</SelectItem>
-                {locations.map(location => (
-                  <SelectItem key={location} value={location}>{location}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex mt-4 lg:mt-0 space-x-2">
+            <Button variant="outline">
+              <Heart className="h-4 w-4 mr-2" />
+              {savedArtists.length} favoris
+            </Button>
+            <Button variant="default">
+              <Mail className="h-4 w-4 mr-2" />
+              Invitations en cours
+            </Button>
           </div>
         </div>
         
-        {/* Résultats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Barre de recherche principale */}
+        <div className="relative mb-8">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            className="pl-10 py-6"
+            placeholder="Rechercher par nom, genre ou compétences..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          
+          <Button 
+            className="absolute right-1 top-1/2 -translate-y-1/2"
+            variant="ghost"
+            onClick={() => setSearchQuery('')}
+          >
+            {searchQuery && 'Effacer'}
+          </Button>
+        </div>
+        
+        {/* Filtres avancés */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center">
+              <Filter className="h-5 w-5 mr-2 text-muted-foreground" />
+              <CardTitle>Filtres avancés</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <Label htmlFor="genre">Genre musical</Label>
+                <Select value={genreFilter} onValueChange={setGenreFilter}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Tous les genres" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les genres</SelectItem>
+                    <SelectItem value="House">House</SelectItem>
+                    <SelectItem value="Techno">Techno</SelectItem>
+                    <SelectItem value="EDM">EDM</SelectItem>
+                    <SelectItem value="Jazz">Jazz</SelectItem>
+                    <SelectItem value="Funk">Funk</SelectItem>
+                    <SelectItem value="Pop">Pop</SelectItem>
+                    <SelectItem value="R&B">R&B</SelectItem>
+                    <SelectItem value="Hip-Hop">Hip-Hop</SelectItem>
+                    <SelectItem value="Classical">Classique</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="location">Localisation</Label>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Toutes les villes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes les villes</SelectItem>
+                    <SelectItem value="Paris">Paris</SelectItem>
+                    <SelectItem value="Lyon">Lyon</SelectItem>
+                    <SelectItem value="Marseille">Marseille</SelectItem>
+                    <SelectItem value="Nice">Nice</SelectItem>
+                    <SelectItem value="Bordeaux">Bordeaux</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="rating">Note minimale</Label>
+                <Select value={ratingFilter.toString()} onValueChange={(val) => setRatingFilter(Number(val))}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Toutes les notes" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Toutes les notes</SelectItem>
+                    <SelectItem value="3">3+ étoiles</SelectItem>
+                    <SelectItem value="4">4+ étoiles</SelectItem>
+                    <SelectItem value="4.5">4.5+ étoiles</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <Label>Fourchette de prix</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {formatCurrency(priceRange[0])} - {formatCurrency(priceRange[1])}
+                  </span>
+                </div>
+                <Slider
+                  defaultValue={[50000, 150000]}
+                  max={200000}
+                  min={0}
+                  step={5000}
+                  value={priceRange}
+                  onValueChange={setPriceRange}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="available" 
+                  checked={availabilityFilter}
+                  onCheckedChange={setAvailabilityFilter}
+                />
+                <Label htmlFor="available" className="cursor-pointer">Disponibles uniquement</Label>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Résultats de recherche */}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            {filteredArtists.length} {filteredArtists.length > 1 ? 'artistes' : 'artiste'} trouvé{filteredArtists.length > 1 ? 's' : ''}
+          </h2>
+          
+          <Select defaultValue="rating">
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Trier par" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="rating">Note (décroissante)</SelectItem>
+              <SelectItem value="price_low">Prix (croissant)</SelectItem>
+              <SelectItem value="price_high">Prix (décroissant)</SelectItem>
+              <SelectItem value="experience">Expérience</SelectItem>
+              <SelectItem value="popularity">Popularité</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {filteredArtists.length > 0 ? (
             filteredArtists.map(artist => (
               <Card key={artist.id} className="overflow-hidden">
-                <CardHeader className="p-0 relative h-48">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
-                  <img 
-                    src={artist.profileImage} 
-                    alt={artist.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-4 left-4 z-20 flex flex-col">
-                    <CardTitle className="text-white text-xl">{artist.name}</CardTitle>
-                    <div className="flex items-center mt-1">
-                      <Badge variant="outline" className="bg-primary/20 text-white border-primary mr-2">
-                        <Music className="h-3 w-3 mr-1" />
-                        {artist.genre}
-                      </Badge>
-                      <div className="flex items-center text-white text-sm">
-                        <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-                        {artist.rating}
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3 bg-muted p-6 flex flex-col items-center justify-center">
+                    <Avatar className="h-24 w-24 mb-4">
+                      <AvatarImage src={artist.avatarUrl} alt={artist.name} />
+                      <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="text-center">
+                      <h3 className="text-lg font-bold">{artist.name}</h3>
+                      <div className="flex items-center justify-center mt-1">
+                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        <span className="ml-1">{artist.rating.toFixed(1)}</span>
+                        <span className="text-xs text-muted-foreground ml-1">({artist.performances})</span>
+                      </div>
+                      <div className="mt-2 flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {artist.location}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 space-y-2 w-full">
+                      <Button 
+                        className="w-full" 
+                        variant="default"
+                        onClick={() => inviteArtist(artist.name)}
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Inviter
+                      </Button>
+                      <Button 
+                        className="w-full" 
+                        variant={savedArtists.includes(artist.id) ? "secondary" : "outline"}
+                        onClick={() => toggleSaveArtist(artist.id)}
+                      >
+                        <Bookmark className={`h-4 w-4 mr-2 ${savedArtists.includes(artist.id) ? "fill-current" : ""}`} />
+                        {savedArtists.includes(artist.id) ? 'Enregistré' : 'Enregistrer'}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="md:w-2/3 p-6">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {artist.genres.map(genre => (
+                        <Badge key={genre} variant="secondary">
+                          <Music className="h-3 w-3 mr-1" />
+                          {genre}
+                        </Badge>
+                      ))}
+                      {artist.featured && (
+                        <Badge variant="default" className="bg-gradient-to-r from-amber-500 to-orange-500">
+                          <Flame className="h-3 w-3 mr-1" />
+                          Tendance
+                        </Badge>
+                      )}
+                      {artist.verified && (
+                        <Badge variant="outline" className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400">
+                          <Award className="h-3 w-3 mr-1" />
+                          Vérifié
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">{artist.bio}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Cachet</div>
+                        <div className="font-semibold">{formatCurrency(artist.fee)}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Expérience</div>
+                        <div className="font-semibold">{artist.experience} ans</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Spécialités</div>
+                        <div className="font-semibold">{artist.specialties.join(', ')}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-muted-foreground">Disponibilité</div>
+                        <div className={`font-semibold ${artist.availability ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
+                          {artist.availability ? 'Disponible' : 'Non disponible'}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <div className="text-sm font-medium mb-2">Portfolio</div>
+                      <div className="flex space-x-2 overflow-x-auto pb-2">
+                        {artist.portfolio.map((item, index) => (
+                          <div key={index} className="min-w-[120px] w-[120px] rounded-md overflow-hidden">
+                            <img 
+                              src={item.image} 
+                              alt={item.title} 
+                              className="h-[80px] w-full object-cover"
+                            />
+                            <div className="text-xs p-1 truncate">{item.title}</div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="flex justify-between mb-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {artist.location}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {artist.bookings} réservations
-                    </div>
-                  </div>
-                  <p className="text-sm line-clamp-2 mb-2">{artist.bio}</p>
-                  <p className="text-lg font-semibold mb-2 flex items-center">
-                    <Coins className="h-4 w-4 mr-1 text-green-600" />
-                    {artist.fee.toLocaleString()} Ar
-                  </p>
-                </CardContent>
-                <CardFooter className="pt-0 flex gap-2">
-                  <Button onClick={() => handleViewArtist(artist)} variant="outline" className="flex-1">
-                    Profil
-                  </Button>
-                  <Button onClick={() => handleBookArtist(artist.id)} className="flex-1">
-                    Inviter
-                  </Button>
-                </CardFooter>
+                </div>
               </Card>
             ))
           ) : (
-            <div className="col-span-2 py-12 text-center">
-              <p className="text-muted-foreground">Aucun artiste ne correspond à votre recherche.</p>
+            <div className="col-span-2 text-center py-12">
+              <div className="text-muted-foreground mb-2">Aucun artiste ne correspond à vos critères de recherche</div>
+              <Button variant="outline" onClick={() => {
+                setSearchQuery('');
+                setGenreFilter('all');
+                setPriceRange([50000, 150000]);
+                setAvailabilityFilter(false);
+                setRatingFilter(0);
+                setLocationFilter('all');
+              }}>
+                Réinitialiser les filtres
+              </Button>
             </div>
           )}
         </div>
-      </div>
-
-      {/* Dialog pour les réservations */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Invitation d'artiste</DialogTitle>
-            <DialogDescription>
-              Envoyez une demande d'invitation à {selectedArtist?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">
-                Date
-              </Label>
-              <div className="col-span-3">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={`w-full justify-start text-left font-normal ${!bookingDate ? "text-muted-foreground" : ""}`}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {bookingDate ? format(bookingDate, 'PPP', { locale: fr }) : <span>Choisir une date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={bookingDate}
-                      onSelect={setBookingDate}
-                      initialFocus
-                      disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="message" className="text-right">
-                Message
-              </Label>
-              <Textarea
-                id="message"
-                placeholder="Détails sur l'événement..."
-                className="col-span-3"
-                value={bookingMessage}
-                onChange={(e) => setBookingMessage(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" onClick={handleSubmitBooking} disabled={!bookingDate}>
-              Envoyer l'invitation
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Modal pour afficher les détails d'un artiste */}
-      {selectedArtist && !isDialogOpen && (
-        <Dialog open={!!selectedArtist && !isDialogOpen} onOpenChange={() => setSelectedArtist(null)}>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={selectedArtist.profileImage} alt={selectedArtist.name} />
-                  <AvatarFallback>{selectedArtist.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <DialogTitle>{selectedArtist.name}</DialogTitle>
+        
+        {/* Suggestions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Artistes recommandés</CardTitle>
+            <CardDescription>Basé sur vos événements précédents et vos préférences</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {artistsData.slice(0, 4).map(artist => (
+                <div key={artist.id} className="flex flex-col items-center text-center">
+                  <Avatar className="h-20 w-20 mb-3">
+                    <AvatarImage src={artist.avatarUrl} alt={artist.name} />
+                    <AvatarFallback>{artist.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <h4 className="font-medium">{artist.name}</h4>
                   <div className="flex items-center mt-1">
-                    <Badge variant="outline" className="bg-primary/10 border-primary mr-2">
-                      <Music className="h-3 w-3 mr-1" />
-                      {selectedArtist.genre}
-                    </Badge>
-                    <div className="flex items-center text-sm">
-                      <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
-                      {selectedArtist.rating}
-                    </div>
+                    <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                    <span className="ml-1 text-sm">{artist.rating.toFixed(1)}</span>
                   </div>
+                  <div className="mt-2 text-sm text-muted-foreground">{artist.genres[0]}</div>
+                  <Button 
+                    className="mt-3" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => inviteArtist(artist.name)}
+                  >
+                    Inviter
+                  </Button>
                 </div>
-              </div>
-            </DialogHeader>
-            
-            <Tabs defaultValue="profile" className="mt-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="profile">Profil</TabsTrigger>
-                <TabsTrigger value="performances">Performances</TabsTrigger>
-              </TabsList>
-              <TabsContent value="profile" className="mt-4">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-medium">Bio</h3>
-                    <p className="text-sm text-muted-foreground">{selectedArtist.bio}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="font-medium">Localisation</h3>
-                      <p className="text-sm text-muted-foreground flex items-center">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {selectedArtist.location}
-                      </p>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Tarif</h3>
-                      <p className="text-sm text-muted-foreground flex items-center">
-                        <Coins className="h-4 w-4 mr-1 text-green-600" />
-                        {selectedArtist.fee.toLocaleString()} Ar
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="font-medium">Réservations</h3>
-                      <p className="text-sm text-muted-foreground flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {selectedArtist.bookings} événements
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="performances" className="mt-4">
-                <div className="space-y-4">
-                  {selectedArtist.performances.length > 0 ? (
-                    selectedArtist.performances.map(performance => (
-                      <Card key={performance.id} className="overflow-hidden">
-                        <div className="flex flex-col sm:flex-row">
-                          <div className="sm:w-1/3 h-32">
-                            <img 
-                              src={performance.image} 
-                              alt={performance.title} 
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="p-4 flex-1">
-                            <h3 className="font-medium">{performance.title}</h3>
-                            <p className="text-sm text-muted-foreground flex items-center mt-1">
-                              <MapPin className="h-3 w-3 mr-1" />
-                              {performance.venue}
-                            </p>
-                            <p className="text-sm text-muted-foreground flex items-center mt-1">
-                              <CalendarIcon className="h-3 w-3 mr-1" />
-                              {format(new Date(performance.date), 'dd MMMM yyyy', { locale: fr })}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-                    ))
-                  ) : (
-                    <p className="text-center text-muted-foreground py-4">
-                      Aucune performance récente
-                    </p>
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
-            
-            <DialogFooter className="mt-6">
-              <Button onClick={() => {
-                setIsDialogOpen(true);
-              }}>
-                Inviter cet artiste
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-    </ClubLayout>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </ResponsiveLayout>
   );
-}
+};
+
+export default FindArtistsPage;
