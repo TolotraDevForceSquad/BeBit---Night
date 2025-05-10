@@ -26,6 +26,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import {
   Download,
   Filter,
   Calendar,
@@ -372,6 +384,17 @@ const TicketsManagementPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  const [recommendationsOpen, setRecommendationsOpen] = useState(false);
+  const [aiSettings, setAiSettings] = useState({
+    enablePredictions: true,
+    enableInsights: true,
+    enableSuggestions: true,
+    dataCollectionLevel: 2, // 0-3: minimum, basic, standard, comprehensive
+    predictionAccuracy: 90, // 70-99: balance between speed and accuracy
+    updateFrequency: 1, // 0-3: daily, weekly, monthly, quarterly
+    confidenceThreshold: 2, // 0-3: low, medium, high, very high
+  });
   
   // Filtrer les événements
   const filteredEvents = events.filter(event => {
@@ -500,10 +523,155 @@ const TicketsManagementPage: React.FC = () => {
           </div>
           
           <div className="mt-3 flex justify-between items-center">
-            <Button variant="outline" size="sm" className="text-xs h-8">
-              <Award className="h-3.5 w-3.5 mr-1.5" />
-              Voir toutes les recommandations
-            </Button>
+            <Dialog open={recommendationsOpen} onOpenChange={setRecommendationsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-xs h-8">
+                  <Award className="h-3.5 w-3.5 mr-1.5" />
+                  Voir toutes les recommandations
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Recommandations IA
+                  </DialogTitle>
+                  <DialogDescription>
+                    Analyse complète et recommandations basées sur l'intelligence artificielle
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                  {/* Opportunities */}
+                  <div className="space-y-3">
+                    <h3 className="text-base font-medium flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                      Opportunités détectées
+                    </h3>
+                    
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="border rounded-md p-3 space-y-1">
+                        <div className="flex justify-between">
+                          <h4 className="text-sm font-medium">Recommandation #{i}</h4>
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            Impact élevé
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {i === 1 && "Les clients qui achètent des tickets VIP dépensent 72% de plus au bar."}
+                          {i === 2 && "Les événements pendant la semaine ont un taux de conversion 18% plus élevé quand promus 14 jours à l'avance."}
+                          {i === 3 && "Les offres de groupe (6+ personnes) génèrent 34% plus de revenus par événement."}
+                          {i === 4 && "L'ajout d'un DJ international augmente les réservations VIP de 42%."}
+                          {i === 5 && "Les utilisateurs qui réservent une table dépensent en moyenne 3.2x plus en consommations."}
+                        </p>
+                        <div className="flex justify-between items-center pt-1 text-xs">
+                          <div className="flex items-center gap-1">
+                            <LineChart className="h-3.5 w-3.5 text-muted-foreground" />
+                            <span className="text-muted-foreground">Basé sur {10 + i * 5} événements similaires</span>
+                          </div>
+                          <Button variant="outline" size="sm" className="h-7 px-2 text-xs">
+                            Appliquer
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Predictions */}
+                  <div className="space-y-3 pt-2">
+                    <h3 className="text-base font-medium flex items-center gap-2">
+                      <LineChart className="h-4 w-4 text-blue-500" />
+                      Prévisions et tendances
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="border rounded-md p-3">
+                        <h4 className="text-sm font-medium mb-2">Prévisions de fréquentation</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Mai 2023:</span>
+                            <span className="font-medium">+12%</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Juin 2023:</span>
+                            <span className="font-medium">+18%</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Juillet 2023:</span>
+                            <span className="font-medium">+24%</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-md p-3">
+                        <h4 className="text-sm font-medium mb-2">Tendances musicales</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Afrobeats:</span>
+                            <span className="font-medium text-green-500">↑ 32%</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Tech House:</span>
+                            <span className="font-medium text-green-500">↑ 18%</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">EDM:</span>
+                            <span className="font-medium text-red-500">↓ 8%</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-md p-3">
+                        <h4 className="text-sm font-medium mb-2">Optimisation tarifaire</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Standard:</span>
+                            <span className="font-medium">5,500 Ar</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">VIP:</span>
+                            <span className="font-medium">12,000 Ar</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Ultra VIP:</span>
+                            <span className="font-medium">28,000 Ar</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-md p-3">
+                        <h4 className="text-sm font-medium mb-2">Clientèle optimale</h4>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Âge moyen:</span>
+                            <span className="font-medium">27-34 ans</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Zone d'affluence:</span>
+                            <span className="font-medium">12km</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground">Groupe cible:</span>
+                            <span className="font-medium">Professionnels</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    Rapport complet disponible en téléchargement
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                      <Download className="h-4 w-4" />
+                      Exporter
+                    </Button>
+                    <Button size="sm" onClick={() => setRecommendationsOpen(false)}>Fermer</Button>
+                  </div>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <p className="text-xs text-muted-foreground">
               Dernière analyse: <span className="font-medium">Aujourd'hui, 08:12</span>
             </p>
@@ -1462,10 +1630,161 @@ const TicketsManagementPage: React.FC = () => {
                 <div className="text-xs text-muted-foreground">
                   Optimisé par BeIA™ - Précision prédictive: 92%
                 </div>
-                <Button variant="outline" size="sm" className="gap-1.5">
-                  <Settings className="h-4 w-4" />
-                  Paramètres IA
-                </Button>
+                <Dialog open={aiSettingsOpen} onOpenChange={setAiSettingsOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-1.5">
+                      <Settings className="h-4 w-4" />
+                      Paramètres IA
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[450px]">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Brain className="h-5 w-5 text-primary" />
+                        Configuration de l'IA
+                      </DialogTitle>
+                      <DialogDescription>
+                        Personnalisez les fonctionnalités d'intelligence artificielle selon vos besoins
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-medium">Fonctionnalités</h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="enable-predictions" className="flex-1">
+                              Prévisions de vente
+                              <p className="text-xs text-muted-foreground">
+                                Estimation du nombre de tickets qui seront vendus
+                              </p>
+                            </Label>
+                            <Switch 
+                              id="enable-predictions" 
+                              checked={aiSettings.enablePredictions}
+                              onCheckedChange={(checked) => setAiSettings({...aiSettings, enablePredictions: checked})}
+                            />
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="enable-insights" className="flex-1">
+                              Insights automatiques
+                              <p className="text-xs text-muted-foreground">
+                                Détection des tendances et opportunités
+                              </p>
+                            </Label>
+                            <Switch 
+                              id="enable-insights" 
+                              checked={aiSettings.enableInsights}
+                              onCheckedChange={(checked) => setAiSettings({...aiSettings, enableInsights: checked})}
+                            />
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <Label htmlFor="enable-suggestions" className="flex-1">
+                              Suggestions d'amélioration
+                              <p className="text-xs text-muted-foreground">
+                                Recommandations pour optimiser les prix et promotions
+                              </p>
+                            </Label>
+                            <Switch 
+                              id="enable-suggestions" 
+                              checked={aiSettings.enableSuggestions}
+                              onCheckedChange={(checked) => setAiSettings({...aiSettings, enableSuggestions: checked})}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-medium">Configuration avancée</h4>
+                        <div className="space-y-5">
+                          <div>
+                            <div className="flex justify-between mb-2">
+                              <Label htmlFor="data-collection">Niveau de collecte des données</Label>
+                              <span className="text-xs">
+                                {aiSettings.dataCollectionLevel === 0 && "Minimum"}
+                                {aiSettings.dataCollectionLevel === 1 && "Basique"}
+                                {aiSettings.dataCollectionLevel === 2 && "Standard"}
+                                {aiSettings.dataCollectionLevel === 3 && "Complet"}
+                              </span>
+                            </div>
+                            <Slider 
+                              id="data-collection"
+                              min={0} 
+                              max={3} 
+                              step={1}
+                              value={[aiSettings.dataCollectionLevel]}
+                              onValueChange={(value) => setAiSettings({...aiSettings, dataCollectionLevel: value[0]})}
+                            />
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between mb-2">
+                              <Label htmlFor="prediction-accuracy">Précision des prédictions</Label>
+                              <span className="text-xs">{aiSettings.predictionAccuracy}%</span>
+                            </div>
+                            <Slider 
+                              id="prediction-accuracy"
+                              min={70} 
+                              max={99} 
+                              step={1}
+                              value={[aiSettings.predictionAccuracy]}
+                              onValueChange={(value) => setAiSettings({...aiSettings, predictionAccuracy: value[0]})}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Une précision plus élevée nécessite plus de données et de temps de calcul
+                            </p>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="update-frequency" className="mb-2 block">Fréquence des mises à jour</Label>
+                            <Select 
+                              value={aiSettings.updateFrequency.toString()}
+                              onValueChange={(value) => setAiSettings({...aiSettings, updateFrequency: parseInt(value)})}
+                            >
+                              <SelectTrigger id="update-frequency">
+                                <SelectValue placeholder="Sélectionner une fréquence" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">Quotidienne</SelectItem>
+                                <SelectItem value="1">Hebdomadaire</SelectItem>
+                                <SelectItem value="2">Mensuelle</SelectItem>
+                                <SelectItem value="3">Trimestrielle</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="confidence-threshold" className="mb-2 block">Seuil de confiance</Label>
+                            <Select 
+                              value={aiSettings.confidenceThreshold.toString()}
+                              onValueChange={(value) => setAiSettings({...aiSettings, confidenceThreshold: parseInt(value)})}
+                            >
+                              <SelectTrigger id="confidence-threshold">
+                                <SelectValue placeholder="Sélectionner un seuil" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">Bas (plus de suggestions)</SelectItem>
+                                <SelectItem value="1">Moyen</SelectItem>
+                                <SelectItem value="2">Élevé</SelectItem>
+                                <SelectItem value="3">Très élevé (suggestions plus précises)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button 
+                        onClick={() => setAiSettingsOpen(false)}
+                        className="gap-1.5"
+                      >
+                        <Brain className="h-4 w-4" />
+                        Appliquer
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </CardFooter>
             </Card>
           </TabsContent>
