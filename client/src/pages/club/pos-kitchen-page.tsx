@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 
 // Importation des types depuis les autres composants
-import { Order, OrderItem } from '../../components/OrderModal';
 import { Product } from '../../components/ProductModal';
 import { ProductCategory } from '../../components/ProductCategoryModal';
 
@@ -40,9 +39,18 @@ interface KitchenOrderItem {
   preparationTime?: number; // en minutes
 }
 
-// État étendu pour les commandes
-interface KitchenOrder extends Order {
+// Interface spécifique pour les commandes de cuisine
+interface KitchenOrder {
+  id: number;
+  tableId?: number;
+  tableName?: string;
+  customerName?: string;
   items: KitchenOrderItem[];
+  status: 'pending' | 'processing' | 'completed' | 'cancelled';
+  total: number;
+  createdAt: Date;
+  updatedAt: Date;
+  paymentMethod: 'cash' | 'card' | 'mobile' | 'pending';
   priority: 'normal' | 'high' | 'low';
   estimatedCompletionTime?: Date;
 }

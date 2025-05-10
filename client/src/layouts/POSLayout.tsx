@@ -141,9 +141,54 @@ export default function POSLayout({
       )}
       
       {/* Contenu principal */}
-      <main className="flex-1">
+      <main className="flex-1 pb-16">
         {children}
       </main>
+      
+      {/* Barre de navigation mobile */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg z-50">
+        <div className="flex justify-around items-center py-2">
+          <Link 
+            href="/club/pos" 
+            className={`flex flex-col items-center justify-center p-2 ${
+              location === "/club/pos" ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            <HomeIcon className="h-6 w-6" />
+            <span className="text-xs mt-1">Dashboard</span>
+          </Link>
+          
+          <Link 
+            href="/club/catalog" 
+            className={`flex flex-col items-center justify-center p-2 ${
+              location === "/club/catalog" ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            <ListOrderedIcon className="h-6 w-6" />
+            <span className="text-xs mt-1">Catalogue</span>
+          </Link>
+          
+          <Link 
+            href="/club/tables" 
+            className={`flex flex-col items-center justify-center p-2 ${
+              (location === "/club/tables") ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            <LayoutGridIcon className="h-6 w-6" />
+            <span className="text-xs mt-1">Tables</span>
+          </Link>
+          
+          <Link 
+            href="/club/kitchen" 
+            className={`flex flex-col items-center justify-center p-2 ${
+              (location === "/club/kitchen" || location === "/club/pos-kitchen") ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            <UtensilsIcon className="h-6 w-6" />
+            <span className="text-xs mt-1">Cuisine</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }
