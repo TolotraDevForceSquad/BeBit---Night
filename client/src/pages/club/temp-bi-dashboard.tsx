@@ -621,23 +621,349 @@ const BIDashboardPage: React.FC = () => {
 
           <TabsContent value="attendance">
             <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analyse de la fréquentation</CardTitle>
-                  <CardDescription>Cette section sera disponible prochainement</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="p-8 text-center">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+                <Card className="md:col-span-2">
+                  <CardHeader>
+                    <CardTitle>Affluence et heures de pointe</CardTitle>
+                    <CardDescription>Analyse par jour et heure (30 derniers jours)</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="aspect-[4/3] relative">
+                      {/* Heatmap simulation */}
+                      <div className="grid grid-cols-7 grid-rows-6 gap-1 w-full h-full">
+                        {/* Labels pour les jours */}
+                        <div className="absolute -left-8 top-0 h-full flex flex-col justify-between py-1">
+                          {['18:00', '19:00', '20:00', '21:00', '22:00', '23:00', '00:00', '01:00', '02:00', '03:00', '04:00'].map((hour, i) => (
+                            <div key={`hour-${i}`} className="text-xs text-muted-foreground">
+                              {hour}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Labels pour les heures */}
+                        <div className="absolute -top-6 left-0 w-full flex justify-between px-1">
+                          {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, i) => (
+                            <div key={`day-${i}`} className="text-xs text-muted-foreground">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Cellules du heatmap */}
+                        {Array.from({ length: 77 }).map((_, i) => {
+                          const row = Math.floor(i / 7);
+                          const col = i % 7;
+                          // Plus de clients le vendredi et samedi soir
+                          const isWeekend = col === 5 || col === 4;
+                          // Plus de clients en soirée (20h-1h)
+                          const isPrimeTime = row >= 2 && row <= 6;
+                          
+                          // Calculer l'intensité de couleur basée sur l'affluence simulée
+                          let intensity = 0;
+                          if (isWeekend && isPrimeTime) {
+                            intensity = 0.7 + Math.random() * 0.3; // Forte affluence
+                          } else if (isWeekend || isPrimeTime) {
+                            intensity = 0.3 + Math.random() * 0.4; // Affluence moyenne
+                          } else {
+                            intensity = Math.random() * 0.3; // Faible affluence
+                          }
+                          
+                          // Convertir l'intensité en une teinte de bleu
+                          const heatColor = `rgba(79, 70, 229, ${intensity})`;
+                          
+                          return (
+                            <div 
+                              key={`cell-${i}`} 
+                              className="rounded-sm hover:ring-1 ring-primary cursor-pointer transition-all duration-150 flex items-center justify-center group"
+                              style={{ backgroundColor: heatColor }}
+                            >
+                              <span className="opacity-0 group-hover:opacity-100 text-xs font-medium bg-background text-foreground px-1.5 py-0.5 rounded shadow-sm border">
+                                {Math.round(intensity * 100)}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <h3 className="text-lg font-medium mb-2">Section en développement</h3>
-                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                      Cette fonctionnalité sera bientôt disponible avec des analyses démographiques, les heures de pointe et les tendances de fréquentation.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                    
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-indigo-200 mr-1"></div>
+                          <span className="text-xs">Faible</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-indigo-400 mr-1"></div>
+                          <span className="text-xs">Moyenne</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-indigo-600 mr-1"></div>
+                          <span className="text-xs">Forte</span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs text-muted-foreground">
+                        Moyenne sur les 30 derniers jours
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Analyse démographique</CardTitle>
+                    <CardDescription>Profil de votre clientèle</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      {/* Répartition par âge */}
+                      <div>
+                        <h3 className="text-sm font-medium mb-3">Répartition par âge</h3>
+                        <div className="space-y-2">
+                          <div>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>18-24 ans</span>
+                              <span className="font-medium">35%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-primary rounded-full" style={{ width: '35%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>25-34 ans</span>
+                              <span className="font-medium">42%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-primary rounded-full" style={{ width: '42%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>35-44 ans</span>
+                              <span className="font-medium">18%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-primary rounded-full" style={{ width: '18%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>45+ ans</span>
+                              <span className="font-medium">5%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-primary rounded-full" style={{ width: '5%' }}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Répartition par genre */}
+                      <div>
+                        <h3 className="text-sm font-medium mb-3">Répartition par genre</h3>
+                        <div className="flex items-center">
+                          <div className="w-24 h-24 relative">
+                            <svg viewBox="0 0 100 100">
+                              <circle 
+                                cx="50" 
+                                cy="50" 
+                                r="40" 
+                                fill="none" 
+                                stroke="#e0e0e0" 
+                                strokeWidth="20" 
+                              />
+                              <circle 
+                                cx="50" 
+                                cy="50" 
+                                r="40" 
+                                fill="none" 
+                                stroke="#4f46e5" 
+                                strokeWidth="20" 
+                                strokeDasharray="184" 
+                                strokeDashoffset="0" 
+                                transform="rotate(-90 50 50)"
+                              />
+                              <circle 
+                                cx="50" 
+                                cy="50" 
+                                r="40" 
+                                fill="none" 
+                                stroke="#ec4899" 
+                                strokeWidth="20" 
+                                strokeDasharray="184" 
+                                strokeDashoffset="105" 
+                                transform="rotate(-90 50 50)"
+                              />
+                            </svg>
+                          </div>
+                          
+                          <div className="ml-4 space-y-2">
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-[#4f46e5] mr-2 rounded-sm"></div>
+                              <span className="text-xs">Hommes (54%)</span>
+                            </div>
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-[#ec4899] mr-2 rounded-sm"></div>
+                              <span className="text-xs">Femmes (43%)</span>
+                            </div>
+                            <div className="flex items-center">
+                              <div className="w-3 h-3 bg-[#e0e0e0] mr-2 rounded-sm"></div>
+                              <span className="text-xs">Autres (3%)</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Tendance d'affluence */}
+                      <div>
+                        <h3 className="text-sm font-medium mb-1">Tendance d'affluence</h3>
+                        <div className="flex items-center">
+                          <div className="text-2xl font-bold text-green-500">+12.5%</div>
+                          <div className="text-xs ml-2 text-muted-foreground">vs mois précédent</div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Comportement de la clientèle</CardTitle>
+                    <CardDescription>Habitudes et préférences</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-sm font-medium mb-3">Durée moyenne de présence</h3>
+                        <div className="flex space-x-3">
+                          <div className="flex-1 bg-muted/50 rounded-md p-3 text-center">
+                            <div className="text-xl font-bold">2h 45m</div>
+                            <div className="text-xs text-muted-foreground">En semaine</div>
+                          </div>
+                          <div className="flex-1 bg-muted/50 rounded-md p-3 text-center">
+                            <div className="text-xl font-bold">3h 20m</div>
+                            <div className="text-xs text-muted-foreground">Weekend</div>
+                          </div>
+                          <div className="flex-1 bg-muted/50 rounded-md p-3 text-center">
+                            <div className="text-xl font-bold">4h 05m</div>
+                            <div className="text-xs text-muted-foreground">Événements</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium mb-3">Taux de retour clients</h3>
+                        <div className="flex items-center">
+                          <div className="w-full bg-muted h-8 rounded-md overflow-hidden flex">
+                            <div className="bg-green-500 h-full w-[32%] flex items-center justify-center text-xs font-medium text-white">
+                              Réguliers (32%)
+                            </div>
+                            <div className="bg-blue-500 h-full w-[45%] flex items-center justify-center text-xs font-medium text-white">
+                              Occasionnels (45%)
+                            </div>
+                            <div className="bg-orange-500 h-full w-[23%] flex items-center justify-center text-xs font-medium text-white">
+                              Nouveaux (23%)
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium mb-2">Zones les plus fréquentées</h3>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                              <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                              <span className="text-xs">Bar principal</span>
+                            </div>
+                            <span className="text-xs font-medium">85%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                              <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                              <span className="text-xs">Piste de danse</span>
+                            </div>
+                            <span className="text-xs font-medium">76%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                              <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                              <span className="text-xs">Terrasse</span>
+                            </div>
+                            <span className="text-xs font-medium">62%</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                              <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                              <span className="text-xs">Zone VIP</span>
+                            </div>
+                            <span className="text-xs font-medium">48%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Prédictions et recommandations IA</CardTitle>
+                    <CardDescription>Optimisations basées sur les données de fréquentation</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md">
+                        <h3 className="font-medium text-sm flex items-center mb-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1 text-blue-600"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                          Prédiction d'affluence
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Basé sur les données historiques et les événements à venir, nous prévoyons un pic d'affluence de <span className="font-medium">+18%</span> le weekend prochain, principalement dans la zone bar et terrasse.
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md">
+                        <h3 className="font-medium text-sm flex items-center mb-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1 text-amber-600"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path><path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1"></path></svg>
+                          Optimisation du personnel
+                        </h3>
+                        <p className="text-xs text-muted-foreground mb-1">
+                          Recommandation d'ajouter <span className="font-medium">2 barmans supplémentaires</span> pour le vendredi et samedi entre 22h et 2h pour réduire le temps d'attente au bar principal.
+                        </p>
+                        <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-amber-500 h-full" style={{ width: '75%' }}></div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md">
+                        <h3 className="font-medium text-sm flex items-center mb-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1 text-green-600"><path d="M5.51 18.49a10 10 0 1 0 0-14.14 9.89 9.89 0 0 0 0 14.14"></path><path d="m12 8-4 4 4 4"></path><path d="m16 12h-8"></path></svg>
+                          Optimisation de l'espace
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          La zone VIP est sous-utilisée le mercredi et jeudi. Suggestion de <span className="font-medium">promotion spéciale mid-week</span> pour augmenter la fréquentation de 48% à 65%.
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-md">
+                        <h3 className="font-medium text-sm flex items-center mb-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1 text-purple-600"><path d="M12 2v4"></path><path d="m6.41 6.41 2.83 2.83"></path><path d="M2 12h4"></path><path d="m6.41 17.59 2.83-2.83"></path><path d="M12 22v-4"></path><path d="m17.59 17.59-2.83-2.83"></path><path d="M22 12h-4"></path><path d="m17.59 6.41-2.83 2.83"></path></svg>
+                          Tendance et opportunité
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Forte augmentation de la clientèle 25-34 ans (+15%). Opportunité d'organiser des événements ciblés pour cette tranche d'âge les jeudis avec un <span className="font-medium">potentiel de revenu de +22%</span>.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
