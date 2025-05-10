@@ -288,7 +288,7 @@ const POSHistoryPage = () => {
       case 'inventory':
         return <ArrowDownUp className="h-4 w-4 mr-1" />;
       default:
-        return <History className="h-4 w-4 mr-1" />;
+        return <ClipboardList className="h-4 w-4 mr-1" />;
     }
   };
   

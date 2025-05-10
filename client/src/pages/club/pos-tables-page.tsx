@@ -122,8 +122,8 @@ const initialOrders: Order[] = [
     tableId: 2,
     tableName: "Table 2",
     items: [
-      { id: 1, productId: 1, productName: "Coca-Cola", quantity: 2, unitPrice: 5000, subtotal: 10000 },
-      { id: 2, productId: 7, productName: "Burger", quantity: 2, unitPrice: 25000, subtotal: 50000 }
+      { id: 1, productId: 1, productName: "Coca-Cola", quantity: 2, price: 5000, subtotal: 10000 },
+      { id: 2, productId: 7, productName: "Burger", quantity: 2, price: 25000, subtotal: 50000 }
     ],
     status: "processing" as const,
     total: 60000,
@@ -136,8 +136,8 @@ const initialOrders: Order[] = [
     tableId: 6,
     tableName: "Table 6",
     items: [
-      { id: 3, productId: 3, productName: "Mojito", quantity: 4, unitPrice: 15000, subtotal: 60000 },
-      { id: 4, productId: 5, productName: "Chips", quantity: 2, unitPrice: 5000, subtotal: 10000 }
+      { id: 3, productId: 3, productName: "Mojito", quantity: 4, price: 15000, subtotal: 60000 },
+      { id: 4, productId: 5, productName: "Chips", quantity: 2, price: 5000, subtotal: 10000 }
     ],
     status: "processing" as const,
     total: 70000,
