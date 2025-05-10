@@ -150,7 +150,7 @@ const initialOrders: Order[] = [
 
 const POSTablesPage = () => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("tables");
+  const [activeTab, setActiveTab] = useState("floor-plan");
   const [searchTerm, setSearchTerm] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -174,6 +174,12 @@ const POSTablesPage = () => {
   
   // Obtenir les zones/emplacements uniques
   const uniqueAreas = Array.from(new Set(tables.map(table => table.area)));
+  
+  // Regrouper les tables par zone pour le plan de tables
+  const tablesByArea = uniqueAreas.reduce((acc, area) => {
+    acc[area] = tables.filter(table => table.area === area);
+    return acc;
+  }, {} as Record<string, POSTable[]>);
   
   // Filtrer les tables
   const filteredTables = tables.filter(table => {
@@ -506,12 +512,108 @@ const POSTablesPage = () => {
         </div>
         
         <Tabs defaultValue="tables" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2 w-full max-w-md mb-6">
-            <TabsTrigger value="tables">Tables</TabsTrigger>
+          <TabsList className="grid grid-cols-3 w-full max-w-md mb-6">
+            <TabsTrigger value="floor-plan">Plan de tables</TabsTrigger>
+            <TabsTrigger value="tables">Liste des tables</TabsTrigger>
             <TabsTrigger value="orders">Commandes</TabsTrigger>
           </TabsList>
           
-          {/* Vue des Tables */}
+          {/* Vue du plan de tables */}
+          <TabsContent value="floor-plan">
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                  <div>
+                    <CardTitle>Plan de tables</CardTitle>
+                    <CardDescription>Vue d'ensemble des tables par zone</CardDescription>
+                  </div>
+                  <Button onClick={handleAddTable}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Ajouter une table
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {uniqueAreas.map(area => (
+                  <div key={area} className="mb-8">
+                    <h3 className="text-lg font-bold mb-4 px-4 py-2 bg-muted rounded-md">{area}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {tablesByArea[area].map(table => (
+                        <div 
+                          key={table.id}
+                          onClick={() => {
+                            if (table.status === 'occupied') {
+                              const order = getTableOrder(table.id);
+                              if (order) {
+                                handleEditOrder(order);
+                              }
+                            } else {
+                              handleEditTable(table);
+                            }
+                          }}
+                          className={`
+                            p-4 rounded-md border-2 cursor-pointer relative
+                            ${table.status === 'available' ? 'border-green-400 bg-green-50 dark:bg-green-950' : ''}
+                            ${table.status === 'occupied' ? 'border-red-400 bg-red-50 dark:bg-red-950' : ''}
+                            ${table.status === 'reserved' ? 'border-blue-400 bg-blue-50 dark:bg-blue-950' : ''}
+                            hover:shadow-md transition-shadow
+                          `}
+                        >
+                          <div className="text-center">
+                            <div className="font-bold text-lg">{table.number}</div>
+                            <div className="text-sm truncate">{table.name}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{table.capacity} places</div>
+                          </div>
+                          
+                          <div className="absolute top-2 right-2 flex space-x-1">
+                            {table.status === 'occupied' && (
+                              <Button size="icon" variant="ghost" className="h-6 w-6" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const order = getTableOrder(table.id);
+                                  if (order) handleEditOrder(order);
+                                }}>
+                                <FileText className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button size="icon" variant="ghost" className="h-6 w-6"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditTable(table);
+                              }}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+
+                          {table.status === 'available' && (
+                            <Button 
+                              variant="default" 
+                              size="sm" 
+                              className="w-full mt-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddOrder(table.id);
+                              }}
+                            >
+                              Nouvelle commande
+                            </Button>
+                          )}
+                          
+                          {table.status === 'occupied' && (
+                            <div className="text-xs font-medium text-center mt-2">
+                              {table.currentOrderId && `Commande #${table.currentOrderId}`}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Vue des Tables (liste) */}
           <TabsContent value="tables">
             <Card>
               <CardHeader>
