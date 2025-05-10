@@ -39,6 +39,7 @@ import BIDashboardPage from "./pages/club/temp-bi-dashboard";
 import ClubTableReservationPage from "./pages/club/table-reservation-page";
 import FindArtistsPage from "./pages/club/find-artists-page";
 import ClubInvitationsPage from "./pages/club/invitations-page";
+import ClubWalletPage from "./pages/club/wallet-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -401,12 +402,7 @@ function App() {
             </Route>
             
             <Route path="/club/wallet">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Portefeuille</h1>
-                  <p className="text-lg">Gérez vos revenus</p>
-                </div>
-              </ResponsiveLayout>
+              <ClubWalletPage />
             </Route>
             
             <Route path="/club/reservations">
