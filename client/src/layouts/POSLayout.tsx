@@ -10,7 +10,8 @@ import {
   Home as HomeIcon, 
   ListOrdered as ListOrderedIcon,
   LayoutGrid as LayoutGridIcon,
-  Utensils as UtensilsIcon
+  Utensils as UtensilsIcon,
+  ClipboardList
 } from "lucide-react";
 
 interface POSLayoutProps {
@@ -186,6 +187,16 @@ export default function POSLayout({
           >
             <UtensilsIcon className="h-6 w-6" />
             <span className="text-xs mt-1">Cuisine</span>
+          </Link>
+          
+          <Link 
+            href="/club/history" 
+            className={`flex flex-col items-center justify-center p-2 ${
+              (location === "/club/history" || location === "/club/pos-history") ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            <ClipboardList className="h-6 w-6" />
+            <span className="text-xs mt-1">Historique</span>
           </Link>
         </div>
       </nav>

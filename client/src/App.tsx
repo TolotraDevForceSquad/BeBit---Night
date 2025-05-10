@@ -31,6 +31,7 @@ import POSCatalogPage from "./pages/club/pos-catalog-page";
 import POSTablesPage from "./pages/club/pos-tables-page";
 import POSLoginPage from "./pages/club/pos-login-page";
 import POSKitchenPage from "./pages/club/pos-kitchen-page";
+import POSHistoryPage from "./pages/club/pos-history-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -345,6 +346,15 @@ function App() {
             {/* Alias pour faciliter l'accès */}
             <Route path="/club/kitchen">
               <POSKitchenPage />
+            </Route>
+            
+            <Route path="/club/pos-history">
+              <POSHistoryPage />
+            </Route>
+            
+            {/* Alias pour faciliter l'accès */}
+            <Route path="/club/history">
+              <POSHistoryPage />
             </Route>
 
             <Route path="/club/create-event">
