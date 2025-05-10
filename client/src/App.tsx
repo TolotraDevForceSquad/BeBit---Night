@@ -40,6 +40,7 @@ import ClubTableReservationPage from "./pages/club/table-reservation-page";
 import FindArtistsPage from "./pages/club/find-artists-page";
 import ClubInvitationsPage from "./pages/club/invitations-page";
 import ClubWalletPage from "./pages/club/wallet-page";
+import AttendeesPage from "./pages/club/attendees-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -393,12 +394,7 @@ function App() {
             </Route>
             
             <Route path="/club/attendees">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Participants</h1>
-                  <p className="text-lg">Consultez la liste des participants</p>
-                </div>
-              </ResponsiveLayout>
+              <AttendeesPage />
             </Route>
             
             <Route path="/club/wallet">

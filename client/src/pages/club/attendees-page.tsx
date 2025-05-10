@@ -1,725 +1,1898 @@
-import { useState, useEffect } from "react";
-import ResponsiveLayout from "@/layouts/ResponsiveLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
-import { Users, Search, CheckCircle, XCircle, Calendar, MessageSquare, 
-  Filter, ChevronDown, User, QrCode, Mail, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Download,
+  Search,
+  ArrowUpRight,
+  ArrowDownRight,
+  Filter,
+  Star,
+  UserCheck,
+  Users,
+  Calendar,
+  ChevronRight,
+  TrendingUp,
+  BarChart4,
+  Activity,
+  Heart,
+  MessageSquare,
+  Mail,
+  Phone,
+  AlertCircle,
+  Cake,
+  Zap,
+  CreditCard,
+  MapPin,
+  Clock,
+  Check
+} from "lucide-react";
+import ResponsiveLayout from "../../layouts/ResponsiveLayout";
 
-// Type pour l'utilisateur authentifié
-type AuthUser = {
-  username: string;
-  role: string;
-  profileImage?: string;
-};
-
-// Type pour un événement
-type Event = {
-  id: number;
-  title: string;
-  date: string;
-  attendeeCount: number;
-  capacity: number;
-};
-
-// Type pour un participant
-type Attendee = {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string;
-  profileImage?: string;
-  ticketType: "standard" | "vip" | "early_bird";
-  checkInStatus: "pending" | "checked_in" | "no_show";
-  purchaseDate: string;
-  ticketId: string;
-  eventId: number;
-  eventTitle?: string;
-  specialRequests?: string;
-};
-
-// Données fictives pour les événements
-const mockEvents: Event[] = [
+// Données factices pour les participants
+const attendees = [
   {
     id: 1,
-    title: "Soirée Techno avec DJ Elektra",
-    date: "2023-12-15T21:00:00",
-    attendeeCount: 120,
-    capacity: 200
+    name: "Emma Dubois",
+    avatar: "/avatars/emma.jpg",
+    email: "emma.dubois@mail.com",
+    phone: "+261 34 56 78 90",
+    visits: 18,
+    lastVisit: "2023-05-05T21:45:00",
+    totalSpent: 240000,
+    avgSpent: 13333,
+    preferredEvents: ["DJ Night", "Electronic"],
+    memberSince: "2022-10-15",
+    status: "active",
+    tags: ["VIP", "High Spender", "Regular"],
+    birthday: "1995-08-12",
+    address: "Antananarivo, Quartier Isoraka",
+    loyaltyPoints: 850,
+    preferences: {
+      music: ["Electronic", "House", "Techno"],
+      drinks: ["Cocktails", "Champagne"],
+      location: "Terrasse"
+    },
+    feedback: {
+      rating: 4.8,
+      reviews: 7,
+      lastFeedback: "Soirée incroyable, j'adore l'ambiance! Les cocktails étaient parfaits."
+    },
+    segments: ["High Value", "Frequent", "Trendsetter"]
   },
   {
     id: 2,
-    title: "House Party avec MC Blaze",
-    date: "2023-12-22T22:00:00",
-    attendeeCount: 85,
-    capacity: 150
+    name: "Thomas Rakoto",
+    avatar: "/avatars/thomas.jpg",
+    email: "thomas.r@mail.com",
+    phone: "+261 32 11 22 33",
+    visits: 12,
+    lastVisit: "2023-05-02T23:15:00",
+    totalSpent: 185000,
+    avgSpent: 15416,
+    preferredEvents: ["Live Music", "Jazz"],
+    memberSince: "2022-11-20",
+    status: "active",
+    tags: ["Regular", "Table Reservation"],
+    birthday: "1990-04-22",
+    address: "Antananarivo, Quartier Analakely",
+    loyaltyPoints: 620,
+    preferences: {
+      music: ["Jazz", "Live", "Soul"],
+      drinks: ["Whisky", "Craft Beer"],
+      location: "VIP Area"
+    },
+    feedback: {
+      rating: 4.5,
+      reviews: 4,
+      lastFeedback: "J'apprécie l'ambiance jazz des jeudis soir. Service impeccable."
+    },
+    segments: ["Medium Value", "Regular", "Enthusiast"]
   },
   {
     id: 3,
-    title: "Nuit Électro",
-    date: "2023-11-25T20:00:00",
-    attendeeCount: 180,
-    capacity: 200
-  }
-];
-
-// Données fictives pour les participants
-const mockAttendees: Attendee[] = [
-  {
-    id: 1,
-    name: "Marie Dupont",
-    email: "marie.dupont@gmail.com",
-    phone: "+33 6 12 34 56 78",
-    profileImage: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop",
-    ticketType: "vip",
-    checkInStatus: "checked_in",
-    purchaseDate: "2023-12-01T14:23:00",
-    ticketId: "TKT-12345",
-    eventId: 1
-  },
-  {
-    id: 2,
-    name: "Thomas Martin",
-    email: "thomas.martin@gmail.com",
-    profileImage: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop",
-    ticketType: "standard",
-    checkInStatus: "pending",
-    purchaseDate: "2023-12-02T09:15:00",
-    ticketId: "TKT-12346",
-    eventId: 1
-  },
-  {
-    id: 3,
-    name: "Sophie Bernard",
-    email: "sophie.bernard@gmail.com",
-    phone: "+33 6 23 45 67 89",
-    profileImage: "https://images.unsplash.com/photo-1563306406-e66174fa3787?w=120&h=120&fit=crop",
-    ticketType: "early_bird",
-    checkInStatus: "checked_in",
-    purchaseDate: "2023-11-15T18:45:00",
-    ticketId: "TKT-12347",
-    eventId: 1,
-    specialRequests: "Allergique aux arachides"
+    name: "Sophie Andrianome",
+    avatar: "/avatars/sophie.jpg",
+    email: "sophie.a@mail.com",
+    phone: "+261 33 44 55 66",
+    visits: 7,
+    lastVisit: "2023-04-28T22:30:00",
+    totalSpent: 98000,
+    avgSpent: 14000,
+    preferredEvents: ["Weekend Party", "R&B"],
+    memberSince: "2023-01-10",
+    status: "active",
+    tags: ["New", "Weekend"],
+    birthday: "1998-12-05",
+    address: "Antananarivo, Quartier Ivandry",
+    loyaltyPoints: 310,
+    preferences: {
+      music: ["R&B", "Hip-Hop", "Afrobeats"],
+      drinks: ["Cocktails", "Wine"],
+      location: "Dance Floor"
+    },
+    feedback: {
+      rating: 4.2,
+      reviews: 2,
+      lastFeedback: "Bonne ambiance, mais l'attente au bar était un peu longue."
+    },
+    segments: ["Medium Value", "Growing", "Social"]
   },
   {
     id: 4,
-    name: "Lucas Petit",
-    email: "lucas.petit@gmail.com",
-    profileImage: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=120&h=120&fit=crop",
-    ticketType: "standard",
-    checkInStatus: "no_show",
-    purchaseDate: "2023-12-05T11:30:00",
-    ticketId: "TKT-12348",
-    eventId: 1
+    name: "Jean Razafindrakoto",
+    avatar: "/avatars/jean.jpg",
+    email: "jean.r@mail.com",
+    phone: "+261 34 11 00 99",
+    visits: 22,
+    lastVisit: "2023-05-06T20:15:00",
+    totalSpent: 320000,
+    avgSpent: 14545,
+    preferredEvents: ["DJ Night", "House"],
+    memberSince: "2022-08-05",
+    status: "active",
+    tags: ["VIP", "High Spender", "Regular"],
+    birthday: "1988-06-30",
+    address: "Antananarivo, Quartier Tana Waterfront",
+    loyaltyPoints: 980,
+    preferences: {
+      music: ["House", "EDM", "Progressive"],
+      drinks: ["Premium Spirits", "Cocktails"],
+      location: "VIP Area"
+    },
+    feedback: {
+      rating: 4.9,
+      reviews: 9,
+      lastFeedback: "Le meilleur club de la ville! Les DJ sont toujours excellents."
+    },
+    segments: ["High Value", "Frequent", "Promoter"]
   },
   {
     id: 5,
-    name: "Camille Leblanc",
-    email: "camille.leblanc@gmail.com",
-    phone: "+33 6 34 56 78 90",
-    profileImage: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&h=120&fit=crop",
-    ticketType: "vip",
-    checkInStatus: "pending",
-    purchaseDate: "2023-12-08T20:12:00",
-    ticketId: "TKT-12349",
-    eventId: 1,
-    specialRequests: "Fête d'anniversaire, table réservée"
+    name: "Marie Solofo",
+    avatar: "/avatars/marie.jpg",
+    email: "marie.s@mail.com",
+    phone: "+261 32 88 77 66",
+    visits: 4,
+    lastVisit: "2023-04-15T21:00:00",
+    totalSpent: 45000,
+    avgSpent: 11250,
+    preferredEvents: ["Weekend Party", "Pop"],
+    memberSince: "2023-03-12",
+    status: "inactive",
+    tags: ["New", "Occasional"],
+    birthday: "1997-02-18",
+    address: "Antananarivo, Quartier Ankorondrano",
+    loyaltyPoints: 180,
+    preferences: {
+      music: ["Pop", "Commercial", "Latin"],
+      drinks: ["Wine", "Soft Drinks"],
+      location: "Bar Area"
+    },
+    feedback: {
+      rating: 3.8,
+      reviews: 1,
+      lastFeedback: "Ambiance sympa, mais un peu trop bruyant pour discuter."
+    },
+    segments: ["Low Value", "Occasional", "Potential"]
   },
   {
     id: 6,
-    name: "Alexandre Dubois",
-    email: "alex.dubois@gmail.com",
-    profileImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop",
-    ticketType: "standard",
-    checkInStatus: "pending",
-    purchaseDate: "2023-12-10T15:45:00",
-    ticketId: "TKT-12350",
-    eventId: 2
+    name: "Luc Randriamanga",
+    avatar: "/avatars/luc.jpg",
+    email: "luc.r@mail.com",
+    phone: "+261 33 22 11 00",
+    visits: 15,
+    lastVisit: "2023-05-01T23:45:00",
+    totalSpent: 225000,
+    avgSpent: 15000,
+    preferredEvents: ["DJ Night", "Techno"],
+    memberSince: "2022-09-28",
+    status: "active",
+    tags: ["Regular", "Table Reservation"],
+    birthday: "1992-11-14",
+    address: "Antananarivo, Quartier Ambanidia",
+    loyaltyPoints: 750,
+    preferences: {
+      music: ["Techno", "Minimal", "Underground"],
+      drinks: ["Beer", "Spirits"],
+      location: "Main Floor"
+    },
+    feedback: {
+      rating: 4.6,
+      reviews: 5,
+      lastFeedback: "Les soirées techno sont exceptionnelles. Continuez comme ça!"
+    },
+    segments: ["High Value", "Regular", "Enthusiast"]
   },
   {
     id: 7,
-    name: "Emma Roussel",
-    email: "emma.roussel@gmail.com",
-    phone: "+33 6 45 67 89 01",
-    profileImage: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&fit=crop",
-    ticketType: "early_bird",
-    checkInStatus: "pending",
-    purchaseDate: "2023-11-20T08:30:00",
-    ticketId: "TKT-12351",
-    eventId: 2
+    name: "Nathalie Rabemananjara",
+    avatar: "/avatars/nathalie.jpg",
+    email: "nathalie.r@mail.com",
+    phone: "+261 34 99 88 77",
+    visits: 9,
+    lastVisit: "2023-04-22T22:00:00",
+    totalSpent: 135000,
+    avgSpent: 15000,
+    preferredEvents: ["Weekend Party", "RnB"],
+    memberSince: "2022-12-15",
+    status: "active",
+    tags: ["Regular", "Social Media"],
+    birthday: "1994-09-25",
+    address: "Antananarivo, Quartier Andraharo",
+    loyaltyPoints: 450,
+    preferences: {
+      music: ["RnB", "Afrobeats", "Hip-Hop"],
+      drinks: ["Cocktails", "Premium Spirits"],
+      location: "Lounge Area"
+    },
+    feedback: {
+      rating: 4.4,
+      reviews: 3,
+      lastFeedback: "J'adore la sélection musicale et l'ambiance générale!"
+    },
+    segments: ["Medium Value", "Growing", "Influencer"]
+  },
+  {
+    id: 8,
+    name: "Paul Andriamihaja",
+    avatar: "/avatars/paul.jpg",
+    email: "paul.a@mail.com",
+    phone: "+261 32 55 66 77",
+    visits: 3,
+    lastVisit: "2023-04-08T21:30:00",
+    totalSpent: 38000,
+    avgSpent: 12667,
+    preferredEvents: ["Live Music", "Blues"],
+    memberSince: "2023-03-05",
+    status: "inactive",
+    tags: ["New", "Occasional"],
+    birthday: "1985-07-11",
+    address: "Antananarivo, Quartier Behoririka",
+    loyaltyPoints: 150,
+    preferences: {
+      music: ["Blues", "Jazz", "Rock"],
+      drinks: ["Whisky", "Craft Beer"],
+      location: "Quiet Area"
+    },
+    feedback: {
+      rating: 4.0,
+      reviews: 1,
+      lastFeedback: "Bonne soirée blues, mais les prix sont un peu élevés."
+    },
+    segments: ["Low Value", "Occasional", "Niche"]
+  },
+  {
+    id: 9,
+    name: "Chantal Razafindrabe",
+    avatar: "/avatars/chantal.jpg",
+    email: "chantal.r@mail.com",
+    phone: "+261 33 12 23 34",
+    visits: 11,
+    lastVisit: "2023-04-29T23:00:00",
+    totalSpent: 175000,
+    avgSpent: 15909,
+    preferredEvents: ["Weekend Party", "House"],
+    memberSince: "2022-11-10",
+    status: "active",
+    tags: ["Regular", "High Spender"],
+    birthday: "1993-03-19",
+    address: "Antananarivo, Quartier Ambohimanarina",
+    loyaltyPoints: 580,
+    preferences: {
+      music: ["House", "Disco", "Funk"],
+      drinks: ["Champagne", "Cocktails"],
+      location: "VIP Area"
+    },
+    feedback: {
+      rating: 4.7,
+      reviews: 4,
+      lastFeedback: "Service VIP exceptionnel, toujours une expérience parfaite!"
+    },
+    segments: ["High Value", "Regular", "Social"]
+  },
+  {
+    id: 10,
+    name: "Eric Rakotondrabe",
+    avatar: "/avatars/eric.jpg",
+    email: "eric.r@mail.com",
+    phone: "+261 34 45 67 89",
+    visits: 6,
+    lastVisit: "2023-04-21T20:30:00",
+    totalSpent: 78000,
+    avgSpent: 13000,
+    preferredEvents: ["DJ Night", "Afrobeats"],
+    memberSince: "2023-01-25",
+    status: "active",
+    tags: ["New", "Weekend"],
+    birthday: "1996-05-07",
+    address: "Antananarivo, Quartier Ampandrana",
+    loyaltyPoints: 280,
+    preferences: {
+      music: ["Afrobeats", "Dancehall", "Reggaeton"],
+      drinks: ["Beer", "Rum"],
+      location: "Dance Floor"
+    },
+    feedback: {
+      rating: 4.3,
+      reviews: 2,
+      lastFeedback: "Super ambiance et bonne sélection musicale!"
+    },
+    segments: ["Medium Value", "Growing", "Explorer"]
   }
 ];
 
-interface AttendeesPageProps {
-  selectedEventId?: number;
+// Données factices pour les tendances
+const trends = {
+  visitsByDayOfWeek: [
+    { day: "Lun", count: 120 },
+    { day: "Mar", count: 150 },
+    { day: "Mer", count: 180 },
+    { day: "Jeu", count: 250 },
+    { day: "Ven", count: 420 },
+    { day: "Sam", count: 480 },
+    { day: "Dim", count: 200 }
+  ],
+  visitorDemographics: {
+    ageGroups: [
+      { group: "18-24", percentage: 35 },
+      { group: "25-34", percentage: 42 },
+      { group: "35-44", percentage: 18 },
+      { group: "45+", percentage: 5 }
+    ],
+    gender: [
+      { type: "Homme", percentage: 55 },
+      { type: "Femme", percentage: 42 },
+      { type: "Autre", percentage: 3 }
+    ]
+  },
+  spendingByCategory: [
+    { category: "Entrées", amount: 850000 },
+    { category: "Boissons", amount: 1250000 },
+    { category: "Tables VIP", amount: 680000 },
+    { category: "Événements spéciaux", amount: 420000 }
+  ],
+  customerRetention: {
+    oneTime: 35,
+    occasional: 45,
+    regular: 20
+  },
+  topEvents: [
+    { name: "DJ International Night", attendance: 450, rating: 4.8 },
+    { name: "Weekend Fever", attendance: 420, rating: 4.6 },
+    { name: "Ladies Night", attendance: 380, rating: 4.7 },
+    { name: "Throwback Thursday", attendance: 320, rating: 4.5 },
+    { name: "Afrobeats Special", attendance: 310, rating: 4.4 }
+  ]
+};
+
+// Formatage des montants en Ariary
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('fr-MG', {
+    style: 'currency',
+    currency: 'MGA',
+    maximumFractionDigits: 0
+  }).format(amount);
+};
+
+// Formatage des dates
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('fr-FR', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+};
+
+// Date relative (ex: "il y a 3 jours")
+const getRelativeTime = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) {
+    return "Aujourd'hui";
+  } else if (diffDays === 1) {
+    return "Hier";
+  } else if (diffDays < 7) {
+    return `Il y a ${diffDays} jours`;
+  } else if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return `Il y a ${weeks} semaine${weeks > 1 ? 's' : ''}`;
+  } else {
+    const months = Math.floor(diffDays / 30);
+    return `Il y a ${months} mois`;
+  }
+};
+
+interface Attendee {
+  id: number;
+  name: string;
+  avatar?: string;
+  email: string;
+  phone: string;
+  visits: number;
+  lastVisit: string;
+  totalSpent: number;
+  avgSpent: number;
+  preferredEvents: string[];
+  memberSince: string;
+  status: string;
+  tags: string[];
+  birthday: string;
+  address: string;
+  loyaltyPoints: number;
+  preferences: {
+    music: string[];
+    drinks: string[];
+    location: string;
+  };
+  feedback: {
+    rating: number;
+    reviews: number;
+    lastFeedback: string;
+  };
+  segments: string[];
 }
 
-export default function AttendeesPage({ selectedEventId }: AttendeesPageProps) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
-  const [filteredAttendees, setFilteredAttendees] = useState<Attendee[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<number | null>(selectedEventId || null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [ticketTypeFilter, setTicketTypeFilter] = useState<string>("all");
-  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
-  const [isAttendeeModalOpen, setIsAttendeeModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isQrScannerOpen, setIsQrScannerOpen] = useState(false);
-  const [scanResult, setScanResult] = useState("");
-
-  // Récupérer les données utilisateur du localStorage
-  useEffect(() => {
-    const authData = localStorage.getItem('auth_user');
-    if (authData) {
-      try {
-        const userData = JSON.parse(authData);
-        setUser(userData);
-      } catch (error) {
-        console.error("Erreur lors de la lecture des données d'authentification:", error);
-      }
-    }
-  }, []);
-
-  // Simuler un chargement des données
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setEvents(mockEvents);
-      setAttendees(mockAttendees);
-      setIsLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Filtrer les participants en fonction des critères
-  useEffect(() => {
-    let filtered = [...attendees];
-    
-    // Filtrer par événement
-    if (selectedEvent) {
-      filtered = filtered.filter(a => a.eventId === selectedEvent);
-    }
-    
-    // Filtrer par recherche
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(a => 
-        a.name.toLowerCase().includes(query) || 
-        a.email.toLowerCase().includes(query) || 
-        a.ticketId.toLowerCase().includes(query)
-      );
-    }
-    
-    // Filtrer par statut de check-in
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(a => a.checkInStatus === statusFilter);
-    }
-    
-    // Filtrer par type de billet
-    if (ticketTypeFilter !== "all") {
-      filtered = filtered.filter(a => a.ticketType === ticketTypeFilter);
-    }
-    
-    setFilteredAttendees(filtered);
-  }, [attendees, selectedEvent, searchQuery, statusFilter, ticketTypeFilter]);
-  
-  // Contenu d'en-tête pour le layout
-  const headerContent = (
-    <div className="flex items-center justify-between">
-      <h1 className="font-heading font-bold text-lg md:text-xl">
-        <span className="text-primary">Be</span> <span className="text-secondary">bit.</span>
-        <span className="ml-2 text-foreground">Club</span>
-      </h1>
-      
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/25 px-3 py-1">
-          <Users className="h-3 w-3 mr-1" />
-          <span>Club</span>
-        </Badge>
-        
-        {user && (
-          <Avatar className="h-9 w-9">
-            <AvatarImage src={user.profileImage} alt={user.username} />
-            <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-        )}
-      </div>
-    </div>
+const AttendeeCard: React.FC<{ attendee: Attendee }> = ({ attendee }) => {
+  return (
+    <Card className="group hover:shadow-md transition-shadow duration-200 cursor-pointer">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+              {attendee.avatar ? (
+                <img src={attendee.avatar} alt={attendee.name} className="w-full h-full object-cover" />
+              ) : (
+                <Users size={24} className="text-muted-foreground" />
+              )}
+            </div>
+            <div>
+              <h3 className="font-medium">{attendee.name}</h3>
+              <div className="flex items-center text-xs text-muted-foreground">
+                <Clock size={12} className="mr-1" />
+                <span>Dernière visite: {getRelativeTime(attendee.lastVisit)}</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <Badge variant={
+              attendee.visits > 15 ? "default" : 
+              attendee.visits > 8 ? "secondary" : "outline"
+            }>
+              {attendee.visits} visites
+            </Badge>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="pb-3">
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="flex flex-col">
+            <span className="text-muted-foreground text-xs">Total dépensé</span>
+            <span className="font-medium">{formatCurrency(attendee.totalSpent)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-muted-foreground text-xs">Moy. par visite</span>
+            <span className="font-medium">{formatCurrency(attendee.avgSpent)}</span>
+          </div>
+          <div className="flex flex-col col-span-2 mt-1">
+            <span className="text-muted-foreground text-xs">Préférences</span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {attendee.tags.slice(0, 3).map((tag: string, index: number) => (
+                <Badge key={index} variant="outline" className="text-xs py-0 px-1.5">{tag}</Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="pt-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="w-full flex justify-between items-center">
+          <Button variant="ghost" size="sm" className="h-7 text-xs px-2">
+            <Mail size={14} className="mr-1" />
+            Contacter
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 text-xs px-2">
+            Voir profil
+            <ChevronRight size={14} className="ml-1" />
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   );
+};
 
-  const openAttendeeDetails = (attendee: Attendee) => {
-    setSelectedAttendee(attendee);
-    setIsAttendeeModalOpen(true);
-  };
+const AttendeesPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("recent");
   
-  const handleCheckIn = (id: number) => {
-    setAttendees(prevAttendees => 
-      prevAttendees.map(attendee => 
-        attendee.id === id 
-          ? { ...attendee, checkInStatus: "checked_in" } 
-          : attendee
-      )
-    );
-  };
-
-  const getEventTitle = (eventId: number): string => {
-    const event = events.find(e => e.id === eventId);
-    return event ? event.title : "Événement inconnu";
-  };
-
-  const getTicketTypeLabel = (type: string): string => {
-    switch (type) {
-      case "standard": return "Standard";
-      case "vip": return "VIP";
-      case "early_bird": return "Early Bird";
-      default: return type;
+  // Filtrer les participants
+  const filteredAttendees = attendees.filter(attendee => {
+    // Filtre de recherche
+    if (searchTerm && !attendee.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
     }
-  };
-
-  const getStatusLabel = (status: string): JSX.Element => {
-    switch (status) {
-      case "checked_in": 
-        return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
-                <CheckCircle className="h-3 w-3 mr-1" />Présent
-               </Badge>;
-      case "pending": 
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200">
-                En attente
-               </Badge>;
-      case "no_show": 
-        return <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">
-                <XCircle className="h-3 w-3 mr-1" />Absent
-               </Badge>;
-      default: 
-        return <Badge variant="outline">{status}</Badge>;
+    // Filtre de statut
+    if (statusFilter !== "all" && attendee.status !== statusFilter) {
+      return false;
     }
-  };
+    return true;
+  });
+  
+  // Trier les participants
+  const sortedAttendees = [...filteredAttendees].sort((a, b) => {
+    if (sortOrder === "recent") {
+      return new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime();
+    } else if (sortOrder === "visits") {
+      return b.visits - a.visits;
+    } else if (sortOrder === "spending") {
+      return b.totalSpent - a.totalSpent;
+    } else if (sortOrder === "loyalty") {
+      return b.loyaltyPoints - a.loyaltyPoints;
+    }
+    return 0;
+  });
 
   return (
-    <ResponsiveLayout
-      activeItem="événements"
-      headerContent={headerContent}
-    >
-      {isLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    <ResponsiveLayout>
+      <div className="p-6 md:p-8 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Participants</h1>
+            <p className="text-lg text-muted-foreground mt-1.5">
+              Analysez vos visiteurs et leurs habitudes
+            </p>
+          </div>
+          <div className="flex items-center space-x-2 mt-4 md:mt-0">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Download size={16} />
+              Exporter
+            </Button>
+            <Button size="sm" className="gap-1.5">
+              <Mail size={16} />
+              Campagne Email
+            </Button>
+          </div>
         </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">Participants</h1>
-              <p className="text-muted-foreground">
-                Gérez les participants à vos événements
-              </p>
+
+        <Tabs defaultValue="overview" className="space-y-6" onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-4 w-full max-w-lg">
+            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="visitors">Visiteurs</TabsTrigger>
+            <TabsTrigger value="segments">Segments</TabsTrigger>
+            <TabsTrigger value="trends">Tendances</TabsTrigger>
+          </TabsList>
+
+          {/* Tab: Vue d'ensemble */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-medium">
+                    Total visiteurs
+                  </CardTitle>
+                  <CardDescription>
+                    Tous temps confondus
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {attendees.length}
+                  </div>
+                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                    <ArrowUpRight size={16} className="text-green-500 mr-1" />
+                    <span className="text-green-500 font-medium">+12.8%</span>
+                    <span className="ml-1.5">depuis le mois dernier</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-3 pb-1">
+                  <Button variant="link" className="p-0 h-auto text-primary font-medium flex items-center">
+                    Voir tous les visiteurs
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-medium">
+                    Fréquentation moyenne
+                  </CardTitle>
+                  <CardDescription>
+                    Par événement
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    350
+                  </div>
+                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                    <ArrowUpRight size={16} className="text-green-500 mr-1" />
+                    <span className="text-green-500 font-medium">+8.2%</span>
+                    <span className="ml-1.5">depuis le mois dernier</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-3 pb-1">
+                  <Button variant="link" className="p-0 h-auto text-primary font-medium flex items-center">
+                    Détails par événement
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-medium">
+                    Dépense moyenne
+                  </CardTitle>
+                  <CardDescription>
+                    Par visiteur et visite
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    {formatCurrency(14562)}
+                  </div>
+                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                    <ArrowUpRight size={16} className="text-green-500 mr-1" />
+                    <span className="text-green-500 font-medium">+5.3%</span>
+                    <span className="ml-1.5">depuis le mois dernier</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-3 pb-1">
+                  <Button variant="link" className="p-0 h-auto text-primary font-medium flex items-center">
+                    Détails des dépenses
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-medium">
+                    Taux de fidélisation
+                  </CardTitle>
+                  <CardDescription>
+                    Visiteurs réguliers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">
+                    65%
+                  </div>
+                  <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                    <ArrowUpRight size={16} className="text-green-500 mr-1" />
+                    <span className="text-green-500 font-medium">+3.7%</span>
+                    <span className="ml-1.5">depuis le mois dernier</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-3 pb-1">
+                  <Button variant="link" className="p-0 h-auto text-primary font-medium flex items-center">
+                    Analyse fidélisation
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle>Participants récents</CardTitle>
+                    <CardDescription>
+                      Les derniers visiteurs de votre établissement
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filtrer par statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        <SelectItem value="active">Actifs</SelectItem>
+                        <SelectItem value="inactive">Inactifs</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="relative">
+                      <Input 
+                        placeholder="Rechercher..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-9"
+                      />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {sortedAttendees.slice(0, 6).map((attendee) => (
+                    <AttendeeCard key={attendee.id} attendee={attendee} />
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-center border-t pt-4">
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Users size={16} />
+                  Voir tous les participants
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>Fréquentation par jour</CardTitle>
+                  <CardDescription>
+                    Nombre de visiteurs par jour de la semaine
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pl-2">
+                  <div className="h-[300px]">
+                    {/* Chart simulation */}
+                    <div className="flex h-[250px] items-end space-x-2">
+                      {trends.visitsByDayOfWeek.map((item, index) => (
+                        <div key={index} className="flex flex-col items-center flex-1">
+                          <div 
+                            className="w-full bg-primary/90 hover:bg-primary rounded-t transition-all"
+                            style={{ 
+                              height: `${(item.count / 500) * 250}px`
+                            }}
+                          ></div>
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            {item.day}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between items-center border-t pt-4">
+                  <div className="text-sm text-muted-foreground">
+                    Basé sur les 30 derniers jours
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <BarChart4 size={16} />
+                    Rapport détaillé
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top événements</CardTitle>
+                  <CardDescription>Par nombre de participants</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {trends.topEvents.map((event, index) => (
+                      <div key={index} className="flex items-center justify-between pb-2 border-b border-border last:border-0 last:pb-0">
+                        <div>
+                          <div className="font-medium text-sm">{event.name}</div>
+                          <div className="flex items-center text-xs text-muted-foreground mt-1">
+                            <Users size={12} className="mr-1" />
+                            <span>{event.attendance} participants</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center bg-primary/10 px-2 py-1 rounded text-xs">
+                          <Star size={12} className="text-amber-500 mr-1 fill-amber-500" />
+                          <span>{event.rating}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-4">
+                  <Button variant="link" className="p-0 h-auto text-primary font-medium flex items-center">
+                    Tous les événements
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Tab: Visiteurs */}
+          <TabsContent value="visitors" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle>Tous les participants</CardTitle>
+                    <CardDescription>Liste complète de vos visiteurs</CardDescription>
+                  </div>
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2">
+                    <div className="relative flex-1">
+                      <Input 
+                        placeholder="Rechercher..." 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9 w-full"
+                      />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[120px] flex-shrink-0">
+                        <SelectValue placeholder="Statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous</SelectItem>
+                        <SelectItem value="active">Actifs</SelectItem>
+                        <SelectItem value="inactive">Inactifs</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={sortOrder} onValueChange={setSortOrder}>
+                      <SelectTrigger className="w-[140px] flex-shrink-0">
+                        <SelectValue placeholder="Trier par" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="recent">Plus récents</SelectItem>
+                        <SelectItem value="visits">Visites</SelectItem>
+                        <SelectItem value="spending">Dépenses</SelectItem>
+                        <SelectItem value="loyalty">Fidélité</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left font-medium p-2">Participant</th>
+                        <th className="text-left font-medium p-2">Dernière visite</th>
+                        <th className="text-left font-medium p-2">Visites</th>
+                        <th className="text-left font-medium p-2">Dépenses</th>
+                        <th className="text-left font-medium p-2">Préférences</th>
+                        <th className="text-left font-medium p-2">Statut</th>
+                        <th className="text-right font-medium p-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedAttendees.map((attendee) => (
+                        <tr key={attendee.id} className="border-b border-border hover:bg-muted/50">
+                          <td className="p-2">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+                                {attendee.avatar ? (
+                                  <img src={attendee.avatar} alt={attendee.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <Users size={16} className="text-muted-foreground" />
+                                )}
+                              </div>
+                              <div>
+                                <div className="font-medium">{attendee.name}</div>
+                                <div className="text-xs text-muted-foreground">{attendee.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <div>{formatDate(attendee.lastVisit)}</div>
+                            <div className="text-xs text-muted-foreground">{getRelativeTime(attendee.lastVisit)}</div>
+                          </td>
+                          <td className="p-2">{attendee.visits}</td>
+                          <td className="p-2">
+                            <div>{formatCurrency(attendee.totalSpent)}</div>
+                            <div className="text-xs text-muted-foreground">
+                              Moy: {formatCurrency(attendee.avgSpent)}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <div className="flex flex-wrap gap-1">
+                              {attendee.preferredEvents.map((pref, index) => (
+                                <Badge key={index} variant="outline" className="text-xs py-0 px-1.5">{pref}</Badge>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            <Badge variant={attendee.status === 'active' ? 'default' : 'secondary'}>
+                              {attendee.status === 'active' ? 'Actif' : 'Inactif'}
+                            </Badge>
+                          </td>
+                          <td className="p-2 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Mail size={16} />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <UserCheck size={16} />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <ChevronRight size={16} />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+              <CardFooter className="flex items-center justify-between border-t pt-4">
+                <div className="text-sm text-muted-foreground">
+                  Affichage de {sortedAttendees.length} participants
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" disabled>Précédent</Button>
+                  <Button variant="outline" size="sm" className="bg-primary/10">1</Button>
+                  <Button variant="outline" size="sm">2</Button>
+                  <Button variant="outline" size="sm">3</Button>
+                  <Button variant="outline" size="sm">Suivant</Button>
+                </div>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle>Profil détaillé du participant</CardTitle>
+                    <CardDescription>Sélectionnez un participant pour voir ses détails</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 border-t">
+                <div className="p-6 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                    <UserCheck size={24} className="text-primary/60" />
+                  </div>
+                  <h3 className="font-medium mb-2">Aucun participant sélectionné</h3>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                    Cliquez sur un participant dans la liste ci-dessus pour afficher son profil détaillé avec historique, préférences et opportunités de fidélisation.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Segments */}
+          <TabsContent value="segments" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Segments clients</CardTitle>
+                  <CardDescription>
+                    Classification de vos participants
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-sm font-medium mb-3">Par valeur</h3>
+                      <div className="space-y-2">
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>High Value</span>
+                            <span className="font-medium">28%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-green-500 rounded-full" style={{ width: '28%' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Medium Value</span>
+                            <span className="font-medium">42%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '42%' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Low Value</span>
+                            <span className="font-medium">30%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-gray-500 rounded-full" style={{ width: '30%' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium mb-3">Par fréquence</h3>
+                      <div className="space-y-2">
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Frequent (8+ visits)</span>
+                            <span className="font-medium">15%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-indigo-500 rounded-full" style={{ width: '15%' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Regular (3-7 visits)</span>
+                            <span className="font-medium">35%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-violet-500 rounded-full" style={{ width: '35%' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Occasional (1-2 visits)</span>
+                            <span className="font-medium">50%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-purple-400 rounded-full" style={{ width: '50%' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium mb-3">Par comportement</h3>
+                      <div className="space-y-2">
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Trendsetter</span>
+                            <span className="font-medium">12%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-pink-500 rounded-full" style={{ width: '12%' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Social</span>
+                            <span className="font-medium">38%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-teal-500 rounded-full" style={{ width: '38%' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Enthusiast</span>
+                            <span className="font-medium">25%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-amber-500 rounded-full" style={{ width: '25%' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span>Autres segments</span>
+                            <span className="font-medium">25%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-muted rounded-full">
+                            <div className="h-1.5 bg-gray-400 rounded-full" style={{ width: '25%' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="border-t pt-4">
+                  <Button variant="link" className="p-0 h-auto text-primary font-medium flex items-center">
+                    Configurer les segments
+                    <ChevronRight size={16} className="ml-1" />
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>Recommandations par segment</CardTitle>
+                  <CardDescription>
+                    Actions marketing ciblées par groupe de participants
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+                      <h3 className="font-medium flex items-center text-blue-800 dark:text-blue-300 mb-2">
+                        <Zap size={16} className="mr-2" />
+                        HIGH VALUE / FREQUENT
+                      </h3>
+                      <div className="text-sm text-muted-foreground space-y-1 mb-3">
+                        <p>Ce segment représente vos clients les plus précieux - ils dépensent beaucoup et viennent souvent.</p>
+                      </div>
+                      <div className="text-sm">
+                        <h4 className="font-medium mb-1">Actions recommandées:</h4>
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          <li>Programme VIP avec accès anticipé aux événements</li>
+                          <li>Invitations personnalisées aux soirées exclusives</li>
+                          <li>Service de conciergerie de table</li>
+                          <li>Cadeaux d'anniversaire et occasions spéciales</li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-teal-50 dark:bg-teal-950 border border-teal-200 dark:border-teal-800 rounded-md p-4">
+                      <h3 className="font-medium flex items-center text-teal-800 dark:text-teal-300 mb-2">
+                        <TrendingUp size={16} className="mr-2" />
+                        MEDIUM VALUE / GROWING
+                      </h3>
+                      <div className="text-sm text-muted-foreground space-y-1 mb-3">
+                        <p>Ces clients montrent un potentiel de croissance avec une fréquentation et des dépenses en augmentation.</p>
+                      </div>
+                      <div className="text-sm">
+                        <h4 className="font-medium mb-1">Actions recommandées:</h4>
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          <li>Programme de fidélité à paliers avec récompenses</li>
+                          <li>Promotions "invitez un ami" avec avantages partagés</li>
+                          <li>Offres spéciales sur boissons/réservations</li>
+                          <li>Sondages pour comprendre leurs préférences</li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md p-4">
+                      <h3 className="font-medium flex items-center text-amber-800 dark:text-amber-300 mb-2">
+                        <Activity size={16} className="mr-2" />
+                        OCCASIONAL / POTENTIAL
+                      </h3>
+                      <div className="text-sm text-muted-foreground space-y-1 mb-3">
+                        <p>Ces clients viennent occasionnellement mais pourraient être convertis en clients réguliers.</p>
+                      </div>
+                      <div className="text-sm">
+                        <h4 className="font-medium mb-1">Actions recommandées:</h4>
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                          <li>Offres "bienvenue à nouveau" après absence prolongée</li>
+                          <li>Promotions happy hour et entrée gratuite en semaine</li>
+                          <li>Communication ciblée sur les événements correspondant à leurs goûts</li>
+                          <li>Questionnaire post-visite pour amélioration continue</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex items-center justify-between border-t pt-4">
+                  <div className="text-sm text-muted-foreground">
+                    Ces recommandations sont générées automatiquement basées sur les données de fréquentation
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <Mail size={16} />
+                    Créer campagne
+                  </Button>
+                </CardFooter>
+              </Card>
             </div>
             
-            <div className="flex gap-2">
-              <Button variant="default" onClick={() => setIsQrScannerOpen(true)} className="gap-2">
-                <QrCode className="h-4 w-4" />
-                Scanner QR Code
-              </Button>
-              
-              <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {selectedEvent 
-                      ? getEventTitle(selectedEvent)
-                      : "Sélectionner un événement"
-                    }
-                  </span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuLabel>Événements</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={() => setSelectedEvent(null)}
-                  className="cursor-pointer"
-                >
-                  Tous les événements
-                </DropdownMenuItem>
-                {events.map(event => (
-                  <DropdownMenuItem 
-                    key={event.id}
-                    onClick={() => setSelectedEvent(event.id)}
-                    className="cursor-pointer"
-                  >
-                    {event.title}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          {/* Filtres et recherche */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Rechercher par nom, email ou numéro de billet" 
-                    className="pl-9"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                
-                <div className="flex gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="gap-2">
-                        <Filter className="h-4 w-4" />
-                        Statut
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem 
-                        onClick={() => setStatusFilter("all")}
-                        className="cursor-pointer"
-                      >
-                        Tous les statuts
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setStatusFilter("checked_in")}
-                        className="cursor-pointer"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                        Présent
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setStatusFilter("pending")}
-                        className="cursor-pointer"
-                      >
-                        En attente
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setStatusFilter("no_show")}
-                        className="cursor-pointer"
-                      >
-                        <XCircle className="h-4 w-4 mr-2 text-red-600" />
-                        Absent
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="gap-2">
-                        <Filter className="h-4 w-4" />
-                        Type de billet
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem 
-                        onClick={() => setTicketTypeFilter("all")}
-                        className="cursor-pointer"
-                      >
-                        Tous les types
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setTicketTypeFilter("standard")}
-                        className="cursor-pointer"
-                      >
-                        Standard
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setTicketTypeFilter("vip")}
-                        className="cursor-pointer"
-                      >
-                        VIP
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setTicketTypeFilter("early_bird")}
-                        className="cursor-pointer"
-                      >
-                        Early Bird
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Liste des participants */}
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {filteredAttendees.length} Participant{filteredAttendees.length !== 1 ? 's' : ''}
-              </CardTitle>
-              <CardDescription>
-                {selectedEvent 
-                  ? `Pour l'événement: ${getEventTitle(selectedEvent)}`
-                  : "Tous les événements confondus"
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {filteredAttendees.length > 0 ? (
-                  filteredAttendees.map((attendee) => (
-                    <div 
-                      key={attendee.id} 
-                      className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => openAttendeeDetails(attendee)}
-                    >
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={attendee.profileImage} alt={attendee.name} />
-                        <AvatarFallback>{attendee.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
+            <Card>
+              <CardHeader>
+                <CardTitle>Campagnes par segment</CardTitle>
+                <CardDescription>Performance des campagnes marketing ciblées</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left font-medium p-2">Campagne</th>
+                        <th className="text-left font-medium p-2">Segment ciblé</th>
+                        <th className="text-left font-medium p-2">Date</th>
+                        <th className="text-left font-medium p-2">Envois</th>
+                        <th className="text-left font-medium p-2">Ouverture</th>
+                        <th className="text-left font-medium p-2">Conversions</th>
+                        <th className="text-left font-medium p-2">ROI</th>
+                        <th className="text-left font-medium p-2">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-border">
+                        <td className="p-2">VIP Weekend Experience</td>
+                        <td className="p-2">
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900">
+                            HIGH VALUE
+                          </Badge>
+                        </td>
+                        <td className="p-2">12 Mai 2023</td>
+                        <td className="p-2">75</td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">82%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-green-500 rounded-full" style={{ width: '82%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">35%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '35%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <span className="text-green-600 dark:text-green-400 font-medium">3.8x</span>
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900">
+                            Terminé
+                          </Badge>
+                        </td>
+                      </tr>
                       
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                          <h3 className="font-medium truncate">{attendee.name}</h3>
-                          {!selectedEvent && (
-                            <span className="text-xs text-muted-foreground truncate">
-                              {getEventTitle(attendee.eventId)}
-                            </span>
-                          )}
+                      <tr className="border-b border-border">
+                        <td className="p-2">Double Points Fidélité</td>
+                        <td className="p-2">
+                          <Badge className="bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900">
+                            MEDIUM VALUE
+                          </Badge>
+                        </td>
+                        <td className="p-2">5 Mai 2023</td>
+                        <td className="p-2">180</td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">75%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-green-500 rounded-full" style={{ width: '75%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">28%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '28%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <span className="text-green-600 dark:text-green-400 font-medium">2.5x</span>
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900">
+                            Terminé
+                          </Badge>
+                        </td>
+                      </tr>
+                      
+                      <tr className="border-b border-border">
+                        <td className="p-2">Bienvenue à nouveau</td>
+                        <td className="p-2">
+                          <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900">
+                            OCCASIONAL
+                          </Badge>
+                        </td>
+                        <td className="p-2">28 Avril 2023</td>
+                        <td className="p-2">250</td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">68%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-green-500 rounded-full" style={{ width: '68%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">18%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '18%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <span className="text-green-600 dark:text-green-400 font-medium">1.9x</span>
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900">
+                            Terminé
+                          </Badge>
+                        </td>
+                      </tr>
+                      
+                      <tr className="border-b border-border">
+                        <td className="p-2">Anniversaire Club - Special VIP</td>
+                        <td className="p-2">
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900">
+                            HIGH VALUE
+                          </Badge>
+                        </td>
+                        <td className="p-2">15 Mai 2023</td>
+                        <td className="p-2">85</td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">45%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-amber-500 rounded-full" style={{ width: '45%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">10%</span>
+                            <div className="w-16 h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '10%' }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-2">
+                          <span className="text-amber-600 dark:text-amber-400 font-medium">-</span>
+                        </td>
+                        <td className="p-2">
+                          <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900">
+                            En cours
+                          </Badge>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+              <CardFooter className="flex items-center justify-between border-t pt-4">
+                <div className="text-sm text-muted-foreground">
+                  Affichage des 4 dernières campagnes
+                </div>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Mail size={16} />
+                  Nouvelle campagne
+                </Button>
+              </CardFooter>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Tendances */}
+          <TabsContent value="trends" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Répartition démographique</CardTitle>
+                  <CardDescription>Profil de vos participants</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Répartition par âge */}
+                    <div>
+                      <h3 className="text-sm font-medium mb-3">Répartition par âge</h3>
+                      <div className="space-y-2">
+                        {trends.visitorDemographics.ageGroups.map((item, index) => (
+                          <div key={index}>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>{item.group} ans</span>
+                              <span className="font-medium">{item.percentage}%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-primary rounded-full" style={{ width: `${item.percentage}%` }}></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Répartition par genre */}
+                    <div>
+                      <h3 className="text-sm font-medium mb-3">Répartition par genre</h3>
+                      <div className="flex items-center">
+                        <div className="w-28 h-28 relative">
+                          <svg viewBox="0 0 100 100">
+                            <circle 
+                              cx="50" 
+                              cy="50" 
+                              r="40" 
+                              fill="none" 
+                              stroke="#e0e0e0" 
+                              strokeWidth="20" 
+                            />
+                            <circle 
+                              cx="50" 
+                              cy="50" 
+                              r="40" 
+                              fill="none" 
+                              stroke="#4f46e5" 
+                              strokeWidth="20" 
+                              strokeDasharray="184" 
+                              strokeDashoffset="0" 
+                              transform="rotate(-90 50 50)"
+                            />
+                            <circle 
+                              cx="50" 
+                              cy="50" 
+                              r="40" 
+                              fill="none" 
+                              stroke="#ec4899" 
+                              strokeWidth="20" 
+                              strokeDasharray="184" 
+                              strokeDashoffset="101.2" 
+                              transform="rotate(-90 50 50)"
+                            />
+                            <circle 
+                              cx="50" 
+                              cy="50" 
+                              r="40" 
+                              fill="none" 
+                              stroke="#e0e0e0" 
+                              strokeWidth="20" 
+                              strokeDasharray="184" 
+                              strokeDashoffset="178.48" 
+                              transform="rotate(-90 50 50)"
+                            />
+                          </svg>
                         </div>
                         
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4 mt-1 text-sm">
-                          <span className="text-muted-foreground flex items-center">
-                            <Mail className="h-3 w-3 mr-1" />
-                            {attendee.email}
-                          </span>
-                          <span className="text-muted-foreground">
-                            {attendee.ticketId}
-                          </span>
+                        <div className="ml-4 space-y-2">
+                          {trends.visitorDemographics.gender.map((item, index) => (
+                            <div key={index} className="flex items-center">
+                              <div className={`w-3 h-3 mr-2 rounded-sm ${
+                                index === 0 ? "bg-[#4f46e5]" : 
+                                index === 1 ? "bg-[#ec4899]" : "bg-[#e0e0e0]"
+                              }`}></div>
+                              <span className="text-xs">{item.type} ({item.percentage}%)</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Insights démographiques</h3>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p>• La tranche d'âge 25-34 ans représente votre segment principal</p>
+                        <p>• Légère surreprésentation masculine (55% vs 42%)</p>
+                        <p>• Opportunité: créer plus d'événements ciblant les 35-44 ans</p>
+                        <p>• Les clients 18-24 ans dépensent moins mais viennent plus fréquemment</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Comportement des clients</CardTitle>
+                  <CardDescription>Habitudes et fidélisation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Fidélisation des clients</h3>
+                      <div className="w-full h-8 rounded-md overflow-hidden bg-muted flex">
+                        <div 
+                          className="h-full flex items-center justify-center text-xs font-medium text-white"
+                          style={{ 
+                            width: `${trends.customerRetention.oneTime}%`,
+                            backgroundColor: "#f97316"
+                          }}
+                        >
+                          {trends.customerRetention.oneTime}%
+                        </div>
+                        <div 
+                          className="h-full flex items-center justify-center text-xs font-medium text-white"
+                          style={{ 
+                            width: `${trends.customerRetention.occasional}%`,
+                            backgroundColor: "#3b82f6"
+                          }}
+                        >
+                          {trends.customerRetention.occasional}%
+                        </div>
+                        <div 
+                          className="h-full flex items-center justify-center text-xs font-medium text-white"
+                          style={{ 
+                            width: `${trends.customerRetention.regular}%`,
+                            backgroundColor: "#10b981"
+                          }}
+                        >
+                          {trends.customerRetention.regular}%
+                        </div>
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-amber-500 mr-1"></div>
+                          <span className="text-xs">Unique</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-blue-500 mr-1"></div>
+                          <span className="text-xs">Occasionnel</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-2 h-2 rounded-full bg-green-500 mr-1"></div>
+                          <span className="text-xs">Régulier</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 bg-muted/50 rounded-md">
+                      <h3 className="text-sm font-medium mb-2">Évolution vs. mois précédent</h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-card p-2 rounded-md text-center">
+                          <div className="text-lg font-bold text-amber-500">-5%</div>
+                          <div className="text-xs text-muted-foreground">Clients uniques</div>
+                        </div>
+                        <div className="bg-card p-2 rounded-md text-center">
+                          <div className="text-lg font-bold text-green-500">+8%</div>
+                          <div className="text-xs text-muted-foreground">Clients occasionnels</div>
+                        </div>
+                        <div className="bg-card p-2 rounded-md text-center">
+                          <div className="text-lg font-bold text-green-500">+3%</div>
+                          <div className="text-xs text-muted-foreground">Clients réguliers</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium mb-2">Préférences musicales</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                            <span className="text-xs">House</span>
+                          </div>
+                          <span className="text-xs font-medium">32%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                            <span className="text-xs">Techno</span>
+                          </div>
+                          <span className="text-xs font-medium">25%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                            <span className="text-xs">Hip-Hop</span>
+                          </div>
+                          <span className="text-xs font-medium">18%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                            <span className="text-xs">Afrobeats</span>
+                          </div>
+                          <span className="text-xs font-medium">15%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                            <span className="text-xs">R&B</span>
+                          </div>
+                          <span className="text-xs font-medium">7%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                            <span className="text-xs">Autres</span>
+                          </div>
+                          <span className="text-xs font-medium">3%</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Insights comportementaux</h3>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p>• Conversion positive des visiteurs occasionnels vers réguliers</p>
+                        <p>• Les visiteurs réguliers dépensent en moyenne 45% de plus</p>
+                        <p>• Préférence marquée pour House et Techno</p>
+                        <p>• Opportunité: soirées thématiques Hip-Hop pour diversifier</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Dépenses par catégorie</CardTitle>
+                <CardDescription>Répartition des revenus par source</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                  <div className="md:col-span-2">
+                    <div className="h-80 w-full">
+                      {/* Bar chart simulation */}
+                      <div className="h-full flex items-end">
+                        {trends.spendingByCategory.map((category, index) => (
+                          <div key={index} className="flex-1 flex flex-col items-center">
+                            <div 
+                              className="w-24 bg-primary rounded-t transition-all hover:bg-primary/90"
+                              style={{ 
+                                height: `${(category.amount / 1500000) * 100}%`,
+                                backgroundColor: index === 0 ? "#3b82f6" : 
+                                  index === 1 ? "#10b981" : 
+                                  index === 2 ? "#ec4899" : "#f59e0b"
+                              }}
+                            ></div>
+                            <div className="mt-3 text-sm font-medium text-center">
+                              {category.category}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {formatCurrency(category.amount)}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="space-y-4">
+                      <div className="p-4 border rounded-md">
+                        <h3 className="text-sm font-medium mb-2">Distribution des revenus</h3>
+                        <div className="space-y-2.5">
+                          {trends.spendingByCategory.map((category, index) => (
+                            <div key={index} className="flex items-center justify-between">
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 rounded-sm mr-2" style={{ 
+                                  backgroundColor: index === 0 ? "#3b82f6" : 
+                                    index === 1 ? "#10b981" : 
+                                    index === 2 ? "#ec4899" : "#f59e0b"
+                                }}></div>
+                                <span className="text-sm">{category.category}</span>
+                              </div>
+                              <div className="text-sm font-medium">
+                                {Math.round((category.amount / trends.spendingByCategory.reduce((acc, curr) => acc + curr.amount, 0)) * 100)}%
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                       
-                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
-                        <Badge className="whitespace-nowrap" variant={attendee.ticketType === "vip" ? "default" : "outline"}>
-                          {getTicketTypeLabel(attendee.ticketType)}
-                        </Badge>
-                        {getStatusLabel(attendee.checkInStatus)}
-                        
-                        {attendee.checkInStatus === "pending" && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="hidden sm:flex"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCheckIn(attendee.id);
-                            }}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Check-in
-                          </Button>
-                        )}
+                      <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md space-y-2">
+                        <h3 className="font-medium text-sm flex items-center text-blue-800 dark:text-blue-300">
+                          <TrendingUp size={16} className="mr-2" />
+                          Insights
+                        </h3>
+                        <ul className="text-xs text-muted-foreground space-y-1.5 list-disc pl-5">
+                          <li>Les boissons représentent la principale source de revenus (39%)</li>
+                          <li>Les tables VIP ont l'ARPU (revenu moyen/client) le plus élevé</li>
+                          <li>Opportunité d'augmenter les revenus des événements spéciaux</li>
+                          <li>Tendance: +15% sur les dépenses boissons vs. mois précédent</li>
+                        </ul>
                       </div>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <User className="h-10 w-10 mx-auto text-muted-foreground/50" />
-                    <p className="mt-2 text-lg font-medium">Aucun participant trouvé</p>
-                    <p className="text-muted-foreground">
-                      Essayez de modifier vos filtres ou votre recherche
-                    </p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Modal de détails du participant */}
-          {selectedAttendee && (
-            <Dialog open={isAttendeeModalOpen} onOpenChange={setIsAttendeeModalOpen}>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Détails du participant</DialogTitle>
-                  <DialogDescription>
-                    Informations complètes et gestion du participant
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="flex flex-col items-center py-4">
-                  <Avatar className="h-20 w-20 mb-3">
-                    <AvatarImage src={selectedAttendee.profileImage} alt={selectedAttendee.name} />
-                    <AvatarFallback>{selectedAttendee.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  
-                  <h2 className="text-xl font-semibold">{selectedAttendee.name}</h2>
-                  <p className="text-muted-foreground">
-                    {getEventTitle(selectedAttendee.eventId)}
-                  </p>
-                  
-                  <div className="flex gap-2 mt-3">
-                    {getStatusLabel(selectedAttendee.checkInStatus)}
-                    <Badge className="whitespace-nowrap" variant={selectedAttendee.ticketType === "vip" ? "default" : "outline"}>
-                      {getTicketTypeLabel(selectedAttendee.ticketType)}
-                    </Badge>
                   </div>
                 </div>
-                
-                <div className="space-y-4 border-t pt-4">
-                  <div className="flex flex-col space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{selectedAttendee.email}</span>
-                    </div>
-                    
-                    {selectedAttendee.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span>{selectedAttendee.phone}</span>
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center gap-2">
-                      <QrCode className="h-4 w-4 text-muted-foreground" />
-                      <span>{selectedAttendee.ticketId}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        Acheté le {format(new Date(selectedAttendee.purchaseDate), "d MMMM yyyy, HH:mm", { locale: fr })}
-                      </span>
-                    </div>
-                    
-                    {selectedAttendee.specialRequests && (
-                      <div className="flex items-start gap-2 border-t pt-3 mt-2">
-                        <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5" />
-                        <div>
-                          <p className="font-medium text-sm">Demandes spéciales:</p>
-                          <p className="text-sm">{selectedAttendee.specialRequests}</p>
+              </CardContent>
+              <CardFooter className="border-t pt-4 flex justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Données des 30 derniers jours
+                </div>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Download size={16} />
+                  Exporter
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>Satisfaction client</CardTitle>
+                  <CardDescription>Retours et évaluations</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                      <div className="flex-shrink-0">
+                        <div className="w-36 h-36 rounded-full bg-primary/10 border-8 border-primary flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-4xl font-bold">4.6</div>
+                            <div className="flex items-center mt-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star} 
+                                  size={14} 
+                                  className={`${star <= 4 ? "fill-amber-500 text-amber-500" : "fill-amber-300 text-amber-300"}`} 
+                                />
+                              ))}
+                            </div>
+                            <div className="text-xs mt-1 text-muted-foreground">350 avis</div>
+                          </div>
                         </div>
                       </div>
-                    )}
+                      
+                      <div className="flex-1 w-full space-y-2">
+                        <h3 className="text-sm font-medium mb-1">Répartition des notes</h3>
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 text-xs text-right">5 ★</div>
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-500" style={{ width: "75%" }}></div>
+                          </div>
+                          <div className="w-8 text-xs">75%</div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 text-xs text-right">4 ★</div>
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-400" style={{ width: "15%" }}></div>
+                          </div>
+                          <div className="w-8 text-xs">15%</div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 text-xs text-right">3 ★</div>
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-300" style={{ width: "6%" }}></div>
+                          </div>
+                          <div className="w-8 text-xs">6%</div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 text-xs text-right">2 ★</div>
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-200" style={{ width: "3%" }}></div>
+                          </div>
+                          <div className="w-8 text-xs">3%</div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 text-xs text-right">1 ★</div>
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-100" style={{ width: "1%" }}></div>
+                          </div>
+                          <div className="w-8 text-xs">1%</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-4">
+                      <h3 className="text-sm font-medium mb-3">Commentaires récents</h3>
+                      <div className="space-y-4">
+                        <div className="bg-muted/30 p-3 rounded-md">
+                          <div className="flex items-center mb-2">
+                            <div className="flex items-center">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star} 
+                                  size={12} 
+                                  className={`${star <= 5 ? "fill-amber-500 text-amber-500" : "text-muted"}`} 
+                                />
+                              ))}
+                            </div>
+                            <div className="text-xs ml-2 text-muted-foreground">Il y a 2 jours</div>
+                          </div>
+                          <p className="text-sm">
+                            "Ambiance incroyable, les DJs sont toujours excellents. Le service VIP est impeccable. Un peu d'attente au bar principal mais rien de dramatique."
+                          </p>
+                          <div className="text-xs text-primary mt-1 font-medium">Jean R. · DJ Night</div>
+                        </div>
+                        
+                        <div className="bg-muted/30 p-3 rounded-md">
+                          <div className="flex items-center mb-2">
+                            <div className="flex items-center">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star} 
+                                  size={12} 
+                                  className={`${star <= 4 ? "fill-amber-500 text-amber-500" : "text-muted"}`} 
+                                />
+                              ))}
+                            </div>
+                            <div className="text-xs ml-2 text-muted-foreground">Il y a 5 jours</div>
+                          </div>
+                          <p className="text-sm">
+                            "J'ai adoré la soirée Afrobeats! Le DJ a mis une ambiance de folie. Seul bémol, c'était un peu bondé vers minuit."
+                          </p>
+                          <div className="text-xs text-primary mt-1 font-medium">Sophie A. · Weekend Party</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <DialogFooter className="sm:justify-start">
-                  {selectedAttendee.checkInStatus === "pending" ? (
-                    <Button 
-                      variant="default" 
-                      onClick={() => {
-                        handleCheckIn(selectedAttendee.id);
-                        setIsAttendeeModalOpen(false);
-                      }}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Marquer comme présent
-                    </Button>
-                  ) : (
-                    <Button variant="outline" onClick={() => setIsAttendeeModalOpen(false)}>
-                      Fermer
-                    </Button>
-                  )}
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
-          {/* Statistiques */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-            <Card>
-              <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-32">
-                <div className="text-3xl font-bold text-primary">
-                  {attendees.filter(a => a.checkInStatus === "checked_in").length}
-                </div>
-                <p className="text-muted-foreground mt-1">Participants présents</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-32">
-                <div className="text-3xl font-bold text-yellow-500">
-                  {attendees.filter(a => a.checkInStatus === "pending").length}
-                </div>
-                <p className="text-muted-foreground mt-1">En attente</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6 flex flex-col items-center justify-center text-center h-32">
-                <div className="text-3xl font-bold">
-                  {attendees.filter(a => a.ticketType === "vip").length}
-                </div>
-                <p className="text-muted-foreground mt-1">Billets VIP</p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* QR Scanner Dialog */}
-          <Dialog open={isQrScannerOpen} onOpenChange={setIsQrScannerOpen}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Scanner de QR Code</DialogTitle>
-                <DialogDescription>
-                  Scannez le QR code d'un billet pour enregistrer le participant
-                </DialogDescription>
-              </DialogHeader>
+                </CardContent>
+              </Card>
               
-              <div className="flex flex-col items-center py-4">
-                <div className="border-4 border-dashed border-muted rounded-lg h-64 w-full flex items-center justify-center mb-4">
-                  <QrCode className="h-16 w-16 text-muted-foreground opacity-50" />
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-4">
-                  Placez le QR code devant votre caméra pour le scanner automatiquement.
-                </p>
-                
-                <Input 
-                  placeholder="Ou entrez le code manuellement" 
-                  value={scanResult}
-                  onChange={(e) => setScanResult(e.target.value)}
-                  className="mb-4"
-                />
-                
-                <Button disabled={!scanResult} className="w-full" onClick={() => {
-                  // Simulation d'un check-in par QR code
-                  if (scanResult) {
-                    const attendee = attendees.find(a => a.ticketId === scanResult);
-                    if (attendee) {
-                      handleCheckIn(attendee.id);
-                      setIsQrScannerOpen(false);
-                      setScanResult("");
-                    }
-                  }
-                }}>
-                  Valider le billet
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Points d'amélioration</CardTitle>
+                  <CardDescription>Basé sur les retours clients</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-3 border rounded-md">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle size={18} className="text-red-500" />
+                        <h3 className="font-medium">Temps d'attente au bar</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Mentionné dans 42% des commentaires négatifs. Particulièrement problématique entre 23h-01h le weekend.
+                      </p>
+                      <div className="mt-2 flex items-center">
+                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-red-500" style={{ width: "42%" }}></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 border rounded-md">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle size={18} className="text-amber-500" />
+                        <h3 className="font-medium">Climatisation/Aération</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Mentionné dans 28% des commentaires négatifs. Principalement au niveau de la piste de danse centrale.
+                      </p>
+                      <div className="mt-2 flex items-center">
+                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-amber-500" style={{ width: "28%" }}></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 border rounded-md">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertCircle size={18} className="text-amber-500" />
+                        <h3 className="font-medium">Sélection des boissons</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Mentionné dans 15% des commentaires négatifs. Demande pour plus de cocktails sans alcool et options premium.
+                      </p>
+                      <div className="mt-2 flex items-center">
+                        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-amber-500" style={{ width: "15%" }}></div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4">
+                      <h3 className="text-sm font-medium mb-2">Suggestions d'amélioration</h3>
+                      <ul className="text-sm space-y-2">
+                        <li className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check size={12} className="text-green-600" />
+                          </div>
+                          <span>Ajouter 2 barmans supplémentaires les vendredis et samedis entre 22h et 2h</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check size={12} className="text-green-600" />
+                          </div>
+                          <span>Améliorer le système de ventilation au niveau de la piste de danse</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Check size={12} className="text-green-600" />
+                          </div>
+                          <span>Introduire une carte de cocktails sans alcool de qualité</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </ResponsiveLayout>
   );
-}
+};
+
+export default AttendeesPage;
