@@ -42,6 +42,7 @@ import ClubInvitationsPage from "./pages/club/invitations-page";
 import ClubWalletPage from "./pages/club/wallet-page";
 import AttendeesPage from "./pages/club/attendees-page";
 import TicketsManagementPage from "./pages/club/tickets-management-page";
+import ClubEventsPage from "./pages/club/club-events-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -305,93 +306,7 @@ function App() {
             </Route>
             
             <Route path="/club/events">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Événements du club</h1>
-                  <p className="text-lg">Gérez vos événements passés et à venir</p>
-                  
-                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Carte d'événement simplifiée sans composants complexes */}
-                    <div className="bg-card rounded-lg overflow-hidden border border-border shadow-sm">
-                      <div className="h-40 bg-gradient-to-r from-purple-600 to-blue-500 relative"></div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-bold text-lg">Summer Night Party</h3>
-                            <p className="text-sm text-muted-foreground">15 juillet 2025</p>
-                          </div>
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-600 text-white">À venir</span>
-                        </div>
-                        <div className="mt-4 space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Réservations</span>
-                            <span className="text-sm font-medium">145 / 180</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Vente de tickets</span>
-                            <span className="text-sm font-medium">25.200.000 Ar</span>
-                          </div>
-                        </div>
-                        <div className="w-full mt-4 bg-primary text-white py-2 px-4 rounded-md text-center text-sm font-medium">
-                          Gérer l'événement
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-card rounded-lg overflow-hidden border border-border shadow-sm">
-                      <div className="h-40 bg-gradient-to-r from-rose-500 to-orange-400 relative"></div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-bold text-lg">DJ Elektra Live</h3>
-                            <p className="text-sm text-muted-foreground">22 août 2025</p>
-                          </div>
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-600 text-white">En planification</span>
-                        </div>
-                        <div className="mt-4 space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Réservations</span>
-                            <span className="text-sm font-medium">42 / 200</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Vente de tickets</span>
-                            <span className="text-sm font-medium">8.400.000 Ar</span>
-                          </div>
-                        </div>
-                        <div className="w-full mt-4 bg-primary text-white py-2 px-4 rounded-md text-center text-sm font-medium">
-                          Gérer l'événement
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-card rounded-lg overflow-hidden border border-border shadow-sm">
-                      <div className="h-40 bg-gradient-to-r from-gray-500 to-gray-700 relative"></div>
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-bold text-lg">Techno Revolution</h3>
-                            <p className="text-sm text-muted-foreground">10 avril 2025</p>
-                          </div>
-                          <span className="px-2 py-1 text-xs font-medium rounded-full border text-muted-foreground">Passé</span>
-                        </div>
-                        <div className="mt-4 space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Participants</span>
-                            <span className="text-sm font-medium">175 / 200</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Revenus totaux</span>
-                            <span className="text-sm font-medium">36.750.000 Ar</span>
-                          </div>
-                        </div>
-                        <div className="w-full mt-4 border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 px-4 rounded-md text-center text-sm font-medium">
-                          Voir le récapitulatif
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </ResponsiveLayout>
+              <ClubEventsPage />
             </Route>
             
             <Route path="/club/attendees">
