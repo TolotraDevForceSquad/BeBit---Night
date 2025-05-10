@@ -34,6 +34,7 @@ import POSKitchenPage from "./pages/club/pos-kitchen-page";
 import POSHistoryPage from "./pages/club/pos-history-page";
 import BIDashboardPage from "./pages/club/bi-dashboard-page";
 import FindArtistsPage from "./pages/club/find-artists-page";
+import ClubInvitationsPage from "./pages/club/invitations-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -293,12 +294,7 @@ function App() {
             </Route>
             
             <Route path="/club/invitations">
-              <ResponsiveLayout>
-                <div className="p-8">
-                  <h1 className="text-3xl font-bold mb-6">Invitations</h1>
-                  <p className="text-lg">Gérez vos invitations aux artistes</p>
-                </div>
-              </ResponsiveLayout>
+              <ClubInvitationsPage />
             </Route>
             
             <Route path="/club/attendees">
