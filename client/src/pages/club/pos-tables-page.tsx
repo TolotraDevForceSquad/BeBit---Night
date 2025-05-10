@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import ResponsiveLayout from '../../layouts/ResponsiveLayout';
+import POSLayout from '../../layouts/POSLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -443,11 +443,11 @@ const POSTablesPage = () => {
   }, [selectedTableId, isOrderModalOpen, tables, getTableOrder]);
   
   return (
-    <ResponsiveLayout>
-      <div className="p-8">
+    <POSLayout>
+      <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">Gestion des Tables et Factures</h1>
+            <h1 className="text-2xl font-bold">Tables et Commandes</h1>
             <p className="text-muted-foreground">Gérez vos tables, prenez les commandes et suivez vos factures</p>
           </div>
         </div>
@@ -839,7 +839,7 @@ const POSTablesPage = () => {
         description={`Êtes-vous sûr de vouloir supprimer ${itemToDelete?.type === 'table' ? 'cette table' : 'cette commande'} ? Cette action est irréversible.`}
         isLoading={isLoading}
       />
-    </ResponsiveLayout>
+    </POSLayout>
   );
 };
 

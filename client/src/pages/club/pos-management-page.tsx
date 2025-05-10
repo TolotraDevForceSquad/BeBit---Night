@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import ResponsiveLayout from '../../layouts/ResponsiveLayout';
+import POSLayout from '../../layouts/POSLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";

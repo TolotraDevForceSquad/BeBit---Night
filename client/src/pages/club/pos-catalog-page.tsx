@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import ResponsiveLayout from '../../layouts/ResponsiveLayout';
+import POSLayout from '../../layouts/POSLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
@@ -290,8 +290,8 @@ const POSCatalogPage = () => {
   }, [products, categories, toast]);
   
   return (
-    <ResponsiveLayout>
-      <div className="p-8">
+    <POSLayout>
+      <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Catalogue des produits</h1>
@@ -564,7 +564,7 @@ const POSCatalogPage = () => {
         description={`Êtes-vous sûr de vouloir supprimer ${itemToDelete?.type === 'category' ? 'la catégorie' : 'le produit'} "${itemToDelete?.item?.name}" ? Cette action est irréversible.`}
         isLoading={isLoading}
       />
-    </ResponsiveLayout>
+    </POSLayout>
   );
 };
 
