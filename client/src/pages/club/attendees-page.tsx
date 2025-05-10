@@ -534,6 +534,7 @@ const AttendeesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("recent");
+  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
   
   // Filtrer les participants
   const filteredAttendees = attendees.filter(attendee => {
@@ -883,7 +884,11 @@ const AttendeesPage: React.FC = () => {
                     </thead>
                     <tbody>
                       {sortedAttendees.map((attendee) => (
-                        <tr key={attendee.id} className="border-b border-border hover:bg-muted/50">
+                        <tr 
+                          key={attendee.id} 
+                          className={`border-b border-border hover:bg-muted/50 cursor-pointer ${selectedAttendee?.id === attendee.id ? 'bg-muted' : ''}`}
+                          onClick={() => setSelectedAttendee(attendee)}
+                        >
                           <td className="p-2">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -924,13 +929,37 @@ const AttendeesPage: React.FC = () => {
                           </td>
                           <td className="p-2 text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Action pour envoyer un email
+                                }}
+                              >
                                 <Mail size={16} />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Action pour gérer les statuts du client
+                                }}
+                              >
                                 <UserCheck size={16} />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAttendee(attendee);
+                                }}
+                              >
                                 <ChevronRight size={16} />
                               </Button>
                             </div>
@@ -965,15 +994,287 @@ const AttendeesPage: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent className="p-0 border-t">
-                <div className="p-6 text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-                    <UserCheck size={24} className="text-primary/60" />
+                {!selectedAttendee ? (
+                  <div className="p-6 text-center">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+                      <UserCheck size={24} className="text-primary/60" />
+                    </div>
+                    <h3 className="font-medium mb-2">Aucun participant sélectionné</h3>
+                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                      Cliquez sur un participant dans la liste ci-dessus pour afficher son profil détaillé avec historique, préférences et opportunités de fidélisation.
+                    </p>
                   </div>
-                  <h3 className="font-medium mb-2">Aucun participant sélectionné</h3>
-                  <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    Cliquez sur un participant dans la liste ci-dessus pour afficher son profil détaillé avec historique, préférences et opportunités de fidélisation.
-                  </p>
-                </div>
+                ) : (
+                  <div className="flex flex-col md:flex-row">
+                    <div className="w-full md:w-1/3 p-6 border-r border-border">
+                      <div className="flex flex-col items-center text-center mb-6">
+                        <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden mb-4">
+                          {selectedAttendee.avatar ? (
+                            <img src={selectedAttendee.avatar} alt={selectedAttendee.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Users size={36} className="text-muted-foreground" />
+                          )}
+                        </div>
+                        <h2 className="text-xl font-semibold">{selectedAttendee.name}</h2>
+                        <div className="text-sm text-muted-foreground">{selectedAttendee.email}</div>
+                        <div className="text-sm text-muted-foreground">{selectedAttendee.phone}</div>
+                        
+                        <div className="flex items-center mt-4 gap-2">
+                          <Badge variant={selectedAttendee.status === 'active' ? 'default' : 'secondary'}>
+                            {selectedAttendee.status === 'active' ? 'Actif' : 'Inactif'}
+                          </Badge>
+                          {selectedAttendee.tags.slice(0, 2).map((tag, index) => (
+                            <Badge key={index} variant="outline">{tag}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs text-muted-foreground">Client depuis</span>
+                          <span className="text-sm">{new Date(selectedAttendee.memberSince).toLocaleDateString('fr-FR')}</span>
+                        </div>
+                        
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs text-muted-foreground">Nombre de visites</span>
+                          <span className="text-sm">{selectedAttendee.visits} visites</span>
+                        </div>
+                        
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs text-muted-foreground">Dépenses totales</span>
+                          <span className="text-sm font-medium">{formatCurrency(selectedAttendee.totalSpent)}</span>
+                        </div>
+                        
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs text-muted-foreground">Moyenne par visite</span>
+                          <span className="text-sm">{formatCurrency(selectedAttendee.avgSpent)}</span>
+                        </div>
+                        
+                        <div className="flex flex-col space-y-1">
+                          <span className="text-xs text-muted-foreground">Points de fidélité</span>
+                          <span className="text-sm">{selectedAttendee.loyaltyPoints} points</span>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-6 space-y-2">
+                        <Button className="w-full" size="sm">
+                          <Mail size={16} className="mr-2" />
+                          Contacter
+                        </Button>
+                        <Button variant="outline" className="w-full" size="sm">
+                          <UserCheck size={16} className="mr-2" />
+                          Gérer le statut
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="w-full md:w-2/3 p-6">
+                      <Tabs defaultValue="preferences">
+                        <TabsList className="w-full grid grid-cols-4">
+                          <TabsTrigger value="preferences">Préférences</TabsTrigger>
+                          <TabsTrigger value="history">Historique</TabsTrigger>
+                          <TabsTrigger value="feedback">Avis</TabsTrigger>
+                          <TabsTrigger value="opportunities">Opportunités</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="preferences" className="pt-4">
+                          <div className="space-y-6">
+                            <div>
+                              <h3 className="text-sm font-medium mb-3">Préférences musicales</h3>
+                              <div className="flex flex-wrap gap-1.5">
+                                {selectedAttendee.preferences.music.map((genre, index) => (
+                                  <Badge key={index} variant="secondary">{genre}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-sm font-medium mb-3">Boissons préférées</h3>
+                              <div className="flex flex-wrap gap-1.5">
+                                {selectedAttendee.preferences.drinks.map((drink, index) => (
+                                  <Badge key={index} variant="secondary">{drink}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-sm font-medium mb-3">Emplacement préféré</h3>
+                              <Badge variant="secondary">{selectedAttendee.preferences.location}</Badge>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-sm font-medium mb-3">Types d'événements fréquentés</h3>
+                              <div className="flex flex-wrap gap-1.5">
+                                {selectedAttendee.preferredEvents.map((event, index) => (
+                                  <Badge key={index} variant="secondary">{event}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-sm font-medium mb-3">Segments client</h3>
+                              <div className="flex flex-wrap gap-1.5">
+                                {selectedAttendee.segments.map((segment, index) => (
+                                  <Badge key={index} className={
+                                    segment.includes("High") ? "bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900 dark:text-green-100 dark:hover:bg-green-900" :
+                                    segment.includes("Medium") ? "bg-blue-100 text-blue-800 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-100 dark:hover:bg-blue-900" :
+                                    "bg-amber-100 text-amber-800 hover:bg-amber-100 dark:bg-amber-900 dark:text-amber-100 dark:hover:bg-amber-900"
+                                  }>
+                                    {segment}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="history" className="pt-4">
+                          <div className="space-y-4">
+                            <h3 className="text-sm font-medium">Dernières visites</h3>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center pb-2 border-b border-border">
+                                <div>
+                                  <div className="font-medium">DJ Night - {formatDate(selectedAttendee.lastVisit)}</div>
+                                  <div className="text-xs text-muted-foreground">Table: Non • Entrée: {formatCurrency(3500)}</div>
+                                </div>
+                                <div className="text-sm font-medium">{formatCurrency(8500)}</div>
+                              </div>
+                              <div className="flex justify-between items-center pb-2 border-b border-border">
+                                <div>
+                                  <div className="font-medium">Weekend Fever - {formatDate("2023-04-22T22:30:00")}</div>
+                                  <div className="text-xs text-muted-foreground">Table: VIP #4 • Entrée: {formatCurrency(5000)}</div>
+                                </div>
+                                <div className="text-sm font-medium">{formatCurrency(12500)}</div>
+                              </div>
+                              <div className="flex justify-between items-center pb-2 border-b border-border">
+                                <div>
+                                  <div className="font-medium">Afrobeats Special - {formatDate("2023-04-15T21:30:00")}</div>
+                                  <div className="text-xs text-muted-foreground">Table: Non • Entrée: {formatCurrency(3500)}</div>
+                                </div>
+                                <div className="text-sm font-medium">{formatCurrency(7200)}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-4">
+                              <h3 className="text-sm font-medium mb-3">Commandes habituelles</h3>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-muted/30 p-2 rounded-md">
+                                  <div className="text-sm font-medium">Bouteille Champagne</div>
+                                  <div className="text-xs text-muted-foreground">5 commandes</div>
+                                </div>
+                                <div className="bg-muted/30 p-2 rounded-md">
+                                  <div className="text-sm font-medium">Cocktails Premium</div>
+                                  <div className="text-xs text-muted-foreground">8 commandes</div>
+                                </div>
+                                <div className="bg-muted/30 p-2 rounded-md">
+                                  <div className="text-sm font-medium">Réservation VIP</div>
+                                  <div className="text-xs text-muted-foreground">3 commandes</div>
+                                </div>
+                                <div className="bg-muted/30 p-2 rounded-md">
+                                  <div className="text-sm font-medium">Shots</div>
+                                  <div className="text-xs text-muted-foreground">4 commandes</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="feedback" className="pt-4">
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-sm font-medium">Note moyenne</h3>
+                              <div className="flex items-center">
+                                <div className="flex mr-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                      key={star} 
+                                      size={14} 
+                                      className={star <= selectedAttendee.feedback.rating ? "fill-amber-500 text-amber-500" : "text-muted"}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-sm font-medium">{selectedAttendee.feedback.rating.toFixed(1)}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-muted/30 p-3 rounded-md">
+                              <div className="flex items-center mb-2">
+                                <div className="flex items-center">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                      key={star} 
+                                      size={12} 
+                                      className={star <= selectedAttendee.feedback.rating ? "fill-amber-500 text-amber-500" : "text-muted"}
+                                    />
+                                  ))}
+                                </div>
+                                <div className="text-xs ml-2 text-muted-foreground">Il y a {selectedAttendee.lastVisit ? getRelativeTime(selectedAttendee.lastVisit) : "récemment"}</div>
+                              </div>
+                              <p className="text-sm">
+                                "{selectedAttendee.feedback.lastFeedback}"
+                              </p>
+                            </div>
+                            
+                            <div className="text-sm text-muted-foreground">
+                              Ce client a laissé {selectedAttendee.feedback.reviews} avis sur votre établissement.
+                            </div>
+                          </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="opportunities" className="pt-4">
+                          <div className="space-y-4">
+                            <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md p-4">
+                              <h3 className="font-medium flex items-center text-green-800 dark:text-green-300 mb-2">
+                                <CreditCard size={16} className="mr-2" />
+                                Opportunité de montée en gamme
+                              </h3>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                Ce client a réservé une table VIP à 3 reprises. Il pourrait être intéressé par notre programme de fidélité premium offrant:
+                              </p>
+                              <ul className="text-sm space-y-1 list-disc pl-5 text-muted-foreground">
+                                <li>Accès prioritaire aux nouvelles tables</li>
+                                <li>Réductions sur les bouteilles de champagne</li>
+                                <li>Invitations aux événements exclusifs</li>
+                              </ul>
+                              <div className="mt-2">
+                                <Button size="sm" className="gap-1.5">
+                                  <Mail size={14} />
+                                  Envoyer l'offre
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-4">
+                              <h3 className="font-medium flex items-center text-blue-800 dark:text-blue-300 mb-2">
+                                <Calendar size={16} className="mr-2" />
+                                Recommandation d'événements
+                              </h3>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                Basé sur les préférences {selectedAttendee.preferences.music.join(", ")}, ce client pourrait être intéressé par:
+                              </p>
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-center p-2 bg-background rounded border">
+                                  <div>
+                                    <div className="font-medium text-sm">DJ International Night</div>
+                                    <div className="text-xs text-muted-foreground">Vendredi 19 Mai</div>
+                                  </div>
+                                  <Button size="sm" variant="outline" className="h-7 text-xs px-2">Inviter</Button>
+                                </div>
+                                <div className="flex justify-between items-center p-2 bg-background rounded border">
+                                  <div>
+                                    <div className="font-medium text-sm">Electronic Fever</div>
+                                    <div className="text-xs text-muted-foreground">Samedi 27 Mai</div>
+                                  </div>
+                                  <Button size="sm" variant="outline" className="h-7 text-xs px-2">Inviter</Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
