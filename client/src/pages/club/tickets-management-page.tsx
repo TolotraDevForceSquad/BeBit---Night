@@ -425,9 +425,9 @@ const TicketsManagementPage: React.FC = () => {
       <div className="p-6 md:p-8 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Gestion des tickets</h1>
+            <h1 className="text-3xl font-bold">BI Tickets</h1>
             <p className="text-lg text-muted-foreground mt-1.5">
-              Gérez vos événements, types de tickets et ventes
+              Analysez et gérez vos événements, tickets et ventes
             </p>
           </div>
           <div className="flex items-center space-x-2 mt-4 md:mt-0">
@@ -599,42 +599,161 @@ const TicketsManagementPage: React.FC = () => {
                             style={{ width: `${(selectedEvent.ticketsSold / selectedEvent.ticketsTotal) * 100}%` }}
                           ></div>
                         </div>
+                        <div className="flex justify-between mt-3 text-xs text-muted-foreground">
+                          <span>Taux de conversion: 4.2%</span>
+                          <span className="text-green-500">↑ 0.8%</span>
+                        </div>
                       </div>
                       
                       <div className="bg-muted/30 p-4 rounded-lg">
                         <div className="flex items-center gap-3 mb-2">
                           <Users className="text-primary" size={20} />
-                          <h3 className="font-medium">Participants attendus</h3>
+                          <h3 className="font-medium">Analyse participants</h3>
                         </div>
                         <div className="flex items-end gap-2">
                           <div className="text-2xl font-bold">{selectedEvent.ticketsSold}</div>
                           <div className="text-sm text-muted-foreground pb-1">personnes</div>
                         </div>
-                        <div className="flex items-center mt-2 text-sm text-muted-foreground">
-                          <ArrowUpRight size={16} className="text-green-500 mr-1" />
-                          <span className="text-green-500 font-medium">+8.2%</span>
-                          <span className="ml-1.5">vs même jour semaine dernière</span>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Hommes/Femmes</div>
+                            <div className="font-medium">45% / 55%</div>
+                          </div>
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Âge moyen</div>
+                            <div className="font-medium">27.3 ans</div>
+                          </div>
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Premières visites</div>
+                            <div className="font-medium">32%</div>
+                          </div>
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Fidèles</div>
+                            <div className="font-medium">22%</div>
+                          </div>
                         </div>
                       </div>
                       
                       <div className="bg-muted/30 p-4 rounded-lg">
                         <div className="flex items-center gap-3 mb-2">
                           <div className="text-primary">Ar</div>
-                          <h3 className="font-medium">Revenus</h3>
+                          <h3 className="font-medium">Analyse financière</h3>
                         </div>
                         <div className="flex items-end gap-2">
                           <div className="text-2xl font-bold">{formatCurrency(selectedEvent.revenue)}</div>
                         </div>
-                        <div className="flex items-center mt-2 text-sm text-muted-foreground">
-                          <ArrowUpRight size={16} className="text-green-500 mr-1" />
-                          <span className="text-green-500 font-medium">+12.5%</span>
-                          <span className="ml-1.5">vs événement similaire</span>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Panier moyen</div>
+                            <div className="font-medium">{formatCurrency(selectedEvent.revenue / selectedEvent.ticketsSold)}</div>
+                          </div>
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Revenues / capacité</div>
+                            <div className="font-medium">{formatCurrency(selectedEvent.revenue / selectedEvent.ticketsTotal)}</div>
+                          </div>
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Croissance</div>
+                            <div className="font-medium text-green-500">+12.5%</div>
+                          </div>
+                          <div className="text-xs">
+                            <div className="text-muted-foreground">Prévision finale</div>
+                            <div className="font-medium">{formatCurrency(selectedEvent.revenue * 1.18)}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
                     
                     <div>
-                      <h3 className="text-lg font-medium mb-4">Types de tickets</h3>
+                      <h3 className="text-lg font-medium mb-4">Analyse des ventes et types de tickets</h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        {/* Graphique de distribution des tickets */}
+                        <div className="border border-border rounded-lg p-4">
+                          <h4 className="text-sm font-medium mb-3">Distribution des ventes par type de ticket</h4>
+                          <div className="aspect-[4/3] flex items-center justify-center">
+                            {/* Simuler un graphique simple */}
+                            <div className="w-full h-full flex items-end justify-around p-4">
+                              {getEventTicketTypes(selectedEvent.id).map((ticketType, index) => (
+                                <div key={ticketType.id} className="flex flex-col items-center">
+                                  <div 
+                                    className="w-16 bg-primary/80 rounded-t-md relative group"
+                                    style={{ 
+                                      height: `${(ticketType.sold / ticketType.available) * 100}%`,
+                                      opacity: 0.5 + (index * 0.15),
+                                      minHeight: '20px'
+                                    }}
+                                  >
+                                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-muted-foreground text-white px-2 py-1 rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                      {ticketType.name}: {ticketType.sold} vendus
+                                    </div>
+                                  </div>
+                                  <div className="text-xs mt-2 max-w-24 truncate text-center">
+                                    {ticketType.name}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                            <div>Distribution par type</div>
+                            <div>Taux de remplissage: {formatPercentage(selectedEvent.ticketsSold, selectedEvent.ticketsTotal)}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Tendances de vente */}
+                        <div className="border border-border rounded-lg p-4">
+                          <h4 className="text-sm font-medium mb-3">Tendances des ventes dans le temps</h4>
+                          <div className="aspect-[4/3] flex items-center justify-center p-4">
+                            {/* Simuler un graphique de tendance */}
+                            <div className="w-full h-full flex items-end">
+                              <div className="w-full h-full relative">
+                                {/* Axe Y */}
+                                <div className="absolute left-0 h-full w-[1px] bg-border"></div>
+                                {/* Axe X */}
+                                <div className="absolute bottom-0 w-full h-[1px] bg-border"></div>
+                                
+                                {/* Courbe de vente - lignes */}
+                                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                  <path 
+                                    d="M0,100 L10,90 L20,85 L30,80 L40,70 L50,50 L60,40 L70,35 L80,25 L90,20 L100,15" 
+                                    fill="none" 
+                                    stroke="hsl(var(--primary))" 
+                                    strokeWidth="2"
+                                  />
+                                  <path 
+                                    d="M0,100 L10,90 L20,85 L30,80 L40,70 L50,50 L60,40 L70,35 L80,25 L90,20 L100,15" 
+                                    fill="hsl(var(--primary)/0.1)" 
+                                    strokeWidth="0"
+                                  />
+                                </svg>
+                                
+                                {/* Points de données */}
+                                <div className="absolute left-[10%] bottom-[10%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[20%] bottom-[15%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[30%] bottom-[20%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[40%] bottom-[30%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[50%] bottom-[50%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[60%] bottom-[60%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[70%] bottom-[65%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[80%] bottom-[75%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[90%] bottom-[80%] w-2 h-2 rounded-full bg-primary"></div>
+                                <div className="absolute left-[100%] bottom-[85%] w-2 h-2 rounded-full bg-primary -translate-x-full"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                            <div>60 jours avant l'événement</div>
+                            <div>Jour de l'événement</div>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-2">
+                            <div className="flex items-center justify-between">
+                              <span>Pic de ventes: J-12</span>
+                              <span className="text-green-500">Prévision: +42 ventes à venir</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
                       <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                           <thead>
