@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { 
-  Home, Search, Calendar, Wallet,
+  Home, Search, Calendar, Wallet, PieChart,
   Settings, User, PartyPopper, Users, LogOut, CalendarPlus, Plus,
   GlassWater, UtensilsCrossed, Music, Mic, Guitar, BellRing,
   Ticket, Headphones, Radio, Megaphone, Headset, HeadphonesIcon
