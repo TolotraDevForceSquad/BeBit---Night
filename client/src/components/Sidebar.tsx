@@ -82,11 +82,13 @@ export default function Sidebar({ activeItem }: SidebarProps) {
     // Éléments pour le rôle club
     if (user?.role === 'club') {
       return [
-        { icon: <Calendar className="h-5 w-5" />, label: "Événements", href: "/club" },
+        { icon: <Home className="h-5 w-5" />, label: "Dashboard Club", href: "/club" },
+        { icon: <Calendar className="h-5 w-5" />, label: "Événements", href: "/club/events" },
         { icon: <Search className="h-5 w-5" />, label: "Trouver Artistes", href: "/club/find-artists" },
         { icon: <Mail className="h-5 w-5" />, label: "Invitations", href: "/club/invitations" },
         { icon: <Image className="h-5 w-5" />, label: "Participants", href: "/club/attendees" },
         { icon: <Wallet className="h-5 w-5" />, label: "Portefeuille", href: "/club/wallet" },
+        { icon: <PieChart className="h-5 w-5" />, label: "Business Intelligence", href: "/club/bi-dashboard" },
       ];
     }
     

@@ -118,7 +118,7 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
     // Club
     if (user?.role === 'club') {
       return [
-        { icon: <Home size={24} />, label: "Events", href: "/club" },
+        { icon: <Home size={24} />, label: "Dashboard", href: "/club" },
         { icon: <Users size={24} />, label: "Réservations", href: "/club/reservations" },
         { 
           icon: (
@@ -132,8 +132,9 @@ export default function MobileNavigation({ activeItem }: MobileNavigationProps) 
           label: "Créer", 
           href: "/club/create-event" 
         },
-        { icon: <Calendar size={24} />, label: "Participants", href: "/club/attendees" },
+        { icon: <Calendar size={24} />, label: "Événements", href: "/club/events" },
         { icon: <Search size={24} />, label: "Artistes", href: "/club/find-artists" },
+        { icon: <PieChart size={24} />, label: "BI", href: "/club/bi-dashboard" },
       ];
     }
     

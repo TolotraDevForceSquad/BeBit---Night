@@ -297,6 +297,102 @@ function App() {
               <ClubInvitationsPage />
             </Route>
             
+            <Route path="/club/events">
+              <ResponsiveLayout>
+                <div className="p-8">
+                  <h1 className="text-3xl font-bold mb-6">Événements du club</h1>
+                  <p className="text-lg">Gérez vos événements passés et à venir</p>
+                  
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {/* Cette section serait idéalement chargée à partir d'une API */}
+                    <div className="bg-card rounded-lg overflow-hidden border border-border shadow-sm">
+                      <div className="h-40 bg-gradient-to-r from-purple-600 to-blue-500 relative">
+                        <div className="absolute inset-0 flex items-center justify-center text-white">
+                          <Calendar className="h-12 w-12 opacity-20" />
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-bold text-lg">Summer Night Party</h3>
+                            <p className="text-sm text-muted-foreground">15 juillet 2025</p>
+                          </div>
+                          <Badge className="bg-green-600">À venir</Badge>
+                        </div>
+                        <div className="mt-4 space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Réservations</span>
+                            <span className="text-sm font-medium">145 / 180</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Vente de tickets</span>
+                            <span className="text-sm font-medium">25.200.000 Ar</span>
+                          </div>
+                        </div>
+                        <Button className="w-full mt-4" size="sm">Gérer l'événement</Button>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-card rounded-lg overflow-hidden border border-border shadow-sm">
+                      <div className="h-40 bg-gradient-to-r from-rose-500 to-orange-400 relative">
+                        <div className="absolute inset-0 flex items-center justify-center text-white">
+                          <Calendar className="h-12 w-12 opacity-20" />
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-bold text-lg">DJ Elektra Live</h3>
+                            <p className="text-sm text-muted-foreground">22 août 2025</p>
+                          </div>
+                          <Badge className="bg-blue-600">En planification</Badge>
+                        </div>
+                        <div className="mt-4 space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Réservations</span>
+                            <span className="text-sm font-medium">42 / 200</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Vente de tickets</span>
+                            <span className="text-sm font-medium">8.400.000 Ar</span>
+                          </div>
+                        </div>
+                        <Button className="w-full mt-4" size="sm">Gérer l'événement</Button>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-card rounded-lg overflow-hidden border border-border shadow-sm">
+                      <div className="h-40 bg-gradient-to-r from-gray-500 to-gray-700 relative">
+                        <div className="absolute inset-0 flex items-center justify-center text-white">
+                          <Calendar className="h-12 w-12 opacity-20" />
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-bold text-lg">Techno Revolution</h3>
+                            <p className="text-sm text-muted-foreground">10 avril 2025</p>
+                          </div>
+                          <Badge variant="outline">Passé</Badge>
+                        </div>
+                        <div className="mt-4 space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Participants</span>
+                            <span className="text-sm font-medium">175 / 200</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Revenus totaux</span>
+                            <span className="text-sm font-medium">36.750.000 Ar</span>
+                          </div>
+                        </div>
+                        <Button className="w-full mt-4" size="sm" variant="outline">Voir le récapitulatif</Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </ResponsiveLayout>
+            </Route>
+            
             <Route path="/club/attendees">
               <ResponsiveLayout>
                 <div className="p-8">
