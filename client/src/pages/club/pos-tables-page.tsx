@@ -39,15 +39,57 @@ const initialTables: POSTable[] = [
   { id: 1, name: "Table 1", number: 1, area: "Terrasse", capacity: 4, status: "available" as const },
   { id: 2, name: "Table 2", number: 2, area: "Terrasse", capacity: 2, status: "occupied" as const, currentOrderId: 101 },
   { id: 3, name: "Table 3", number: 3, area: "Terrasse", capacity: 4, status: "available" as const },
-  { id: 4, name: "Table 4", number: 4, area: "Intérieur", capacity: 6, status: "reserved" as const },
+  { 
+    id: 4, 
+    name: "Table 4", 
+    number: 4, 
+    area: "Intérieur", 
+    capacity: 6, 
+    status: "reserved" as const,
+    reservationInfo: {
+      userId: 123,
+      userName: "Marie Durand",
+      reservationTime: "Ce soir 20:00",
+      partySize: 5,
+      notes: "Anniversaire - prévoir gâteau"
+    }
+  },
   { id: 5, name: "Table 5", number: 5, area: "Intérieur", capacity: 4, status: "available" as const },
   { id: 6, name: "Table 6", number: 6, area: "Intérieur", capacity: 4, status: "occupied" as const, currentOrderId: 102 },
   { id: 7, name: "Table 7", number: 7, area: "Intérieur", capacity: 8, status: "available" as const },
-  { id: 8, name: "VIP Lounge 1", number: 8, area: "VIP", capacity: 10, status: "reserved" as const },
+  { 
+    id: 8, 
+    name: "VIP Lounge 1", 
+    number: 8, 
+    area: "VIP", 
+    capacity: 10, 
+    status: "reserved" as const,
+    reservationInfo: {
+      userId: 456,
+      userName: "Jean Martin",
+      reservationTime: "Demain 22:00",
+      partySize: 8,
+      notes: "Bouteilles réservées"
+    }
+  },
   { id: 9, name: "VIP Lounge 2", number: 9, area: "VIP", capacity: 8, status: "occupied" as const, currentOrderId: 103 },
   { id: 10, name: "Bar 1", number: 10, area: "Bar", capacity: 2, status: "available" as const },
   { id: 11, name: "Bar 2", number: 11, area: "Bar", capacity: 2, status: "occupied" as const, currentOrderId: 104 },
-  { id: 12, name: "Bar 3", number: 12, area: "Bar", capacity: 2, status: "available" as const },
+  { 
+    id: 12, 
+    name: "Bar 3", 
+    number: 12, 
+    area: "Bar", 
+    capacity: 2, 
+    status: "reserved" as const,
+    reservationInfo: {
+      userId: 789,
+      userName: "Lucie Bernard",
+      reservationTime: "Ce soir 21:30",
+      partySize: 2,
+      notes: "Près de la fenêtre si possible"
+    }
+  },
 ];
 
 // Données fictives pour les produits
@@ -602,6 +644,14 @@ const POSTablesPage = () => {
                           {table.status === 'occupied' && (
                             <div className="text-xs font-medium text-center mt-2">
                               {table.currentOrderId && `Commande #${table.currentOrderId}`}
+                            </div>
+                          )}
+                          
+                          {table.status === 'reserved' && table.reservationInfo && (
+                            <div className="text-xs font-medium text-center mt-2 space-y-1">
+                              <div className="font-semibold">{table.reservationInfo.userName}</div>
+                              <div>{table.reservationInfo.reservationTime}</div>
+                              <div>{table.reservationInfo.partySize} pers.</div>
                             </div>
                           )}
                         </div>

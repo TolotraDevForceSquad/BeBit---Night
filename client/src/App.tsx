@@ -228,6 +228,19 @@ function App() {
                       </div>
                     </div>
                     
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow">
+                      <h2 className="text-xl font-semibold mb-2">Plan de tables</h2>
+                      <p className="text-muted-foreground mb-4">Visualisez et gérez vos tables par zone</p>
+                      <div className="flex space-x-2">
+                        <Link href="/club/tables" className="bg-green-600 text-white hover:bg-green-700 py-2 px-4 rounded-md text-center flex-1">
+                          Voir le plan
+                        </Link>
+                        <Link href="/club/pos-catalog" className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 px-4 rounded-md text-center flex-1">
+                          Catalogue
+                        </Link>
+                      </div>
+                    </div>
+                    
                     <Link href="/club/create-event" className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow block">
                       <h2 className="text-xl font-semibold mb-2">Créer un événement</h2>
                       <p className="text-muted-foreground mb-4">Planifiez et publiez un nouvel événement dans votre club</p>
@@ -302,6 +315,11 @@ function App() {
             </Route>
             
             <Route path="/club/pos-tables">
+              <POSTablesPage />
+            </Route>
+            
+            {/* Alias pour faciliter l'accès */}
+            <Route path="/club/tables">
               <POSTablesPage />
             </Route>
             

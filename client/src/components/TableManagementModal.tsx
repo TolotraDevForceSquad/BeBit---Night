@@ -23,6 +23,13 @@ export interface POSTable {
   capacity: number;
   status: 'available' | 'occupied' | 'reserved';
   currentOrderId?: number;
+  reservationInfo?: {
+    userId: number;
+    userName: string;
+    reservationTime: string;
+    partySize: number;
+    notes?: string;
+  };
 }
 
 interface TableManagementModalProps {
@@ -220,27 +227,71 @@ const TableManagementModal = ({
             </div>
             
             {editingTable && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <div className="text-right text-sm text-muted-foreground">
-                  Statut
-                </div>
-                <div className="col-span-3">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    table.status === 'available' ? 'bg-green-100 text-green-800' :
-                    table.status === 'reserved' ? 'bg-orange-100 text-orange-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {table.status === 'available' ? 'Disponible' :
-                     table.status === 'reserved' ? 'Réservée' :
-                     'Occupée'}
-                  </span>
-                  {table.currentOrderId && (
-                    <span className="text-xs text-muted-foreground ml-2">
-                      Commande #{table.currentOrderId}
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <div className="text-right text-sm text-muted-foreground">
+                    Statut
+                  </div>
+                  <div className="col-span-3">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      table.status === 'available' ? 'bg-green-100 text-green-800' :
+                      table.status === 'reserved' ? 'bg-orange-100 text-orange-800' :
+                      'bg-blue-100 text-blue-800'
+                    }`}>
+                      {table.status === 'available' ? 'Disponible' :
+                       table.status === 'reserved' ? 'Réservée' :
+                       'Occupée'}
                     </span>
-                  )}
+                    {table.currentOrderId && (
+                      <span className="text-xs text-muted-foreground ml-2">
+                        Commande #{table.currentOrderId}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
+
+                {table.status === 'reserved' && table.reservationInfo && (
+                  <>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <div className="text-right text-sm text-muted-foreground">
+                        Réservée par
+                      </div>
+                      <div className="col-span-3 text-sm">
+                        {table.reservationInfo.userName}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <div className="text-right text-sm text-muted-foreground">
+                        Horaire
+                      </div>
+                      <div className="col-span-3 text-sm">
+                        {table.reservationInfo.reservationTime}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <div className="text-right text-sm text-muted-foreground">
+                        Personnes
+                      </div>
+                      <div className="col-span-3 text-sm">
+                        {table.reservationInfo.partySize} personne{table.reservationInfo.partySize > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                    
+                    {table.reservationInfo.notes && (
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <div className="text-right text-sm text-muted-foreground">
+                          Notes
+                        </div>
+                        <div className="col-span-3 text-sm">
+                          {table.reservationInfo.notes}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
             )}
           </div>
           
