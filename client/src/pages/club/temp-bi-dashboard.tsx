@@ -969,23 +969,419 @@ const BIDashboardPage: React.FC = () => {
 
           <TabsContent value="marketing">
             <div className="grid gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analyses marketing</CardTitle>
-                  <CardDescription>Cette section sera disponible prochainement</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="p-8 text-center">
-                    <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Performance des campagnes</CardTitle>
+                    <CardDescription>Suivi des 5 dernières campagnes marketing</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-8">
+                      <div>
+                        <div className="mb-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium">Weekend DJ International (Avril)</h3>
+                            <span className="text-sm font-medium text-green-500">+38%</span>
+                          </div>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-green-500" style={{ width: '92%' }}></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Budget: 5 000 Ar</span>
+                            <span>ROI: 3.8x</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium">Happy Hour Extended (Mars)</h3>
+                            <span className="text-sm font-medium text-green-500">+21%</span>
+                          </div>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-green-500" style={{ width: '78%' }}></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Budget: 2 500 Ar</span>
+                            <span>ROI: 2.2x</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium">Ladies Night (Mars)</h3>
+                            <span className="text-sm font-medium text-green-500">+28%</span>
+                          </div>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-green-500" style={{ width: '85%' }}></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Budget: 3 200 Ar</span>
+                            <span>ROI: 2.7x</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium">Soirée Masquée (Février)</h3>
+                            <span className="text-sm font-medium text-amber-500">+12%</span>
+                          </div>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-500" style={{ width: '65%' }}></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Budget: 4 200 Ar</span>
+                            <span>ROI: 1.5x</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mb-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-medium">Soirée Nouvel An (Janvier)</h3>
+                            <span className="text-sm font-medium text-red-500">+8%</span>
+                          </div>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-red-500" style={{ width: '42%' }}></div>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Budget: 7 500 Ar</span>
+                            <span>ROI: 1.1x</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="border border-border p-3 rounded-md">
+                        <h3 className="text-sm font-medium mb-2">Analyse de l'efficacité</h3>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <p>- Les campagnes ciblant des DJs internationaux ont le meilleur ROI (3.8x)</p>
+                          <p>- Les promotions "Happy Hour" sont rentables avec un faible investissement</p>
+                          <p>- Les événements à thème comme "Soirée Masquée" ont un ROI moyen</p>
+                          <p>- Campagne "Nouvel An" surbudgétisée avec un faible retour</p>
+                        </div>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-medium mb-2">Section en développement</h3>
-                    <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                      Cette fonctionnalité sera bientôt disponible avec des analyses de campagnes, l'efficacité des promotions et les recommandations marketing.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Efficacité des promotions</CardTitle>
+                    <CardDescription>Impact sur la fréquentation et les ventes</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="text-sm font-medium mb-4">Taux de conversion par type de promotion</h3>
+                        <div className="relative w-full aspect-square">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-xs text-center">
+                              <div className="font-medium text-lg">+26%</div>
+                              <div className="text-muted-foreground">Taux moyen</div>
+                            </div>
+                          </div>
+                          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                            <circle r="40" cx="50" cy="50" fill="transparent" stroke="#f1f5f9" strokeWidth="10"></circle>
+                            
+                            {/* Réduction sur les boissons */}
+                            <circle 
+                              r="40" 
+                              cx="50" 
+                              cy="50" 
+                              fill="transparent" 
+                              stroke="#3b82f6" 
+                              strokeWidth="10" 
+                              strokeDasharray="251.2" 
+                              strokeDashoffset="0"
+                            ></circle>
+                            
+                            {/* Happy Hour */}
+                            <circle 
+                              r="40" 
+                              cx="50" 
+                              cy="50" 
+                              fill="transparent" 
+                              stroke="#10b981" 
+                              strokeWidth="10" 
+                              strokeDasharray="251.2" 
+                              strokeDashoffset="100.5"
+                            ></circle>
+                            
+                            {/* Entrée gratuite */}
+                            <circle 
+                              r="40" 
+                              cx="50" 
+                              cy="50" 
+                              fill="transparent" 
+                              stroke="#f59e0b" 
+                              strokeWidth="10" 
+                              strokeDasharray="251.2" 
+                              strokeDashoffset="151"
+                            ></circle>
+                            
+                            {/* Cadeaux */}
+                            <circle 
+                              r="40" 
+                              cx="50" 
+                              cy="50" 
+                              fill="transparent" 
+                              stroke="#ec4899" 
+                              strokeWidth="10" 
+                              strokeDasharray="251.2" 
+                              strokeDashoffset="201"
+                            ></circle>
+                          </svg>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 mt-4">
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-sm bg-blue-500 mr-2"></div>
+                            <span className="text-xs">Réduction sur les boissons (40%)</span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-sm bg-green-500 mr-2"></div>
+                            <span className="text-xs">Happy Hour (20%)</span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-sm bg-amber-500 mr-2"></div>
+                            <span className="text-xs">Entrée gratuite (20%)</span>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-3 h-3 rounded-sm bg-pink-500 mr-2"></div>
+                            <span className="text-xs">Cadeaux/Concours (20%)</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-sm font-medium mb-2">Impact des canaux marketing</h3>
+                        <div className="space-y-2">
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs">Instagram</span>
+                              <span className="text-xs font-medium">42%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-indigo-500 rounded-full" style={{ width: '42%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs">Stories Instagram</span>
+                              <span className="text-xs font-medium">35%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-purple-500 rounded-full" style={{ width: '35%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs">Email</span>
+                              <span className="text-xs font-medium">15%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-blue-500 rounded-full" style={{ width: '15%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs">SMS</span>
+                              <span className="text-xs font-medium">8%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-muted rounded-full">
+                              <div className="h-1.5 bg-green-500 rounded-full" style={{ width: '8%' }}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-muted/30 p-3 rounded-md">
+                        <h3 className="text-sm font-medium mb-2">Insights sur les promotions</h3>
+                        <ul className="text-xs space-y-1 list-disc pl-4 text-muted-foreground">
+                          <li>Les réductions sur les boissons augmentent les dépenses moyennes de 35%</li>
+                          <li>Les promotions "Happy Hour" attirent 2.5x plus de clients en début de soirée</li>
+                          <li>L'entrée gratuite avant 23h augmente l'affluence générale de 30%</li>
+                          <li>Instagram est le canal le plus efficace avec un CPL 60% plus bas</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+                <Card className="md:col-span-2">
+                  <CardHeader>
+                    <CardTitle>Plan marketing optimisé</CardTitle>
+                    <CardDescription>Recommandations basées sur les données</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left font-medium p-2">Type</th>
+                            <th className="text-left font-medium p-2">Canal</th>
+                            <th className="text-left font-medium p-2">Timing</th>
+                            <th className="text-left font-medium p-2 hidden md:table-cell">Budget</th>
+                            <th className="text-left font-medium p-2">ROI prévu</th>
+                            <th className="text-left font-medium p-2 hidden md:table-cell">Priorité</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr className="border-b border-border">
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                                <span>DJ International</span>
+                              </div>
+                            </td>
+                            <td className="p-2">Instagram + Email</td>
+                            <td className="p-2">Mensuel</td>
+                            <td className="p-2 hidden md:table-cell">5 000 Ar</td>
+                            <td className="p-2">
+                              <div className="font-medium text-green-500">3.8x</div>
+                            </td>
+                            <td className="p-2 hidden md:table-cell">
+                              <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded px-1.5 py-0.5 inline-block font-medium">Élevée</div>
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-border">
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                                <span>Happy Hour</span>
+                              </div>
+                            </td>
+                            <td className="p-2">Stories Instagram</td>
+                            <td className="p-2">Hebdomadaire</td>
+                            <td className="p-2 hidden md:table-cell">1 000 Ar</td>
+                            <td className="p-2">
+                              <div className="font-medium text-green-500">2.5x</div>
+                            </td>
+                            <td className="p-2 hidden md:table-cell">
+                              <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded px-1.5 py-0.5 inline-block font-medium">Élevée</div>
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-border">
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                                <span>Ladies Night</span>
+                              </div>
+                            </td>
+                            <td className="p-2">Instagram + SMS</td>
+                            <td className="p-2">Bimensuel</td>
+                            <td className="p-2 hidden md:table-cell">2 500 Ar</td>
+                            <td className="p-2">
+                              <div className="font-medium text-green-500">2.2x</div>
+                            </td>
+                            <td className="p-2 hidden md:table-cell">
+                              <div className="bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 text-xs rounded px-1.5 py-0.5 inline-block font-medium">Moyenne</div>
+                            </td>
+                          </tr>
+                          
+                          <tr className="border-b border-border">
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-amber-500"></div>
+                                <span>Weekend VIP</span>
+                              </div>
+                            </td>
+                            <td className="p-2">Email + SMS</td>
+                            <td className="p-2">Mensuel</td>
+                            <td className="p-2 hidden md:table-cell">3 000 Ar</td>
+                            <td className="p-2">
+                              <div className="font-medium text-amber-500">1.8x</div>
+                            </td>
+                            <td className="p-2 hidden md:table-cell">
+                              <div className="bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 text-xs rounded px-1.5 py-0.5 inline-block font-medium">Moyenne</div>
+                            </td>
+                          </tr>
+                          
+                          <tr>
+                            <td className="p-2">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-red-500"></div>
+                                <span>Événement à thème</span>
+                              </div>
+                            </td>
+                            <td className="p-2">Instagram</td>
+                            <td className="p-2">Trimestriel</td>
+                            <td className="p-2 hidden md:table-cell">4 500 Ar</td>
+                            <td className="p-2">
+                              <div className="font-medium text-red-500">1.3x</div>
+                            </td>
+                            <td className="p-2 hidden md:table-cell">
+                              <div className="bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 text-xs rounded px-1.5 py-0.5 inline-block font-medium">Basse</div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recommandations IA</CardTitle>
+                    <CardDescription>Suggestions générées par notre IA</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="border-l-4 border-blue-500 pl-3 py-1">
+                        <h3 className="text-sm font-medium mb-1">Campagnes à privilégier</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Concentrez 60% de votre budget marketing sur les campagnes DJ International et Happy Hour qui offrent le meilleur ROI.
+                        </p>
+                      </div>
+                      
+                      <div className="border-l-4 border-indigo-500 pl-3 py-1">
+                        <h3 className="text-sm font-medium mb-1">Optimisation des canaux</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Réallouez le budget des campagnes SMS (-50%) vers les stories Instagram (+50%) pour un meilleur taux de conversion.
+                        </p>
+                      </div>
+                      
+                      <div className="border-l-4 border-amber-500 pl-3 py-1">
+                        <h3 className="text-sm font-medium mb-1">Ciblage amélioré</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Ciblez prioritairement la tranche 25-34 ans qui représente 42% de votre clientèle avec des formats visuels courts.
+                        </p>
+                      </div>
+                      
+                      <div className="border-l-4 border-green-500 pl-3 py-1">
+                        <h3 className="text-sm font-medium mb-1">Calendrier optimal</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Lancez vos promotions Happy Hour les mardis et mercredis pour stimuler la fréquentation en début de semaine (+35%).
+                        </p>
+                      </div>
+                      
+                      <div className="border-l-4 border-purple-500 pl-3 py-1">
+                        <h3 className="text-sm font-medium mb-1">Test recommandé</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Testez une campagne "After Work" ciblant les professionnels avec un potentiel d'augmentation de 28% le jeudi.
+                        </p>
+                      </div>
+                      
+                      <div className="mt-4 bg-blue-50 dark:bg-blue-950 p-3 rounded-md">
+                        <div className="flex items-start">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 w-5 h-5 mt-0.5 mr-2"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 2 2 4-4"></path></svg>
+                          <div>
+                            <h3 className="text-sm font-medium mb-1">ROI Global Prévu</h3>
+                            <p className="text-xs text-muted-foreground">
+                              En suivant ces recommandations, vous pouvez augmenter votre ROI marketing global de <span className="font-medium text-blue-500">1.8x à 2.4x</span>, générant environ <span className="font-medium">+32%</span> de revenus additionnels.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
