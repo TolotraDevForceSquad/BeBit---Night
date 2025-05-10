@@ -258,6 +258,14 @@ function App() {
                         Gérer les réservations
                       </div>
                     </Link>
+                    
+                    <Link href="/club/history" className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow block">
+                      <h2 className="text-xl font-semibold mb-2">Historique des transactions</h2>
+                      <p className="text-muted-foreground mb-4">Consultez l'historique détaillé des opérations et transactions</p>
+                      <div className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 px-4 rounded-md text-center">
+                        Voir l'historique
+                      </div>
+                    </Link>
                   </div>
                 </div>
               </ResponsiveLayout>
