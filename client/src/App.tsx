@@ -215,40 +215,34 @@ function App() {
                   <p className="text-lg">Gérez vos événements et votre établissement</p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = "/club/pos"}>
+                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow">
                       <h2 className="text-xl font-semibold mb-2">Gestion des points de vente</h2>
                       <p className="text-muted-foreground mb-4">Gérez vos terminaux POS, les utilisateurs et suivez vos ventes</p>
                       <div className="flex space-x-2">
-                        <div className="bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-md text-center flex-1" onClick={(e) => {
-                          e.stopPropagation();
-                          window.location.href = "/club/pos";
-                        }}>
+                        <Link href="/club/pos" className="bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-md text-center flex-1">
                           Administration
-                        </div>
-                        <div className="bg-orange-500 text-white hover:bg-orange-600 py-2 px-4 rounded-md text-center flex-1" onClick={(e) => {
-                          e.stopPropagation();
-                          window.location.href = "/club/pos-login";
-                        }}>
+                        </Link>
+                        <Link href="/club/pos-login" className="bg-orange-500 text-white hover:bg-orange-600 py-2 px-4 rounded-md text-center flex-1">
                           Se connecter
-                        </div>
+                        </Link>
                       </div>
                     </div>
                     
-                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = "/club/create-event"}>
+                    <Link href="/club/create-event" className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow block">
                       <h2 className="text-xl font-semibold mb-2">Créer un événement</h2>
                       <p className="text-muted-foreground mb-4">Planifiez et publiez un nouvel événement dans votre club</p>
                       <div className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 px-4 rounded-md text-center">
                         Nouvel événement
                       </div>
-                    </div>
+                    </Link>
                     
-                    <div className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow" onClick={() => window.location.href = "/club/reservations"}>
+                    <Link href="/club/reservations" className="bg-card rounded-lg p-6 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow block">
                       <h2 className="text-xl font-semibold mb-2">Réservations de tables</h2>
                       <p className="text-muted-foreground mb-4">Consultez et gérez les réservations de tables</p>
                       <div className="border border-input bg-background hover:bg-accent hover:text-accent-foreground py-2 px-4 rounded-md text-center">
                         Gérer les réservations
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </ResponsiveLayout>
