@@ -151,9 +151,9 @@ const initialOrders: Order[] = [
     tableName: "VIP Lounge 2",
     customerName: "Groupe VIP",
     items: [
-      { id: 5, productId: 4, productName: "Piña Colada", quantity: 8, unitPrice: 15000, subtotal: 120000 },
-      { id: 6, productId: 6, productName: "Cacahuètes", quantity: 4, unitPrice: 4000, subtotal: 16000 },
-      { id: 7, productId: 8, productName: "Pizza Margherita", quantity: 3, unitPrice: 30000, subtotal: 90000 }
+      { id: 5, productId: 4, productName: "Piña Colada", quantity: 8, price: 15000, subtotal: 120000 },
+      { id: 6, productId: 6, productName: "Cacahuètes", quantity: 4, price: 4000, subtotal: 16000 },
+      { id: 7, productId: 8, productName: "Pizza Margherita", quantity: 3, price: 30000, subtotal: 90000 }
     ],
     status: "processing" as const,
     total: 226000,
@@ -166,8 +166,8 @@ const initialOrders: Order[] = [
     tableId: 11,
     tableName: "Bar 2",
     items: [
-      { id: 8, productId: 2, productName: "Eau minérale", quantity: 1, unitPrice: 3000, subtotal: 3000 },
-      { id: 9, productId: 5, productName: "Chips", quantity: 1, unitPrice: 5000, subtotal: 5000 }
+      { id: 8, productId: 2, productName: "Eau minérale", quantity: 1, price: 3000, subtotal: 3000 },
+      { id: 9, productId: 5, productName: "Chips", quantity: 1, price: 5000, subtotal: 5000 }
     ],
     status: "completed" as const,
     total: 8000,
@@ -178,8 +178,8 @@ const initialOrders: Order[] = [
   {
     id: 105,
     items: [
-      { id: 10, productId: 7, productName: "Burger", quantity: 2, unitPrice: 25000, subtotal: 50000 },
-      { id: 11, productId: 10, productName: "Mousse au chocolat", quantity: 2, unitPrice: 10000, subtotal: 20000 }
+      { id: 10, productId: 7, productName: "Burger", quantity: 2, price: 25000, subtotal: 50000 },
+      { id: 11, productId: 10, productName: "Mousse au chocolat", quantity: 2, price: 10000, subtotal: 20000 }
     ],
     status: "completed" as const,
     customerName: "Client à emporter",

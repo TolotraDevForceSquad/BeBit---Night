@@ -17,6 +17,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Separator } from "./ui/separator";
 import { POSTable } from './TableManagementModal';
 import { Product } from './ProductModal';
+import { ProductCategory } from './ProductCategoryModal';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 
@@ -53,6 +54,7 @@ interface OrderModalProps {
   editingOrder: Order | null;
   tables: POSTable[];
   products: Product[];
+  categories: ProductCategory[];
   selectedTableId?: number;
 }
 
@@ -63,6 +65,7 @@ const OrderModal = ({
   editingOrder,
   tables,
   products,
+  categories,
   selectedTableId
 }: OrderModalProps) => {
   const [order, setOrder] = useState<Order>({
