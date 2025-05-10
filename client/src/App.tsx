@@ -41,6 +41,7 @@ import FindArtistsPage from "./pages/club/find-artists-page";
 import ClubInvitationsPage from "./pages/club/invitations-page";
 import ClubWalletPage from "./pages/club/wallet-page";
 import AttendeesPage from "./pages/club/attendees-page";
+import TicketsManagementPage from "./pages/club/tickets-management-page";
 
 // Version simplifiée sans chargement d'animation pour débloquer
 function App() {
@@ -395,6 +396,10 @@ function App() {
             
             <Route path="/club/attendees">
               <AttendeesPage />
+            </Route>
+            
+            <Route path="/club/tickets">
+              <TicketsManagementPage />
             </Route>
             
             <Route path="/club/wallet">
