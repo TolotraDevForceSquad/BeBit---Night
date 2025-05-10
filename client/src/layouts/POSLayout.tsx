@@ -151,7 +151,7 @@ export default function POSLayout({
           <Link 
             href="/club/pos" 
             className={`flex flex-col items-center justify-center p-2 ${
-              location === "/club/pos" ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+              location === "/club/pos" || location === "/club/dashboard" ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             <HomeIcon className="h-6 w-6" />
@@ -161,7 +161,7 @@ export default function POSLayout({
           <Link 
             href="/club/catalog" 
             className={`flex flex-col items-center justify-center p-2 ${
-              location === "/club/catalog" ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+              location === "/club/catalog" || location === "/club/pos-catalog" ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             <ListOrderedIcon className="h-6 w-6" />
@@ -171,7 +171,7 @@ export default function POSLayout({
           <Link 
             href="/club/tables" 
             className={`flex flex-col items-center justify-center p-2 ${
-              (location === "/club/tables") ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
+              (location === "/club/tables" || location === "/club/pos-tables") ? "text-blue-600" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             <LayoutGridIcon className="h-6 w-6" />

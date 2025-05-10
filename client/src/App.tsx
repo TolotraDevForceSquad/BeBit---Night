@@ -311,7 +311,17 @@ function App() {
               <POSManagementPage />
             </Route>
             
+            {/* Alias pour la page principale du POS */}
+            <Route path="/club/dashboard">
+              <POSManagementPage />
+            </Route>
+            
             <Route path="/club/pos-catalog">
+              <POSCatalogPage />
+            </Route>
+            
+            {/* Alias pour faciliter l'accès */}
+            <Route path="/club/catalog">
               <POSCatalogPage />
             </Route>
             
