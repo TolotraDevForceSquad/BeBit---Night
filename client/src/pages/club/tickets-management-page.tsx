@@ -65,6 +65,8 @@ import {
 } from "lucide-react";
 import ResponsiveLayout from "../../layouts/ResponsiveLayout";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
+import { useOfflineSync } from "@/hooks/use-offline-sync";
 
 // Types
 interface Event {
@@ -460,6 +462,7 @@ const TicketsManagementPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center space-x-2 mt-4 md:mt-0">
+            <SyncStatusIndicator compact />
             <Button variant="outline" size="sm" className="gap-1.5">
               <Download size={16} />
               Exporter
