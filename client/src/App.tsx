@@ -35,7 +35,8 @@ import POSTablesPage from "./pages/club/pos-tables-page";
 import POSLoginPage from "./pages/club/pos-login-page";
 import POSKitchenPage from "./pages/club/pos-kitchen-page";
 import POSHistoryPage from "./pages/club/pos-history-page";
-import BIDashboardPage from "./pages/club/bi-dashboard-page";
+import BIDashboardPage from "./pages/club/temp-bi-dashboard";
+import TableReservationPage from "./pages/club/table-reservation-page";
 import FindArtistsPage from "./pages/club/find-artists-page";
 import ClubInvitationsPage from "./pages/club/invitations-page";
 
