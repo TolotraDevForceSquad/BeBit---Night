@@ -36,7 +36,7 @@ import POSLoginPage from "./pages/club/pos-login-page";
 import POSKitchenPage from "./pages/club/pos-kitchen-page";
 import POSHistoryPage from "./pages/club/pos-history-page";
 import BIDashboardPage from "./pages/club/temp-bi-dashboard";
-import TableReservationPage from "./pages/club/table-reservation-page";
+import ClubTableReservationPage from "./pages/club/table-reservation-page";
 import FindArtistsPage from "./pages/club/find-artists-page";
 import ClubInvitationsPage from "./pages/club/invitations-page";
 
@@ -410,6 +410,10 @@ function App() {
             </Route>
             
             <Route path="/club/reservations">
+              <ClubTableReservationPage />
+            </Route>
+            
+            <Route path="/club/old-reservations">
               <ResponsiveLayout>
                 <div className="p-8">
                   <h1 className="text-3xl font-bold mb-6">Réservations de tables</h1>
