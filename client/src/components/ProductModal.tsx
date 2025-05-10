@@ -246,20 +246,53 @@ const ProductModal = ({
             </div>
             
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="imageUrl" className="text-right">
-                Image URL
+              <Label htmlFor="imageInput" className="text-right">
+                Image
               </Label>
-              <div className="col-span-3 flex gap-2">
-                <Input
-                  id="imageUrl"
-                  name="imageUrl"
-                  value={product.imageUrl}
-                  onChange={handleChange}
-                  placeholder="URL de l'image (optionnel)"
-                />
-                {/* <Button type="button" variant="outline" size="icon" className="flex-shrink-0">
-                  <Upload className="h-4 w-4" />
-                </Button> */}
+              <div className="col-span-3 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Input
+                    id="imageUrl"
+                    name="imageUrl"
+                    value={product.imageUrl}
+                    onChange={handleChange}
+                    placeholder="URL de l'image (optionnel)"
+                    className="flex-1"
+                  />
+                  <div className="relative">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="icon" 
+                      className="flex-shrink-0"
+                      onClick={() => document.getElementById('imageInput')?.click()}
+                    >
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                    <input
+                      id="imageInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            setProduct(prev => ({
+                              ...prev,
+                              imageUrl: event.target?.result as string
+                            }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Entrez une URL ou téléchargez une image locale
+                </p>
               </div>
             </div>
             
@@ -268,7 +301,7 @@ const ProductModal = ({
                 <div className="text-right text-sm text-muted-foreground self-start pt-1">
                   Aperçu
                 </div>
-                <div className="col-span-3 rounded-md overflow-hidden border border-input w-20 h-20">
+                <div className="col-span-3 rounded-md overflow-hidden border border-input w-24 h-24">
                   <img
                     src={product.imageUrl}
                     alt={product.name}
