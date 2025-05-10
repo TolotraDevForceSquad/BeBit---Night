@@ -177,8 +177,8 @@ const POSManagementPage = () => {
   }, [devices, toast]);
 
   return (
-    <ResponsiveLayout>
-      <div className="p-8">
+    <POSLayout>
+      <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold">Gestion des points de vente</h1>
@@ -666,7 +666,7 @@ const POSManagementPage = () => {
         description={`Êtes-vous sûr de vouloir supprimer le terminal "${deviceToDelete?.name}" ? Cette action est irréversible.`}
         isLoading={isLoading}
       />
-    </ResponsiveLayout>
+    </POSLayout>
   );
 };
 
