@@ -101,15 +101,15 @@ class IndexedDBService {
 
   public async get<T>(storeName: string, id: string | number): Promise<T | undefined> {
     const db = await this.dbPromise;
-    return db.get(storeName, id);
+    return db.get(storeName, id as any);
   }
 
-  public async add<T>(storeName: string, item: T): Promise<string | number> {
+  public async add<T>(storeName: string, item: T): Promise<any> {
     const db = await this.dbPromise;
     return db.add(storeName, item);
   }
 
-  public async put<T>(storeName: string, item: T): Promise<string | number> {
+  public async put<T>(storeName: string, item: T): Promise<any> {
     const db = await this.dbPromise;
     return db.put(storeName, item);
   }

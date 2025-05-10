@@ -388,6 +388,7 @@ const TicketsManagementPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [recommendationsOpen, setRecommendationsOpen] = useState(false);
+  const offlineSync = useOfflineSync();
   const [aiSettings, setAiSettings] = useState({
     enablePredictions: true,
     enableInsights: true,
