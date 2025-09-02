@@ -12,6 +12,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 import { Loader2, AlertCircle, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -32,7 +33,7 @@ export interface Product {
 interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (product: Product) => void;
+  onSave: (product: Omit<Product, 'id'> & { id?: number }) => void;
   editingProduct: Product | null;
   categories: ProductCategory[];
 }
@@ -44,8 +45,8 @@ const ProductModal = ({
   editingProduct,
   categories
 }: ProductModalProps) => {
-  const [product, setProduct] = useState<Product>({
-    id: 0,
+  const [product, setProduct] = useState<Omit<Product, 'id'> & { id?: number }>({
+    id: undefined,
     name: '',
     description: '',
     price: 0,
@@ -63,9 +64,9 @@ const ProductModal = ({
         ...editingProduct
       });
     } else {
-      // Réinitialiser pour un nouveau produit
+      // Réinitialiser pour un nouveau produit (sans ID)
       setProduct({
-        id: Date.now(),
+        id: undefined,
         name: '',
         description: '',
         price: 0,
@@ -74,42 +75,51 @@ const ProductModal = ({
         imageUrl: ''
       });
     }
-  }, [editingProduct, categories]);
+    setError(null);
+  }, [editingProduct, categories, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!product.name.trim()) {
       setError('Le nom du produit est requis.');
       return;
     }
-    
+
     if (product.price <= 0) {
       setError('Le prix doit être supérieur à zéro.');
       return;
     }
-    
+
     if (!product.categoryId) {
       setError('Veuillez sélectionner une catégorie.');
       return;
     }
-    
+
     setIsLoading(true);
     setError(null);
-    
-    // Trouver le nom de la catégorie
-    const category = categories.find(c => c.id === product.categoryId);
-    
-    // Simuler une requête API
-    setTimeout(() => {
-      onSave({
+
+    try {
+      // Trouver le nom de la catégorie
+      const category = categories.find(c => c.id === product.categoryId);
+
+      // Préparer les données à sauvegarder
+      const productToSave = {
         ...product,
         categoryName: category?.name || ''
-      });
-      setIsLoading(false);
+      };
+
+      // Appeler onSave avec les données
+      await onSave(productToSave);
+
+      // Fermer le modal seulement après une sauvegarde réussie
       onClose();
-    }, 500);
+    } catch (err) {
+      setError('Une erreur est survenue lors de la sauvegarde.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (
@@ -149,7 +159,7 @@ const ProductModal = ({
               : 'Ajoutez un nouveau produit à votre catalogue.'}
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit}>
           {error && (
             <Alert variant="destructive" className="mb-4">
@@ -157,7 +167,7 @@ const ProductModal = ({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
@@ -172,7 +182,7 @@ const ProductModal = ({
                 placeholder="Nom du produit"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
                 Description
@@ -187,7 +197,7 @@ const ProductModal = ({
                 rows={3}
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="price" className="text-right">
                 Prix (Ar)
@@ -203,7 +213,7 @@ const ProductModal = ({
                 step="500"
               />
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="category" className="text-right">
                 Catégorie
@@ -220,15 +230,24 @@ const ProductModal = ({
                     <SelectItem
                       key={category.id}
                       value={category.id.toString()}
-                      disabled={!category.isActive}
                     >
-                      {category.name} {!category.isActive && '(inactive)'}
+                      <div className="flex items-center">
+                        {category.name}
+
+                        {!category.isActive && (
+                          <Badge
+                            className='bg-red-100 text-red-800 hover:bg-red-100 ml-2'
+                          >
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="isAvailable" className="text-right">
                 Disponible
@@ -244,7 +263,7 @@ const ProductModal = ({
                 </Label>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="imageInput" className="text-right">
                 Image
@@ -260,10 +279,10 @@ const ProductModal = ({
                     className="flex-1"
                   />
                   <div className="relative">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="icon" 
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
                       className="flex-shrink-0"
                       onClick={() => document.getElementById('imageInput')?.click()}
                     >
@@ -295,7 +314,7 @@ const ProductModal = ({
                 </p>
               </div>
             </div>
-            
+
             {product.imageUrl && (
               <div className="grid grid-cols-4 gap-4">
                 <div className="text-right text-sm text-muted-foreground self-start pt-1">
@@ -314,7 +333,7 @@ const ProductModal = ({
               </div>
             )}
           </div>
-          
+
           <DialogFooter>
             <Button variant="outline" type="button" onClick={onClose} disabled={isLoading}>
               Annuler

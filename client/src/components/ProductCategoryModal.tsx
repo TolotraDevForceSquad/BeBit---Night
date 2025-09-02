@@ -27,7 +27,7 @@ export interface ProductCategory {
 interface ProductCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (category: ProductCategory) => void;
+  onSave: (category: { id?: number; name: string; description?: string; isActive: boolean }) => void;
   editingCategory: ProductCategory | null;
   productCount?: number;
 }
@@ -39,8 +39,7 @@ const ProductCategoryModal = ({
   editingCategory,
   productCount = 0
 }: ProductCategoryModalProps) => {
-  const [category, setCategory] = useState<ProductCategory>({
-    id: 0,
+  const [category, setCategory] = useState<{ id?: number; name: string; description?: string; isActive: boolean; productCount?: number }>({
     name: '',
     description: '',
     isActive: true,
@@ -53,13 +52,14 @@ const ProductCategoryModal = ({
   useEffect(() => {
     if (editingCategory) {
       setCategory({
-        ...editingCategory,
+        id: editingCategory.id,
+        name: editingCategory.name,
+        description: editingCategory.description,
+        isActive: editingCategory.isActive,
         productCount: editingCategory.productCount || productCount
       });
     } else {
-      // Réinitialiser pour une nouvelle catégorie
       setCategory({
-        id: Date.now(),
         name: '',
         description: '',
         isActive: true,
@@ -70,19 +70,19 @@ const ProductCategoryModal = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validation
+
     if (!category.name.trim()) {
       setError('Le nom de la catégorie est requis.');
       return;
     }
-    
+
     setIsLoading(true);
     setError(null);
-    
-    // Simuler une requête API
+
     setTimeout(() => {
-      onSave(category);
+      // On ne passe pas productCount à l'API
+      const { id, name, description, isActive } = category;
+      onSave(editingCategory ? { id, name, description, isActive } : { name, description, isActive });
       setIsLoading(false);
       onClose();
     }, 500);

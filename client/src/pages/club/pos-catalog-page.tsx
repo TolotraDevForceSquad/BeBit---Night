@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import POSLayout from '../../layouts/POSLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
@@ -24,29 +24,7 @@ import {
 import ProductCategoryModal, { ProductCategory } from '../../components/ProductCategoryModal';
 import ProductModal, { Product } from '../../components/ProductModal';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal';
-
-// Données fictives pour les catégories
-const initialCategories: ProductCategory[] = [
-  { id: 1, name: "Boissons", description: "Boissons fraîches et chaudes", isActive: true, productCount: 8 },
-  { id: 2, name: "Cocktails", description: "Cocktails avec et sans alcool", isActive: true, productCount: 12 },
-  { id: 3, name: "Snacks", description: "Petites collations", isActive: true, productCount: 6 },
-  { id: 4, name: "Plats", description: "Plats principaux", isActive: true, productCount: 4 },
-  { id: 5, name: "Desserts", description: "Pâtisseries et desserts", isActive: false, productCount: 3 },
-];
-
-// Données fictives pour les produits
-const initialProducts: Product[] = [
-  { id: 1, name: "Coca-Cola", description: "33cl", price: 5000, categoryId: 1, categoryName: "Boissons", isAvailable: true, imageUrl: "" },
-  { id: 2, name: "Eau minérale", description: "50cl", price: 3000, categoryId: 1, categoryName: "Boissons", isAvailable: true, imageUrl: "" },
-  { id: 3, name: "Mojito", description: "Cocktail à base de rhum, menthe et citron vert", price: 15000, categoryId: 2, categoryName: "Cocktails", isAvailable: true, imageUrl: "" },
-  { id: 4, name: "Piña Colada", description: "Cocktail à base de rhum, ananas et coco", price: 15000, categoryId: 2, categoryName: "Cocktails", isAvailable: true, imageUrl: "" },
-  { id: 5, name: "Chips", description: "Sachet de chips", price: 5000, categoryId: 3, categoryName: "Snacks", isAvailable: true, imageUrl: "" },
-  { id: 6, name: "Cacahuètes", description: "Cacahuètes grillées et salées", price: 4000, categoryId: 3, categoryName: "Snacks", isAvailable: true, imageUrl: "" },
-  { id: 7, name: "Burger", description: "Burger avec frites", price: 25000, categoryId: 4, categoryName: "Plats", isAvailable: true, imageUrl: "" },
-  { id: 8, name: "Pizza Margherita", description: "Pizza classique tomate mozzarella", price: 30000, categoryId: 4, categoryName: "Plats", isAvailable: true, imageUrl: "" },
-  { id: 9, name: "Tiramisu", description: "Dessert italien au café", price: 12000, categoryId: 5, categoryName: "Desserts", isAvailable: false, imageUrl: "" },
-  { id: 10, name: "Mousse au chocolat", description: "Mousse au chocolat noir", price: 10000, categoryId: 5, categoryName: "Desserts", isAvailable: true, imageUrl: "" },
-];
+import { api } from '../../services/api';
 
 const POSCatalogPage = () => {
   const { toast } = useToast();
@@ -54,11 +32,11 @@ const POSCatalogPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
-  
+
   // États pour les données
-  const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+
   // États pour les modals
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -67,228 +45,222 @@ const POSCatalogPage = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [itemToDelete, setItemToDelete] = useState<{ type: 'category' | 'product', item: any } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+
+  // Normalisation des données reçues de l'API pour correspondre aux noms utilisés côté front
+  function normalizeProduct(apiProduct: any): Product {
+    return {
+      ...apiProduct,
+      categoryId: apiProduct.category_id,
+      isAvailable: apiProduct.is_available,
+      imageUrl: apiProduct.image_url,
+      // Le nom de la catégorie sera ajouté dynamiquement lors de l'affichage
+    };
+  }
+  function normalizeCategory(apiCategory: any): ProductCategory {
+    return {
+      ...apiCategory,
+      isActive: apiCategory.is_active,
+    };
+  }
+
+  // Charger les catégories et produits depuis l'API au montage du composant
+  useEffect(() => {
+    api.getAllProductCategories()
+      .then((data) => setCategories(data.map(normalizeCategory)))
+      .catch(() => setCategories([]));
+    api.getAllProducts()
+      .then((data) => setProducts(data.map(normalizeProduct)))
+      .catch(() => setProducts([]));
+  }, []);
+
+  // Calcul dynamique du nombre de produits par catégorie
+  const categoryProductCounts = React.useMemo(() => {
+    const counts: Record<number, number> = {};
+    products.forEach((p) => {
+      counts[p.categoryId] = (counts[p.categoryId] || 0) + 1;
+    });
+    return counts;
+  }, [products]);
+
   // Filtrer les produits
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = categoryFilter === "all" || product.categoryId.toString() === categoryFilter;
-    const matchesAvailability = availabilityFilter === "all" || 
-                               (availabilityFilter === "available" && product.isAvailable) ||
-                               (availabilityFilter === "unavailable" && !product.isAvailable);
-    
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = categoryFilter === "all" || product.categoryId?.toString() === categoryFilter;
+    const matchesAvailability = availabilityFilter === "all" ||
+      (availabilityFilter === "available" && product.isAvailable) ||
+      (availabilityFilter === "unavailable" && !product.isAvailable);
     return matchesSearch && matchesCategory && matchesAvailability;
   });
-  
+
   // Callbacks pour la gestion des catégories
   const handleAddCategory = useCallback(() => {
     setEditingCategory(null);
     setIsCategoryModalOpen(true);
   }, []);
-  
+
   const handleEditCategory = useCallback((category: ProductCategory) => {
     setEditingCategory(category);
     setIsCategoryModalOpen(true);
   }, []);
-  
+
   const handleDeleteCategory = useCallback((category: ProductCategory) => {
     setItemToDelete({ type: 'category', item: category });
     setIsDeleteModalOpen(true);
   }, []);
-  
+
   const confirmDeleteItem = useCallback(() => {
     if (!itemToDelete) return;
-    
+
     setIsLoading(true);
-    
-    setTimeout(() => {
-      if (itemToDelete.type === 'category') {
-        const category = itemToDelete.item as ProductCategory;
-        // Vérifier si la catégorie a des produits
-        const hasProducts = products.some(p => p.categoryId === category.id);
-        
-        if (hasProducts) {
+
+    if (itemToDelete.type === 'product') {
+      api.deleteProduct(itemToDelete.item.id)
+        .then(() => api.getAllProducts().then(setProducts))
+        .then(() => {
           toast({
-            title: "Impossible de supprimer",
-            description: "Cette catégorie contient des produits. Veuillez d'abord supprimer ou déplacer ces produits.",
-            variant: "destructive",
-          });
-        } else {
-          const updatedCategories = categories.filter(c => c.id !== category.id);
-          setCategories(updatedCategories);
-          toast({
-            title: "Catégorie supprimée",
-            description: `La catégorie "${category.name}" a été supprimée avec succès.`,
+            title: "Produit supprimé",
+            description: `Le produit "${itemToDelete.item.name}" a été supprimé avec succès.`,
             variant: "default",
           });
-        }
-      } else if (itemToDelete.type === 'product') {
-        const product = itemToDelete.item as Product;
-        const updatedProducts = products.filter(p => p.id !== product.id);
-        setProducts(updatedProducts);
-        
-        // Mettre à jour le compteur de produits dans la catégorie
-        const updatedCategories = categories.map(category => {
-          if (category.id === product.categoryId) {
-            return {
-              ...category,
-              productCount: (category.productCount || 0) - 1
-            };
-          }
-          return category;
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setIsDeleteModalOpen(false);
+          setItemToDelete(null);
         });
-        setCategories(updatedCategories);
-        
+    } else if (itemToDelete.type === 'category') {
+      // Vérifier si la catégorie a des produits
+      const category = itemToDelete.item as ProductCategory;
+      const hasProducts = products.some(p => p.categoryId === category.id);
+      if (hasProducts) {
         toast({
-          title: "Produit supprimé",
-          description: `Le produit "${product.name}" a été supprimé avec succès.`,
-          variant: "default",
+          title: "Impossible de supprimer",
+          description: "Cette catégorie contient des produits. Veuillez d'abord supprimer ou déplacer ces produits.",
+          variant: "destructive",
         });
-      }
-      
-      setIsLoading(false);
-      setIsDeleteModalOpen(false);
-      setItemToDelete(null);
-    }, 500);
-  }, [itemToDelete, products, categories, toast]);
-  
-  const handleSaveCategory = useCallback((category: ProductCategory) => {
-    setIsLoading(true);
-    
-    setTimeout(() => {
-      let updatedCategories;
-      const isNew = !categories.some(c => c.id === category.id);
-      
-      if (isNew) {
-        // Ajout d'une nouvelle catégorie
-        updatedCategories = [...categories, { ...category, productCount: 0 }];
-        toast({
-          title: "Catégorie ajoutée",
-          description: `La catégorie "${category.name}" a été ajoutée avec succès.`,
-          variant: "default",
-        });
+        setIsLoading(false);
+        setIsDeleteModalOpen(false);
+        setItemToDelete(null);
       } else {
-        // Mise à jour d'une catégorie existante
-        updatedCategories = categories.map(c => c.id === category.id ? category : c);
+        api.deleteProductCategory(category.id)
+          .then(() => api.getAllProductCategories().then(setCategories))
+          .then(() => {
+            toast({
+              title: "Catégorie supprimée",
+              description: `La catégorie "${category.name}" a été supprimée avec succès.`,
+              variant: "default",
+            });
+          })
+          .finally(() => {
+            setIsLoading(false);
+            setIsDeleteModalOpen(false);
+            setItemToDelete(null);
+          });
+      }
+    }
+  }, [itemToDelete, products, categories, toast]);
+
+  const handleSaveCategory = useCallback((category: { id?: number; name: string; description?: string; isActive: boolean }) => {
+    setIsLoading(true);
+
+    const isEdit = !!category.id;
+    const savePromise = !isEdit
+      ? api.createProductCategory({
+        name: category.name,
+        description: category.description,
+        isActive: category.isActive
+      })
+      : api.updateProductCategory(category.id!, {
+        name: category.name,
+        description: category.description,
+        isActive: category.isActive
+      });
+
+    savePromise
+      .then(() => api.getAllProductCategories().then(data => setCategories(data.map(normalizeCategory))))
+      .then(() => {
         toast({
-          title: "Catégorie mise à jour",
-          description: `La catégorie "${category.name}" a été mise à jour avec succès.`,
+          title: !isEdit ? "Catégorie ajoutée" : "Catégorie mise à jour",
+          description: `La catégorie "${category.name}" a été ${!isEdit ? "ajoutée" : "mise à jour"} avec succès.`,
           variant: "default",
         });
-      }
-      
-      setCategories(updatedCategories);
-      setIsLoading(false);
-    }, 500);
+      })
+      .finally(() => setIsLoading(false));
   }, [categories, toast]);
-  
+
   // Callbacks pour la gestion des produits
   const handleAddProduct = useCallback(() => {
     setEditingProduct(null);
     setIsProductModalOpen(true);
   }, []);
-  
+
   const handleEditProduct = useCallback((product: Product) => {
     setEditingProduct(product);
     setIsProductModalOpen(true);
   }, []);
-  
+
   const handleDeleteProduct = useCallback((product: Product) => {
     setItemToDelete({ type: 'product', item: product });
     setIsDeleteModalOpen(true);
   }, []);
-  
-  const handleToggleProductAvailability = useCallback((product: Product) => {
+
+  const handleToggleProductAvailability = useCallback(async (product: Product) => {
     setIsLoading(true);
-    
-    setTimeout(() => {
-      const updatedProducts = products.map(p => {
-        if (p.id === product.id) {
-          return { ...p, isAvailable: !p.isAvailable };
-        }
-        return p;
-      });
-      
-      setProducts(updatedProducts);
-      
+    try {
+      // Appel API pour mettre à jour la disponibilité
+      await api.updateProduct(product.id, { isAvailable: !product.isAvailable });
+      // Rafraîchir la liste des produits depuis l'API
+      const updatedProducts = await api.getAllProducts();
+      setProducts(updatedProducts.map(normalizeProduct));
       toast({
-        title: product.isAvailable ? "Produit désactivé" : "Produit activé",
-        description: `Le produit "${product.name}" est maintenant ${product.isAvailable ? 'indisponible' : 'disponible'}.`,
+        title: !product.isAvailable ? "Produit activé" : "Produit désactivé",
+        description: `Le produit "${product.name}" est maintenant ${!product.isAvailable ? 'disponible' : 'indisponible'}.`,
         variant: "default",
       });
-      
+    } finally {
       setIsLoading(false);
-    }, 500);
-  }, [products, toast]);
-  
-  const handleSaveProduct = useCallback((product: Product) => {
+    }
+  }, [toast]);
+
+  const handleSaveProduct = useCallback((productData: any) => {
     setIsLoading(true);
-    
-    setTimeout(() => {
-      let updatedProducts;
-      const isNew = !products.some(p => p.id === product.id);
-      
-      if (isNew) {
-        // Ajout d'un nouveau produit
-        updatedProducts = [...products, product];
-        
-        // Mettre à jour le compteur de produits dans la catégorie
-        const updatedCategories = categories.map(category => {
-          if (category.id === product.categoryId) {
-            return {
-              ...category,
-              productCount: (category.productCount || 0) + 1
-            };
-          }
-          return category;
-        });
-        setCategories(updatedCategories);
-        
+
+    // Préparer les données pour l'API (sans categoryName)
+    const apiProductData = {
+      name: productData.name,
+      description: productData.description,
+      price: productData.price,
+      categoryId: productData.categoryId,
+      isAvailable: productData.isAvailable,
+      imageUrl: productData.imageUrl
+    };
+
+    const savePromise = productData.id
+      ? api.updateProduct(productData.id, apiProductData)
+      : api.createProduct(apiProductData);
+
+    savePromise
+      .then(() => {
+        return api.getAllProducts().then(data => setProducts(data.map(normalizeProduct)));
+      })
+      .then(() => {
         toast({
-          title: "Produit ajouté",
-          description: `Le produit "${product.name}" a été ajouté avec succès.`,
+          title: productData.id ? "Produit mis à jour" : "Produit ajouté",
+          description: `Le produit "${productData.name}" a été ${productData.id ? "mis à jour" : "ajouté"} avec succès.`,
           variant: "default",
         });
-      } else {
-        // Vérifier si la catégorie a changé
-        const oldProduct = products.find(p => p.id === product.id);
-        if (oldProduct && oldProduct.categoryId !== product.categoryId) {
-          // Mettre à jour les compteurs de produits dans les deux catégories
-          const updatedCategories = categories.map(category => {
-            if (category.id === oldProduct.categoryId) {
-              return {
-                ...category,
-                productCount: Math.max(0, (category.productCount || 0) - 1)
-              };
-            } else if (category.id === product.categoryId) {
-              return {
-                ...category,
-                productCount: (category.productCount || 0) + 1
-              };
-            }
-            return category;
-          });
-          setCategories(updatedCategories);
-        }
-        
-        // Mise à jour d'un produit existant
-        updatedProducts = products.map(p => p.id === product.id ? {
-          ...product,
-          categoryName: categories.find(c => c.id === product.categoryId)?.name || ''
-        } : p);
-        
+      })
+      .catch((error) => {
         toast({
-          title: "Produit mis à jour",
-          description: `Le produit "${product.name}" a été mis à jour avec succès.`,
-          variant: "default",
+          title: "Erreur",
+          description: `Une erreur est survenue: ${error.message}`,
+          variant: "destructive",
         });
-      }
-      
-      setProducts(updatedProducts);
-      setIsLoading(false);
-    }, 500);
-  }, [products, categories, toast]);
-  
+      })
+      .finally(() => setIsLoading(false));
+  }, [products, toast]);
+
   return (
     <POSLayout>
       <div className="p-6">
@@ -298,13 +270,13 @@ const POSCatalogPage = () => {
             <p className="text-muted-foreground">Gérez les produits et catégories disponibles sur vos terminaux</p>
           </div>
         </div>
-        
+
         <Tabs defaultValue="products" className="w-full" onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-2 w-full max-w-md mb-6">
             <TabsTrigger value="products">Produits</TabsTrigger>
             <TabsTrigger value="categories">Catégories</TabsTrigger>
           </TabsList>
-          
+
           {/* Onglet Produits */}
           <TabsContent value="products">
             <Card>
@@ -363,7 +335,7 @@ const POSCatalogPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="rounded-md border">
                   <div className="relative w-full overflow-auto">
                     <table className="w-full caption-bottom text-sm">
@@ -379,70 +351,73 @@ const POSCatalogPage = () => {
                       </thead>
                       <tbody className="[&_tr:last-child]:border-0">
                         {filteredProducts.length > 0 ? (
-                          filteredProducts.map((product) => (
-                            <tr key={product.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                              <td className="p-4 align-middle">{product.id}</td>
-                              <td className="p-4 align-middle font-medium">
-                                <div>
-                                  {product.name}
-                                  {product.description && (
-                                    <div className="text-xs text-muted-foreground mt-1">
-                                      {product.description}
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="p-4 align-middle">
-                                <Badge variant="outline" className="font-normal">
-                                  {product.categoryName || '—'}
-                                </Badge>
-                              </td>
-                              <td className="p-4 align-middle font-medium">
-                                {product.price.toLocaleString()} Ar
-                              </td>
-                              <td className="p-4 align-middle">
-                                <Badge 
-                                  className={`${product.isAvailable 
-                                    ? 'bg-green-100 text-green-800 hover:bg-green-100' 
-                                    : 'bg-red-100 text-red-800 hover:bg-red-100'}`}
-                                >
-                                  {product.isAvailable ? 'Disponible' : 'Indisponible'}
-                                </Badge>
-                              </td>
-                              <td className="p-4 align-middle">
-                                <div className="flex space-x-2">
-                                  <Button 
-                                    size="icon" 
-                                    variant="outline"
-                                    onClick={() => handleEditProduct(product)}
+                          filteredProducts.map((product) => {
+                            const category = categories.find(c => c.id === product.categoryId);
+                            return (
+                              <tr key={product.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                                <td className="p-4 align-middle">{product.id}</td>
+                                <td className="p-4 align-middle font-medium">
+                                  <div>
+                                    {product.name}
+                                    {product.description && (
+                                      <div className="text-xs text-muted-foreground mt-1">
+                                        {product.description}
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="p-4 align-middle">
+                                  <Badge variant="outline" className="font-normal">
+                                    {category ? category.name : '—'}
+                                  </Badge>
+                                </td>
+                                <td className="p-4 align-middle font-medium">
+                                  {product.price?.toLocaleString()} Ar
+                                </td>
+                                <td className="p-4 align-middle">
+                                  <Badge
+                                    className={`${product.isAvailable
+                                      ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                                      : 'bg-red-100 text-red-800 hover:bg-red-100'}`}
                                   >
-                                    <Pencil className="h-4 w-4" />
-                                    <span className="sr-only">Modifier</span>
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant={product.isAvailable ? "destructive" : "default"}
-                                    onClick={() => handleToggleProductAvailability(product)}
-                                  >
-                                    {product.isAvailable 
-                                      ? <X className="h-4 w-4" /> 
-                                      : <Check className="h-4 w-4" />}
-                                    <span className="sr-only">
-                                      {product.isAvailable ? 'Désactiver' : 'Activer'}
-                                    </span>
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="destructive"
-                                    onClick={() => handleDeleteProduct(product)}
-                                  >
-                                    <Trash className="h-4 w-4" />
-                                    <span className="sr-only">Supprimer</span>
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))
+                                    {product.isAvailable ? 'Disponible' : 'Indisponible'}
+                                  </Badge>
+                                </td>
+                                <td className="p-4 align-middle">
+                                  <div className="flex space-x-2">
+                                    <Button
+                                      size="icon"
+                                      variant="outline"
+                                      onClick={() => handleEditProduct(product)}
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                      <span className="sr-only">Modifier</span>
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant={product.isAvailable ? "destructive" : "default"}
+                                      onClick={() => handleToggleProductAvailability(product)}
+                                    >
+                                      {product.isAvailable
+                                        ? <X className="h-4 w-4" />
+                                        : <Check className="h-4 w-4" />}
+                                      <span className="sr-only">
+                                        {product.isAvailable ? 'Désactiver' : 'Activer'}
+                                      </span>
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="destructive"
+                                      onClick={() => handleDeleteProduct(product)}
+                                    >
+                                      <Trash className="h-4 w-4" />
+                                      <span className="sr-only">Supprimer</span>
+                                    </Button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })
                         ) : (
                           <tr>
                             <td colSpan={6} className="h-24 text-center">
@@ -457,7 +432,7 @@ const POSCatalogPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           {/* Onglet Catégories */}
           <TabsContent value="categories">
             <Card>
@@ -496,12 +471,12 @@ const POSCatalogPage = () => {
                               {category.description || '—'}
                             </td>
                             <td className="p-4 align-middle">
-                              <Badge variant="secondary">{category.productCount || 0}</Badge>
+                              <Badge variant="secondary">{categoryProductCounts[category.id] || 0}</Badge>
                             </td>
                             <td className="p-4 align-middle">
-                              <Badge 
-                                className={`${category.isActive 
-                                  ? 'bg-green-100 text-green-800 hover:bg-green-100' 
+                              <Badge
+                                className={`${category.isActive
+                                  ? 'bg-green-100 text-green-800 hover:bg-green-100'
                                   : 'bg-orange-100 text-orange-800 hover:bg-orange-100'}`}
                               >
                                 {category.isActive ? 'Active' : 'Inactive'}
@@ -509,8 +484,8 @@ const POSCatalogPage = () => {
                             </td>
                             <td className="p-4 align-middle">
                               <div className="flex space-x-2">
-                                <Button 
-                                  size="icon" 
+                                <Button
+                                  size="icon"
                                   variant="outline"
                                   onClick={() => handleEditCategory(category)}
                                 >
@@ -521,7 +496,7 @@ const POSCatalogPage = () => {
                                   size="icon"
                                   variant="destructive"
                                   onClick={() => handleDeleteCategory(category)}
-                                  disabled={category.productCount! > 0}
+                                  disabled={categoryProductCounts[category.id] > 0}
                                 >
                                   <Trash className="h-4 w-4" />
                                   <span className="sr-only">Supprimer</span>
@@ -539,7 +514,7 @@ const POSCatalogPage = () => {
           </TabsContent>
         </Tabs>
       </div>
-      
+
       {/* Modals */}
       <ProductCategoryModal
         isOpen={isCategoryModalOpen}
@@ -547,15 +522,16 @@ const POSCatalogPage = () => {
         onSave={handleSaveCategory}
         editingCategory={editingCategory}
       />
-      
+
       <ProductModal
         isOpen={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
         onSave={handleSaveProduct}
         editingProduct={editingProduct}
-        categories={categories.filter(c => c.isActive)}
+        // categories={categories.filter(c => c.isActive)}
+        categories={categories}
       />
-      
+
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
