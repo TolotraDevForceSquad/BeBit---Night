@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POS Be Bit - Connexion Employé</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <style>
+    /* 🎨 Variables pour un design sombre */
+    :root {
+      --primary-bg: #110B1C;
+      --secondary-bg: #1B1229;
+      --accent-red: #FE2F58;
+      --accent-cyan: #26DADF;
+      --input-bg: #2A213D;
+      --input-border: #4D4A9E;
+      --text-light: #F0F0F0;
+      --text-subtle: #9E9BCB;
+      --pos-bg-dark: #1F1730;
+    }
+
+    /* 🌍 Styles Généraux */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      background-color: var(--primary-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .main-container {
+      width: 90%;
+      max-width: 1100px;
+      background-color: var(--secondary-bg);
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+      color: var(--text-light);
+    }
+
+    /* 🧾 Logo */
+    .logo-container {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-top: 40px;
+    }
+
+    .logo-pos {
+      font-size: 2.5em;
+      font-weight: 800;
+      letter-spacing: -2px;
+    }
+
+    .logo-pos .be {
+      color: var(--accent-red);
+    }
+
+    .logo-pos .bit {
+      color: var(--accent-cyan);
+    }
+
+    /* 🧩 Contenu principal */
+    .content-wrapper {
+      display: flex;
+      min-height: 550px;
+    }
+
+    /* 🔐 Section Connexion (gauche) */
+    .login-section {
+      flex: 0 0 45%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0 40px 40px;
+      background-color: var(--secondary-bg);
+      text-align: center;
+    }
+
+    .login-header {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .login-header h2 {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-light);
+    }
+
+    .login-header p {
+      color: var(--text-subtle);
+      font-size: 0.9em;
+    }
+
+    .input-group,
+    .select-group {
+      position: relative;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .input-group i,
+    .select-group i {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      font-size: 1.1em;
+      pointer-events: none;
+    }
+
+    .input-group input,
+    .select-group select {
+      width: 100%;
+      padding: 15px 15px 15px 50px;
+      border: 1px solid var(--input-border);
+      background-color: var(--input-bg);
+      border-radius: 8px;
+      color: var(--text-light);
+      font-size: 1em;
+      outline: none;
+      transition: border-color 0.3s;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .input-group input[type="password"] {
+      font-size: 1.5em;
+      text-align: center;
+      letter-spacing: 0.3em;
+      padding: 15px;
+    }
+
+    .input-group input:focus,
+    .select-group select:focus {
+      border-color: var(--accent-red);
+    }
+
+    .select-group::after {
+      content: "\f0d7";
+      font-family: "Font Awesome 5 Free";
+      font-weight: 900;
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-subtle);
+      pointer-events: none;
+    }
+
+    .btn-login {
+      width: 100%;
+      max-width: 300px;
+      padding: 15px;
+      background-color: var(--accent-cyan);
+      border: none;
+      border-radius: 8px;
+      color: var(--primary-bg);
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.1s;
+      margin-top: 10px;
+    }
+
+    .btn-login:hover {
+      background-color: var(--accent-red);
+      color: var(--text-light);
+    }
+
+    /* 💻 Section POS (droite) */
+    .pos-section {
+      flex: 1;
+      background-color: var(--pos-bg-dark);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px;
+      overflow: hidden;
+      color: var(--text-light);
+    }
+
+    .pos-gradient-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.6;
+      background: linear-gradient(135deg, var(--primary-bg) 0%, var(--accent-red) 30%, var(--accent-cyan) 70%, var(--primary-bg) 100%);
+      filter: blur(80px);
+      transform: scale(1.5);
+      animation: pulse 15s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.5;
+        transform: scale(1.4) rotate(0deg);
+      }
+      100% {
+        opacity: 0.7;
+        transform: scale(1.6) rotate(5deg);
+      }
+    }
+
+    .pos-mockup {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 400px;
+    }
+
+    .pos-mockup i {
+      font-size: 5em;
+      color: var(--text-light);
+      text-shadow: 0 0 10px var(--accent-cyan);
+      margin-bottom: 20px;
+    }
+
+    .pos-mockup h1 {
+      font-size: 2em;
+      font-weight: 800;
+      margin-bottom: 15px;
+    }
+
+    .pos-mockup p {
+      font-size: 1em;
+      line-height: 1.6em;
+      color: var(--text-subtle);
+      text-align: center;
+    }
+
+    /* 📱 Responsive */
+    @media (max-width: 850px) {
+      .content-wrapper {
+        flex-direction: column;
+        min-height: auto;
+      }
+
+      .login-section {
+        order: 2;
+        padding: 20px;
+      }
+
+      .pos-section {
+        order: 1;
+        min-height: 220px;
+      }
+
+      .logo-container {
+        padding-top: 20px;
+      }
+
+      .pos-mockup h1 {
+        font-size: 1.6em;
+      }
+
+      .pos-mockup p {
+        font-size: 0.95em;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="content-wrapper">
+      <div class="login-section">
+        <div class="logo-container">
+          <div class="logo-pos"><span class="be">Be</span><span class="bit">Bit</span></div>
+        </div>
+
+        <div class="login-header">
+          <h2>Authentification Employé</h2>
+          <p>Accédez à votre Terminal pour démarrer votre session.</p>
+        </div>
+
+        <form>
+          <div class="select-group">
+            <i class="fas fa-tablet-alt"></i>
+            <select name="device_id" required>
+              <option value="" disabled selected>Choisir un terminal POS</option>
+              <option value="1">Caisse 1 - Devanture</option>
+              <option value="2">Caisse 2 - Arrière</option>
+              <option value="3">Mobile POS - Table 1</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <input type="password" placeholder="PIN" maxlength="6" inputmode="numeric" required>
+          </div>
+
+          <div class="select-group">
+            <i class="fas fa-clock"></i>
+            <select name="session_duration" required>
+              <option value="" disabled selected>Durée de session maximale</option>
+              <option value="60">1 Heure (Standard)</option>
+              <option value="120">2 Heures</option>
+              <option value="360">6 Heures (Journée)</option>
+              <option value="0">Déconnexion après transaction</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-login">
+            <i class="fas fa-lock-open"></i> Démarrer la Session
+          </button>
+        </form>
+      </div>
+
+      <!-- 🎯 Section de présentation POS -->
+      <div class="pos-section">
+        <div class="pos-gradient-bg"></div>
+        <div class="pos-mockup">
+          <i class="fas fa-user-cog"></i>
+          <h1>Connectez-vous à votre Terminal</h1>
+          <p>Activez votre session, prenez vos commandes et réalisez vos meilleures performances de la journée.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

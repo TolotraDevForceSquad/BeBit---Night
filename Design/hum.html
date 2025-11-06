@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+    <!-- Configuration commune pour l'application React -->
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Simulation POS Restaurant - React</title>
+    <!-- Tailwind CSS CDN avec plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Liens pour les polices Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- Configuration Tailwind personnalisée avec nouveau thème sombre -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7C3AED", // Violet sombre
+                        "secondary": "#991B1B", // Rouge sombre
+                        "accent": "#DB2777", // Rose sombre
+                        "dark-bg": "#111827", // Noir très sombre
+                        "blue-light-dark": "#1D4ED8", // Bleu clair sombre
+                        "success": "#10B981",
+                        "warning": "#F59E0B",
+                        "error": "#EF4444",
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#111827",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    animation: {
+                        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                    }
+                },
+            },
+        }
+    </script>
+    <!-- Styles pour les icônes Material Symbols -->
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .toast-enter {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        .toast-enter-active {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+        .toast-exit {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast-exit-active {
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 300ms, transform 300ms;
+        }
+    </style>
+    <!-- Style pour la hauteur minimale du body -->
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-white">
+    <!-- Root pour React -->
+    <div id="root"></div>
+    <!-- CDN pour React et ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel Standalone pour JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Script React avec Babel pour JSX -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Données mock étendues basées strictement sur le schéma fourni, avec plus d'éléments fictifs
+        // Ajout de 'destinations' à products : enum ['bar', 'cuisine']
+        const mockEmployees = [
+            { id: 1, name: 'Jean Dupont', role: 'Manager', pin: '1234', status: true, deviceId: 1, imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD0puKKykqsrFqQa0TGp59cz0xbZFAp5fkCThWpNDHmruMfDKROwORQUld7YlLPzV7L4pvR9rTbub9hvC3bd4zwtiAm7PnfHyjEadob9CVdrr0sOH59aFa4jrjI2qFecm47b-PUR_5OoUNfUiqJF3O-dzoE_3XudGOGkaVEineG7Lk2dOjnxmQzR66uKfrgId8nZrmmhAxdgljJmZ7yN99mk2yTF-NGS_fZz4aYqB8arkjVnMnHbboJkaraG-zADQXuWj3pAUrVjfx5' },
+            { id: 2, name: 'Marie Curie', role: 'Serveur', pin: '5678', status: true, deviceId: 2, imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCEYJvHxFBnVJiBQD3wDWbWmBUL0woFEDd7apDTadFRxZBztHsuPXQBV3lF_-Fxwr67cPzkr3dLKhfoO1CiQysp-ZfmCrXtFcAiojxlzFwavM5m7AOzQwGYdoYeCP64WMdyDrYal8fxMETID8yTmGPrPPtqYIjKHS0KbjBlpUbGoRGUt_RAtAIkMnmkIvpkl89xslr9ACQtnrmwHqoaxFXCioDowiuITY4Mv7aGXPF6v5YfCYl834IBQcfJ1Mk1WWr50HmEdURxjT5E' },
+            { id: 3, name: 'Paul Martin', role: 'Serveur', pin: '9012', status: false, deviceId: null, imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAu0OMs8MuZPGtXDHClBNJ8am1n61gDTEUcqfRRdAPCAdc8v-14VoNqXG5TFpZEY8PmA6b8NBYzsUfKS-6pbBnmJVuV1c2uzdPHsmcx71YP10doXmX0iOvfYf4s1ZBKThFdIe084pVoa-tVgJZ8rPqnFSpbdEjBevM1ZUU9bIZr7zl8pHQ8kZ5Jvo2AOQb65uVPxHynRed16HEHU-I3-mrL2OtUPEsREaK9OdrmgkTC_ACDoOSFb6Mm2_9PLvNkoU8R-GkwZhCtIs_u' },
+            { id: 4, name: 'Sophie Lemoine', role: 'Cuisinier', pin: '3456', status: true, deviceId: 3, imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGsjl44H-mQDsoXyLujylsXNibi7vKZW-YAsZ4zj9_zxZRR737lu_bNtJluUbVQSeFfCtsxku2F9IvUaicVV0XZnZOWi3m2T1J-Iw9shXBEprKigiCnSUxBCJ4YANWOV__YugT62VWfZtbOwIElR3NT5r-vjxYWlxpACNAfkBaKIhbmuVgN4Zbj79Ii2uHJMQD-sk3DGaszNq-FkDnPe_y8-cNq0GMihQu8V--He9-VzBLRS1r1Yd5W5rhAutjX1dSB5Kz4NQO4I63' },
+            { id: 5, name: 'Louis Bertrand', role: 'Barman', pin: '7890', status: true, deviceId: 4, imageUrl: 'https://example.com/image5.jpg' },
+            { id: 6, name: 'Anna Leclerc', role: 'Serveur', pin: '2345', status: false, deviceId: null, imageUrl: 'https://example.com/image6.jpg' },
+            { id: 7, name: 'Pierre Dubois', role: 'Cuisinier', pin: '6789', status: true, deviceId: null, imageUrl: 'https://example.com/image7.jpg' },
+            { id: 8, name: 'Claire Moreau', role: 'Manager', pin: '1122', status: true, deviceId: 1, imageUrl: 'https://example.com/image8.jpg' }
+        ];
+        const mockPosDevices = [
+            { id: 1, name: 'Caisse principale', location: 'Terrasse', status: true, lastActive: 'Aujourd\'hui à 14h32', sales: 1500, imageUrl: 'url-device1' },
+            { id: 2, name: 'Terminal mobile 1', location: 'Salle 1', status: true, lastActive: 'Hier à 21:15', sales: 800, imageUrl: 'url-device2' },
+            { id: 3, name: 'Tablette Cuisine', location: 'Cuisine', status: false, lastActive: '2j', sales: 0, imageUrl: 'url-device3' },
+            { id: 4, name: 'Caisse Bar', location: 'Bar', status: true, lastActive: 'Aujourd\'hui à 18:05', sales: 1200, imageUrl: 'url-device4' },
+            { id: 5, name: 'Terminal mobile 2', location: 'Terrasse', status: true, lastActive: 'Aujourd\'hui à 12:45', sales: 600, imageUrl: 'url-device5' },
+            { id: 6, name: 'Écran Salle', location: 'Salle Principale', status: false, lastActive: '3j', sales: 200, imageUrl: 'url-device6' },
+            { id: 7, name: 'Kiosk Bar', location: 'Bar', status: true, lastActive: 'Hier à 20:30', sales: 900, imageUrl: 'url-device7' },
+            { id: 8, name: 'Tablette Terrasse', location: 'Terrasse', status: true, lastActive: 'Aujourd\'hui à 16:20', sales: 400, imageUrl: 'url-device8' }
+        ];
+        const mockProductCategories = [
+            { id: 1, name: 'Entrées', description: 'Entrées appetissantes', isActive: true, imageUrl: 'url-cat1' },
+            { id: 2, name: 'Plats principaux', description: 'Plats chauds', isActive: true, imageUrl: 'url-cat2' },
+            { id: 3, name: 'Desserts', description: 'Sucrés', isActive: true, imageUrl: 'url-cat3' },
+            { id: 4, name: 'Boissons chaudes', description: 'Chaudes', isActive: false, imageUrl: 'url-cat4' },
+            { id: 5, name: 'Boissons froides', description: 'Froides', isActive: true, imageUrl: 'url-cat5' },
+            { id: 6, name: 'Salades', description: 'Légères', isActive: true, imageUrl: 'url-cat6' },
+            { id: 7, name: 'Fromages', description: 'Fromages variés', isActive: true, imageUrl: 'url-cat7' },
+            { id: 8, name: 'Vins', description: 'Vins sélectionnés', isActive: true, imageUrl: 'url-cat8' },
+            { id: 9, name: 'Bières', description: 'Bières artisanales', isActive: true, imageUrl: 'url-cat9' },
+            { id: 10, name: 'Cafés', description: 'Cafés spéciaux', isActive: true, imageUrl: 'url-cat10' }
+        ];
+        const mockProducts = [
+            { id: 1, name: 'Burger Classique', description: 'Sans oignons', price: 1250, categoryId: 2, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAWGdri-6Ac3uOiy8BED1E_dAX8Vbgp2Qo64FjrEfnNnEdtTAS5QoqXavlKeCp0Z1kcZHFCrPiLyC_MOUNjpFvhXpZmJ4sonDlFJ5OmPz2PBzFZnEd7cbgQ2SrzweYMo-aKApbKaapCJpzCrz2I36WIUVkLeEm6At055VWayAv5RF-9-9B4Nr1lQjKgiuOwkiqpk_sby1q-6eqn3fh0tTYPJvBAgLRxLXPKKYYdzg_FKiLrQeYgwSwdllMI6gTgxczKfmg26ao6EQh3' },
+            { id: 2, name: 'Frites Maison', description: '', price: 450, categoryId: 2, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCe9qOg8s9YF-OD5ksT52KvHhuPJWBnJG7iWn0z_FSohoO9oh9e6xm86JsyHaOkgfBKyaLEF-RTTiCm9DxiV2UXMS54QZcckUkjc48uYzhYODTVwrAhimO-DW59SuG5prOWw06eto7bg2qsKik8Yjc_0_-ts0XIr7P9ZJrSlN9vTaZEDLul41R7kML7d-_z1zHaczuahaFWMj_kM7PRNtX1b5JcEAQHXLW6GdEC2__1a-y62hnVqMsPcHckfRxpbbwoxmaPTVFS3P-a' },
+            { id: 3, name: 'Soda Cola', description: '', price: 300, categoryId: 5, isAvailable: true, destinations: 'bar', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQTjHm4wKIFj3fGtPFMRO1XjGUb9-iX6lSinM4fkxkebbMEU6sUA5A4NR_FaAzOxma5prTMG8-TXEDH9UbDC1UKSh8gNSAV226N4dxYeBckcFLaIPCErKWi455vEGfP-F8gjoTIyysggEl4tiHbcE2KabnnQnRjYO1oNfN4VU5ZMxHFtr9vYT1dlNUNuJRXLI1IVvmhLHy2MrW4kEGRHHMu5NE1oBU6oSzLK02P6YLDuv5GhnRYs08vP83CrARcPgAAwh1CSAbla2M' },
+            { id: 4, name: 'Café Americano', description: '', price: 350, categoryId: 10, isAvailable: true, destinations: 'bar', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAfTmQkzH-p6oeGrLhLHwoQ_bsfpIhGtGhpxpK4ugTAqtTn4VNNsR5SWHAx3FRGbDTZUgfIrvLK62CCymYbqfDH0mH9S2AnCuRffNWSCCygKDUgI5wGXEWW8fEyk5df94htpxGhVsU0wqO1IB34crYmg4qCkfIzuwYgUTQW-W9vmG4SM7q8-Dg9NKwQnzON9eTSwb-98m9gyeiHt3zkvtZlGAX-yN3hSf0Gh7mZGdIDYPg1JZcuL2MbQGruRfsMAbIanX8zlC9WC48q' },
+            { id: 5, name: 'Croissant au beurre', description: '', price: 200, categoryId: 3, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC2FtosHyJ1yoDE-F62xP4JU7gssIk6w2R71EgWS9pwUgvV9jyD6OwtQl0AlpPM-mUSJVQmCAwSg1uF9PDSeeyckKPcZuG4zez2lx8E0SwOd9HExpXhKDoPzFXYgtc8HlOIbbg1DY2VHCPh_sM6BXx-M8fPgQ5yL4WcpIHNDVGy6OsbE264OVjP68i5VMjygnvbqM7gooZ44cxIau_Q2JmfbY8Dp4rk-vKTMAet_FSPGllIwZafB7gDpBe64d_alkdM231-8wYxY-CL' },
+            { id: 6, name: 'Muffin Myrtille', description: '', price: 275, categoryId: 3, isAvailable: false, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZmmv2GbS5PtHdn7d7AfXQdqPLQD7iW-OWNJ31xlgU5zs8iza7uP7fq3zFSl6zLQlJouyLKuu8P9IOA20g6LQ5N0r_Aiggzvt7r0Hku30MU2D6m6IawPODzaAEmZ-f2r2HWGx0cweoc2XNLrT3yV2K9aEmwLFeWyjKaur4brORLZIOCHizaXvF9iZuio9sE7ssVCzQj1AdP6xvjxTgXZ1oNx6Vt8hRHMohgO88sSAo1auEBCkntGhjagspN4ge161WM2RDq5RRKOOw' },
+            { id: 7, name: 'Jus d\'orange pressé', description: '', price: 400, categoryId: 5, isAvailable: true, destinations: 'bar', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBso6gzqlOZjsrMKGllC1NnSOsU_DsKPS_d9J_2i6-EvPfiyARA81LbxPXjqqtef0HAp5MjcGsz4cpnSVNOq5fv6XbJkfGCamru6wZvohrlOROn7wIcY2W-xYqqvhwWSWXTWPwDxbS72stgXqON89XFc909fWhX-wyizm3WJBO6_iumfTwYowIcplgQForzCXG_jSJQuMsJ8R8uqMVSw-TjUElJDHd0m0VF5tG4UW0cZTNEdXQrHMQlKYy_wIMzH84HbnNUbwgYJfQw' },
+            { id: 8, name: 'Salade César', description: '', price: 1250, categoryId: 1, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAPlF8yzCwU0prtaUA3GuatzMG0zd9wFO672aG7Md6etTKBmhe_ZkI2F5O-eYaWfWlqX7NwGMvyw6NieBzBVQVXJ5E_z2KOVRy6q94FM19ERZnIfVMOy5sYuvGcXyb1-omXUPNy0K2QbhS59hRpJoIgUpuzfG72AJjZwCaOeYkyyhNX795HvP0iGuhjowxk9YTflYYELYI9t1RVF8R7udgOuV9Bi0vNKIuCaMuODYfs-7QnFXelhkCboXr9EHqIso6eWpib_N3IrWnu' },
+            { id: 9, name: 'Tiramisu Maison', description: '', price: 800, categoryId: 3, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_TcUNJUBgAl-QYI7FyUNUpz5MZOrmhG3yAnF35aybE4H7KlESe1ZGmNfjNi9n-WyQEQX1hSeHIN1VbcQiqNDrrLRrmRihrDF74d9qjRpn0Br5FWscLHB4mneUfZ8W9VHvyWwYcwi0Uk-pXltOHcxJGGdl3hvqpLrj0kFrroJiA4ibZ7mddman1VTkfRlgitMxcaWSfu2tfYljWxXJjvWCMExNj8-PNHSfI5n-KWBRCyO6t_qL4M6JoWT90euh3B5LieU7aF6r-UHg' },
+            { id: 10, name: 'Saumon Grillé', description: '', price: 1850, categoryId: 2, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB0uNaQQQ7S9ijljUKsnrGALOXT3d_SU6u6nAukPxr6rBTy23SaT3vLh4iCwAclPjLIDLYviJ1GGO2kiSbGeusAg04cWvgCw7OXRSNHAK9HbKwukcsWApH9YV_4JWps7p5lGib-QNAERrFNtPx0ikBlCjS6bfNR1NMcE9yfcy5ooWmR5VipfqLjaS2eaLqaGhoR3Hv60SziTqO8D7dned56AdyQL-9kR2B7Uk0GBwXJH18A-DF5TIsAMdA_HsoHJTZwW_CETLID7mtt' },
+            { id: 11, name: 'Pizza Margherita', description: '', price: 1400, categoryId: 2, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCVo9sjzUIqxQUXBWafunNhFx11XzrLk5KpfV7-IRmHigjYS2JsaH8GS6o6-Ilq2e_XgwmpIVbUYTNfdws5QviCBndtKMueGw9QBxudd6fj-8I0LiksyfzJQZ0jcTnscS9hf3hPvPJ6_wiI-PpwA8kzGgybhNKb3GAY1rnbZxu0J1oMJ30-hr7EsS5i_6lZW_0oaOQHD3dCCxWKwrDmLpWhDf3FAgnJ7SYaioAIMWuzjwF35r_-B1taXdIyJnUj8Vv1ESCxt-bbhA47' },
+            { id: 12, name: 'Risotto Champignons', description: '', price: 1600, categoryId: 2, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDGqdJmEbNBALov7FxGIdYwGS8osM9wz50QsUe0W3rWufK20HBWsfbPtke-IvSwdja0Dm78JCW3Poc6jHKppBuxshPvW1Qm-Xh9sq8E7EmX0lk0QKRR3mXOR1BR65N6lT487YVghXVry4c4-gRDw6NdkNwIjfA-I6o2J4Ng-e3NmcL9mw-3W058aZX8MZ0l_tEGEvTfQZqvqyxSuY7T4vUgkQXMznuvGOVVj6UQ55gxuNo9CGofeh4z6nval6T45OQvdZuaf1ecAWD5' },
+            { id: 13, name: 'Steak Frites', description: 'Moyen', price: 2200, categoryId: 2, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://example.com/steak.jpg' },
+            { id: 14, name: 'Salade Niçoise', description: '', price: 1100, categoryId: 6, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://example.com/salade.jpg' },
+            { id: 15, name: 'Fromage Assorti', description: '', price: 900, categoryId: 7, isAvailable: true, destinations: 'cuisine', imageUrl: 'https://example.com/fromage.jpg' },
+            { id: 16, name: 'Vin Rouge Bordeaux', description: '', price: 1500, categoryId: 8, isAvailable: true, destinations: 'bar', imageUrl: 'https://example.com/vin.jpg' },
+            { id: 17, name: 'Bière Blonde', description: '', price: 500, categoryId: 9, isAvailable: true, destinations: 'bar', imageUrl: 'https://example.com/biere.jpg' },
+            { id: 18, name: 'Crème Brûlée', description: '', price: 700, categoryId: 3, isAvailable: false, destinations: 'cuisine', imageUrl: 'https://example.com/creme.jpg' },
+            { id: 19, name: 'Thé Vert', description: '', price: 250, categoryId: 4, isAvailable: true, destinations: 'bar', imageUrl: 'https://example.com/the.jpg' },
+            { id: 20, name: 'Eau Minérale', description: '', price: 200, categoryId: 5, isAvailable: true, destinations: 'bar', imageUrl: 'https://example.com/eau.jpg' }
+        ];
+        const mockPosTables = [
+            { id: 1, name: 'Table 1', number: 1, area: 'Salle Principale', capacity: 4, status: 'Libre', currentOrderId: null, imageUrl: 'url-table1' },
+            { id: 2, name: 'Table 2', number: 2, area: 'Terrasse', capacity: 2, status: 'Occupée', currentOrderId: 1, imageUrl: 'url-table2' },
+            { id: 3, name: 'Table 3', number: 3, area: 'Salle Principale', capacity: 6, status: 'Réservée', currentOrderId: null, imageUrl: 'url-table3' },
+            { id: 4, name: 'Table 4', number: 4, area: 'Bar', capacity: 4, status: 'Indisponible', currentOrderId: null, imageUrl: 'url-table4' },
+            { id: 5, name: 'Table 5', number: 5, area: 'Terrasse', capacity: 8, status: 'Occupée', currentOrderId: 123, imageUrl: 'url-table5' },
+            { id: 6, name: 'Table 6', number: 6, area: 'Salle Principale', capacity: 2, status: 'Libre', currentOrderId: null, imageUrl: 'url-table6' },
+            { id: 7, name: 'Table 7', number: 7, area: 'Bar', capacity: 4, status: 'Libre', currentOrderId: null, imageUrl: 'url-table7' },
+            { id: 8, name: 'Bar 1', number: 1, area: 'Bar', capacity: 1, status: 'Libre', currentOrderId: null, imageUrl: 'url-bar1' },
+            { id: 9, name: 'Table 8', number: 8, area: 'Terrasse', capacity: 4, status: 'Réservée', currentOrderId: 124, imageUrl: 'url-table8' },
+            { id: 10, name: 'Table 9', number: 9, area: 'Salle Principale', capacity: 6, status: 'Occupée', currentOrderId: 125, imageUrl: 'url-table9' },
+            { id: 11, name: 'Table 10', number: 10, area: 'Bar', capacity: 2, status: 'Indisponible', currentOrderId: null, imageUrl: 'url-table10' },
+            { id: 12, name: 'Bar 2', number: 2, area: 'Bar', capacity: 3, status: 'Libre', currentOrderId: null, imageUrl: 'url-bar2' }
+        ];
+        const mockOrders = [
+            { id: 123, tableId: 5, customerName: 'Client VIP', status: 'En cours', total: 3905, createdAt: '2025-11-05T14:00:00Z', updatedAt: '2025-11-05T14:30:00Z', paymentMethod: null, priority: 'Haute', estimatedCompletionTime: '2025-11-05T14:45:00Z' },
+            { id: 124, tableId: 9, customerName: 'Famille Smith', status: 'Prête', total: 2500, createdAt: '2025-11-05T13:15:00Z', updatedAt: '2025-11-05T14:20:00Z', paymentMethod: 'Espèces', priority: 'Normale', estimatedCompletionTime: '2025-11-05T14:30:00Z' },
+            { id: 125, tableId: 10, customerName: 'Groupe Affaires', status: 'En préparation', total: 4500, createdAt: '2025-11-05T12:00:00Z', updatedAt: '2025-11-05T13:45:00Z', paymentMethod: null, priority: 'Urgente', estimatedCompletionTime: '2025-11-05T13:50:00Z' },
+            { id: 126, tableId: 2, customerName: 'Solo Dîner', status: 'Servie', total: 1800, createdAt: '2025-11-05T11:30:00Z', updatedAt: '2025-11-05T12:15:00Z', paymentMethod: 'Carte Bancaire', priority: 'Normale', estimatedCompletionTime: '2025-11-05T12:10:00Z' },
+            { id: 127, tableId: 3, customerName: 'Réservation 18h', status: 'Attente', total: 0, createdAt: '2025-11-05T18:00:00Z', updatedAt: '2025-11-05T18:00:00Z', paymentMethod: null, priority: 'Réservée', estimatedCompletionTime: null },
+            { id: 128, tableId: 8, customerName: 'Bar Quick', status: 'En cours', total: 1200, createdAt: '2025-11-05T15:45:00Z', updatedAt: '2025-11-05T16:00:00Z', paymentMethod: null, priority: 'Basse', estimatedCompletionTime: '2025-11-05T16:05:00Z' }
+        ];
+        const mockOrderItems = [
+            { id: 1, orderId: 123, productId: 1, quantity: 2, price: 1250, notes: 'Sans oignons', subtotal: 2500, status: 'En préparation', category: 'Plats principaux', preparationTime: 10 },
+            { id: 2, orderId: 123, productId: 2, quantity: 1, price: 450, notes: '', subtotal: 450, status: 'Prêt', category: 'Plats principaux', preparationTime: 5 },
+            { id: 3, orderId: 123, productId: 3, quantity: 2, price: 300, notes: '', subtotal: 600, status: 'En préparation', category: 'Boissons froides', preparationTime: 2 },
+            { id: 4, orderId: 124, productId: 8, quantity: 1, price: 1250, notes: 'Dressing aside', subtotal: 1250, status: 'Prête', category: 'Entrées', preparationTime: 8 },
+            { id: 5, orderId: 124, productId: 4, quantity: 1, price: 350, notes: '', subtotal: 350, status: 'Prête', category: 'Cafés', preparationTime: 3 },
+            { id: 6, orderId: 125, productId: 10, quantity: 3, price: 1850, notes: 'Bien cuit', subtotal: 5550, status: 'En préparation', category: 'Plats principaux', preparationTime: 15 },
+            { id: 7, orderId: 125, productId: 16, quantity: 2, price: 1500, notes: '', subtotal: 3000, status: 'Prêt', category: 'Vins', preparationTime: 1 },
+            { id: 8, orderId: 126, productId: 11, quantity: 1, price: 1400, notes: '', subtotal: 1400, status: 'Servie', category: 'Plats principaux', preparationTime: 12 },
+            { id: 9, orderId: 126, productId: 7, quantity: 1, price: 400, notes: '', subtotal: 400, status: 'Servie', category: 'Boissons froides', preparationTime: 2 },
+            { id: 10, orderId: 128, productId: 17, quantity: 2, price: 500, notes: '', subtotal: 1000, status: 'En préparation', category: 'Bières', preparationTime: 2 },
+            { id: 11, orderId: 128, productId: 19, quantity: 1, price: 250, notes: '', subtotal: 200, status: 'Prêt', category: 'Boissons chaudes', preparationTime: 3 }
+        ];
+        const mockPosHistory = [
+            { id: 1, type: 'Vente', description: 'Vente - Table 5', userId: 1, userName: 'Jean Dupont', userRole: 'Manager', timestamp: '2025-11-05T14:32:00Z', amount: 4550, orderId: 123, tableId: 5, tableName: 'Table 5', details: '3 articles', status: 'Succès' },
+            { id: 2, type: 'Modification', description: 'Commande #124 modifiée', userId: 4, userName: 'Sophie Lemoine', userRole: 'Cuisinier', timestamp: '2025-11-05T14:28:00Z', amount: 0, orderId: 124, tableId: null, tableName: null, details: '1 article ajouté', status: 'Info' },
+            { id: 3, type: 'Remboursement', description: 'Remboursement Table 4', userId: 1, userName: 'Jean Dupont', userRole: 'Manager', timestamp: '2025-11-05T14:15:00Z', amount: -1200, orderId: 126, tableId: 4, tableName: 'Table 4', details: '1 article', status: 'Avertissement' },
+            { id: 4, type: 'Stock', description: 'Produit \'Café\' ajouté au stock', userId: 4, userName: 'Sophie Lemoine', userRole: 'Cuisinier', timestamp: '2025-11-05T13:50:00Z', amount: 0, orderId: null, tableId: null, tableName: null, details: 'Quantité : +50', status: 'Info' },
+            { id: 5, type: 'Login', description: 'Début de service', userId: 1, userName: 'Jean Dupont', userRole: 'Manager', timestamp: '2025-11-05T09:01:00Z', amount: 0, orderId: null, tableId: null, tableName: null, details: '', status: 'Succès' },
+            { id: 6, type: 'Vente', description: 'Vente - Table 2', userId: 2, userName: 'Marie Curie', userRole: 'Serveur', timestamp: '2025-11-05T12:45:00Z', amount: 1800, orderId: 126, tableId: 2, tableName: 'Table 2', details: '2 articles', status: 'Succès' },
+            { id: 7, type: 'Logout', description: 'Fin de service', userId: 2, userName: 'Marie Curie', userRole: 'Serveur', timestamp: '2025-11-05T18:30:00Z', amount: 0, orderId: null, tableId: null, tableName: null, details: '', status: 'Info' },
+            { id: 8, type: 'Réservation', description: 'Réservation Table 3', userId: 8, userName: 'Claire Moreau', userRole: 'Manager', timestamp: '2025-11-05T10:20:00Z', amount: 0, orderId: 127, tableId: 3, tableName: 'Table 3', details: '6 personnes', status: 'Info' },
+            { id: 9, type: 'Paiement', description: 'Paiement Commande #124', userId: 1, userName: 'Jean Dupont', userRole: 'Manager', timestamp: '2025-11-05T14:35:00Z', amount: 1600, orderId: 124, tableId: 9, tableName: 'Table 8', details: 'Espèces', status: 'Succès' },
+            { id: 10, type: 'Stock', description: 'Stock faible - Bières', userId: 5, userName: 'Louis Bertrand', userRole: 'Barman', timestamp: '2025-11-05T15:10:00Z', amount: 0, orderId: null, tableId: null, tableName: null, details: 'Réapprovisionner', status: 'Avertissement' },
+            { id: 11, type: 'Vente', description: 'Vente Bar 1', userId: 5, userName: 'Louis Bertrand', userRole: 'Barman', timestamp: '2025-11-05T16:00:00Z', amount: 1200, orderId: 128, tableId: 8, tableName: 'Bar 1', details: '2 bières', status: 'Succès' },
+            { id: 12, type: 'Modification', description: 'Commande #125 modifiée', userId: 7, userName: 'Pierre Dubois', userRole: 'Cuisinier', timestamp: '2025-11-05T13:40:00Z', amount: 0, orderId: 125, tableId: 10, tableName: 'Table 9', details: 'Quantité augmentée', status: 'Info' },
+            { id: 13, type: 'Remboursement', description: 'Remboursement Dessert', userId: 3, userName: 'Paul Martin', userRole: 'Serveur', timestamp: '2025-11-05T11:45:00Z', amount: -700, orderId: 126, tableId: 2, tableName: 'Table 2', details: 'Client mécontent', status: 'Avertissement' },
+            { id: 14, type: 'Login', description: 'Début de service Bar', userId: 5, userName: 'Louis Bertrand', userRole: 'Barman', timestamp: '2025-11-05T15:00:00Z', amount: 0, orderId: null, tableId: null, tableName: null, details: '', status: 'Succès' },
+            { id: 15, type: 'Logout', description: 'Fin de service Cuisine', userId: 7, userName: 'Pierre Dubois', userRole: 'Cuisinier', timestamp: '2025-11-05T17:00:00Z', amount: 0, orderId: null, tableId: null, tableName: null, details: '', status: 'Info' }
+        ];
+        const mockPaymentMethods = [
+            { id: 1, name: 'Espèces', value: 1 },
+            { id: 2, name: 'Carte Bancaire', value: 2 },
+            { id: 3, name: 'Chèque Cadeau', value: 3 },
+            { id: 4, name: 'Virement', value: 4 },
+            { id: 5, name: 'Apple Pay', value: 5 },
+            { id: 6, name: 'PayPal', value: 6 }
+        ];
+        // Nouveau: Const pour notifications
+        const mockNotifications = [
+            { id: 1, type: 'order', message: 'Nouvelle commande #129 reçue pour Table 1', timestamp: '2025-11-05T14:40:00Z', read: false, priority: 'Haute' },
+            { id: 2, type: 'stock', message: 'Stock faible pour Bières - Réapprovisionner', timestamp: '2025-11-05T14:35:00Z', read: true, priority: 'Moyenne' },
+            { id: 3, type: 'payment', message: 'Paiement confirmé pour Commande #124', timestamp: '2025-11-05T14:30:00Z', read: false, priority: 'Basse' },
+            { id: 4, type: 'error', message: 'Erreur: Produit Muffin Myrtille indisponible', timestamp: '2025-11-05T14:25:00Z', read: false, priority: 'Haute' },
+            { id: 5, type: 'update', message: 'Table 3 réservée pour 18h', timestamp: '2025-11-05T14:20:00Z', read: true, priority: 'Normale' }
+        ];
+
+        // Composant Modal générique
+        function Modal({ isOpen, onClose, title, children, type = 'info' }) {
+            if (!isOpen) return null;
+            const bgColor = type === 'error' ? 'bg-error/10 border-error' : type === 'success' ? 'bg-success/10 border-success' : 'bg-primary/10 border-primary';
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className={`relative w-full max-w-md rounded-xl ${bgColor} border p-6 animate-in fade-in-0 zoom-in-95`}>
+                        <button onClick={onClose} className="absolute top-4 right-4 text-white/70 hover:text-white">
+                            <span className="material-symbols-outlined text-xl">close</span>
+                        </button>
+                        <h2 className="text-lg font-bold mb-4">{title}</h2>
+                        <div className="mb-4">{children}</div>
+                        <button onClick={onClose} className="w-full py-3 bg-primary text-dark-bg rounded-lg font-medium">Fermer</button>
+                    </div>
+                </div>
+            );
+        }
+
+        // Composant Toast pour notifications
+        function Toast({ notifications, onDismiss }) {
+            return (
+                <div className="fixed top-4 right-4 z-50 space-y-2">
+                    {notifications.filter(n => !n.dismissed).map(notif => (
+                        <div key={notif.id} className={`p-4 rounded-lg shadow-lg ${notif.type === 'error' ? 'bg-error text-white' : notif.type === 'success' ? 'bg-success text-white' : 'bg-primary text-white'} animate-pulse-slow`}>
+                            <p className="font-medium">{notif.message}</p>
+                            <p className="text-sm opacity-80">{new Date(notif.timestamp).toLocaleTimeString('fr-FR')}</p>
+                            <button onClick={() => onDismiss(notif.id)} className="absolute top-2 right-2 text-white/70">
+                                <span className="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // Composant Login (inchangé, mais interactif)
+        function LoginPage({ onLogin }) {
+            const [pin, setPin] = useState('');
+            const [pinDots, setPinDots] = useState([false, false, false, false, false, false]);
+            const handlePinInput = (digit) => {
+                if (digit === 'backspace') {
+                    const newPin = pin.slice(0, -1);
+                    setPin(newPin);
+                    setPinDots(Array(6).fill(false).map((_, i) => i < newPin.length));
+                } else if (pin.length < 6) {
+                    const newPin = pin + digit;
+                    setPin(newPin);
+                    setPinDots(Array(6).fill(false).map((_, i) => i < newPin.length));
+                }
+            };
+            const handleSubmit = () => {
+                if (pin.length === 6) {
+                    // Simulation login avec n'importe quel PIN de 6 chiffres pour démo
+                    onLogin();
+                } else {
+                    alert('PIN doit avoir 6 chiffres');
+                }
+            };
+            return (
+                <div className="flex flex-1 flex-col items-center justify-center p-4">
+                    <div className="w-full max-w-sm mx-auto flex flex-col items-center">
+                        <div className="mb-8">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
+                                <span className="material-symbols-outlined text-4xl text-primary">storefront</span>
+                            </div>
+                        </div>
+                        <h1 className="text-white tracking-light text-[32px] font-bold leading-tight px-4 text-center pb-1 pt-6 font-display">Bienvenue</h1>
+                        <p className="text-white/80 text-base font-normal leading-normal pb-3 pt-1 px-4 text-center font-display">Veuillez entrer votre code PIN</p>
+                        <div className="flex justify-center items-center space-x-3 my-6 h-8">
+                            {pinDots.map((filled, index) => (
+                                <div key={index} className={`h-4 w-4 rounded-full transition-colors ${filled ? 'bg-primary' : 'bg-white/20'}`}></div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 w-full max-w-xs mt-4">
+                            {[1,2,3,4,5,6,7,8,9].map(num => (
+                                <button key={num} onClick={() => handlePinInput(num.toString())} className="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">
+                                    {num}
+                                </button>
+                            ))}
+                            <div className="flex items-center justify-center h-20 w-full"></div>
+                            <button onClick={() => handlePinInput('0')} className="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">0</button>
+                            <button onClick={() => handlePinInput('backspace')} className="flex items-center justify-center h-20 w-full rounded-xl bg-transparent text-white transition-colors hover:bg-white/10 active:bg-white/20">
+                                <span className="material-symbols-outlined text-3xl">backspace</span>
+                            </button>
+                        </div>
+                        <div className="w-full max-w-xs mt-8">
+                            <button onClick={handleSubmit} disabled={pin.length < 6} className="w-full h-14 px-6 rounded-xl bg-primary text-dark-bg font-bold text-lg transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed font-display">
+                                Se connecter
+                            </button>
+                        </div>
+                        <div className="mt-8">
+                            <button className="text-primary/80 text-sm font-medium hover:text-primary transition-colors font-display">Changer d'utilisateur</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Composant Dashboard (amélioré avec notifications)
+        function DashboardPage({ orders, tables, history, notifications, onDismissNotification }) {
+            const today = new Date('2025-11-05');
+            const todaySales = history.filter(h => new Date(h.timestamp).toDateString() === today.toDateString() && h.type === 'Vente').reduce((sum, h) => sum + h.amount, 0);
+            const occupiedTables = tables.filter(t => t.status === 'Occupée').length;
+            const totalTables = tables.length;
+            const pendingOrders = orders.filter(o => o.status === 'En cours' || o.status === 'En préparation').length;
+            const unreadNotifications = notifications.filter(n => !n.read).length;
+
+            return (
+                <div className="flex flex-1 flex-col p-4 space-y-4 relative">
+                    <Toast notifications={notifications} onDismiss={onDismissNotification} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Ventes du jour</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{(todaySales / 100).toFixed(2)} €</p>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Tables occupées</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{occupiedTables}/{totalTables}</p>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Commandes en attente</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{pendingOrders}</p>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm relative">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Notifications</p>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{unreadNotifications}</p>
+                            {unreadNotifications > 0 && <div className="absolute -top-1 -right-1 h-4 w-4 bg-error rounded-full flex items-center justify-center text-xs text-white">{unreadNotifications > 9 ? '9+' : unreadNotifications}</div>}
+                        </div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm">
+                        <h2 className="text-lg font-bold mb-4">Commandes récentes</h2>
+                        <div className="space-y-2">
+                            {orders.slice(0, 3).map(order => (
+                                <div key={order.id} className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700 last:border-b-0">
+                                    <div>
+                                        <p className="font-medium">#{order.id} - {order.customerName}</p>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">{order.status}</p>
+                                    </div>
+                                    <p className="font-bold">{(order.total / 100).toFixed(2)} €</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Composants pour Categories et Products (inchangés, mais avec modals pour edits)
+        function CategoriesSubPage({ categories, onUpdateCategory }) {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [filterActive, setFilterActive] = useState('all'); // 'all', 'active', 'inactive'
+            const [editModal, setEditModal] = useState({ open: false, category: null });
+            const filteredCategories = categories.filter(cat =>
+                cat.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                (filterActive === 'all' || (filterActive === 'active' && cat.isActive) || (filterActive === 'inactive' && !cat.isActive))
+            );
+            const toggleActive = (id) => {
+                onUpdateCategory(id, { isActive: !categories.find(c => c.id === id).isActive });
+            };
+            const openEdit = (cat) => setEditModal({ open: true, category: cat });
+            const saveEdit = (updated) => {
+                onUpdateCategory(updated.id, updated);
+                setEditModal({ open: false, category: null });
+            };
+            return (
+                <div className="relative flex min-h-screen w-full flex-col">
+                    <Modal isOpen={editModal.open} onClose={() => setEditModal({ open: false, category: null })} title="Éditer Catégorie">
+                        <input type="text" defaultValue={editModal.category?.name} placeholder="Nom" className="w-full p-2 mb-2 border rounded" id="name" />
+                        <input type="text" defaultValue={editModal.category?.description} placeholder="Description" className="w-full p-2 mb-2 border rounded" id="desc" />
+                        <button onClick={() => {
+                            const name = document.getElementById('name').value;
+                            const desc = document.getElementById('desc').value;
+                            saveEdit({ ...editModal.category, name, description: desc });
+                        }} className="w-full py-2 bg-primary text-dark-bg rounded">Sauvegarder</button>
+                    </Modal>
+                    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-dark-bg px-4 shadow-sm">
+                        <div className="flex items-center gap-2">
+                            <button className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white">
+                                <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                            </button>
+                        </div>
+                        <h1 className="text-lg font-bold text-white">Gestion des catégories</h1>
+                        <div className="flex items-center gap-2">
+                            <button className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white">
+                                <span className="material-symbols-outlined text-2xl">search</span>
+                            </button>
+                        </div>
+                    </header>
+                    <div className="px-4 py-3">
+                        <input
+                            type="text"
+                            placeholder="Rechercher une catégorie..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full h-12 px-4 rounded-lg bg-white/10 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div className="flex gap-3 p-4 pt-0 overflow-x-auto">
+                        {['all', 'active', 'inactive'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setFilterActive(status)}
+                                className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 ${filterActive === status ? 'bg-primary text-dark-bg' : 'bg-white/10 text-white'}`}
+                            >
+                                {status === 'all' ? 'Toutes' : status === 'active' ? 'Actives' : 'Inactives'}
+                            </button>
+                        ))}
+                    </div>
+                    <main className="flex-1 overflow-y-auto p-4 pb-24">
+                        <div className="space-y-3">
+                            {filteredCategories.map(cat => (
+                                <div key={cat.id} className={`flex items-center gap-4 rounded-lg bg-white/5 p-3 text-white ${!cat.isActive ? 'opacity-60' : ''}`}>
+                                    <div className="flex items-center justify-center text-white/50">
+                                        <span className="material-symbols-outlined cursor-grab">drag_indicator</span>
+                                    </div>
+                                    <div className="flex flex-1 flex-col justify-center">
+                                        <p className="text-base font-medium leading-normal">{cat.name}</p>
+                                        <p className="text-sm font-normal leading-normal text-white/60">{cat.description || `${Math.floor(Math.random() * 30) + 10} produits`}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-black/30 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                            <input checked={cat.isActive} onChange={() => toggleActive(cat.id)} className="invisible absolute" type="checkbox"/>
+                                            <div className="h-full w-[27px] rounded-full bg-white" style={{boxShadow: 'rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px'}}></div>
+                                        </label>
+                                        <button className="flex h-10 w-10 items-center justify-center text-white/70" onClick={() => openEdit(cat)}>
+                                            <span className="material-symbols-outlined text-2xl">edit</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </main>
+                    <div className="fixed bottom-6 right-6 z-20">
+                        <button className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-dark-bg shadow-lg" onClick={() => alert('Ajouter nouvelle catégorie')}>
+                            <span className="material-symbols-outlined text-3xl">add</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        function ProductsSubPage({ products, categories, onUpdateProduct }) {
+            const [searchTerm, setSearchTerm] = useState('');
+            const [filterCategory, setFilterCategory] = useState('all');
+            const [filterDestination, setFilterDestination] = useState('all'); // 'all', 'bar', 'cuisine'
+            const [sortBy, setSortBy] = useState('name'); // 'name', 'price', 'availability'
+            const [editModal, setEditModal] = useState({ open: false, product: null });
+            const filteredProducts = products
+                .filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                .filter(p => filterCategory === 'all' || p.categoryId === parseInt(filterCategory))
+                .filter(p => filterDestination === 'all' || p.destinations === filterDestination)
+                .sort((a, b) => {
+                    if (sortBy === 'price') return a.price - b.price;
+                    if (sortBy === 'availability') return b.isAvailable - a.isAvailable;
+                    return a.name.localeCompare(b.name);
+                });
+            const toggleAvailability = (id) => {
+                const product = products.find(pr => pr.id === id);
+                if (!product.isAvailable) {
+                    // Erreur simulation si déjà indisponible
+                    alert('Produit déjà indisponible');
+                    return;
+                }
+                onUpdateProduct(id, { isAvailable: !product.isAvailable });
+            };
+            const openEdit = (prod) => setEditModal({ open: true, product: prod });
+            const saveEdit = (updated) => {
+                onUpdateProduct(updated.id, updated);
+                setEditModal({ open: false, product: null });
+            };
+            return (
+                <div className="relative flex min-h-screen w-full flex-col">
+                    <Modal isOpen={editModal.open} onClose={() => setEditModal({ open: false, product: null })} title="Éditer Produit">
+                        <input type="text" defaultValue={editModal.product?.name} placeholder="Nom" className="w-full p-2 mb-2 border rounded" id="pname" />
+                        <input type="number" defaultValue={editModal.product?.price} placeholder="Prix (cents)" className="w-full p-2 mb-2 border rounded" id="pprice" />
+                        <select defaultValue={editModal.product?.destinations} className="w-full p-2 mb-2 border rounded" id="pdest">
+                            <option value="cuisine">Cuisine</option>
+                            <option value="bar">Bar</option>
+                        </select>
+                        <button onClick={() => {
+                            const name = document.getElementById('pname').value;
+                            const price = parseInt(document.getElementById('pprice').value);
+                            const dest = document.getElementById('pdest').value;
+                            saveEdit({ ...editModal.product, name, price, destinations: dest });
+                        }} className="w-full py-2 bg-primary text-dark-bg rounded">Sauvegarder</button>
+                    </Modal>
+                    <header className="sticky top-0 z-10 bg-background-light dark:bg-background-dark pt-4">
+                        <div className="flex items-center p-4 pb-2">
+                            <h2 className="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1">Produits</h2>
+                            <div className="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-end">
+                                <span className="material-symbols-outlined">menu</span>
+                            </div>
+                        </div>
+                        <div className="px-4 py-3">
+                            <input
+                                type="text"
+                                placeholder="Rechercher un produit..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full h-12 px-4 rounded-xl bg-slate-200 dark:bg-primary/10 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 border-none focus:outline-none focus:ring-primary"
+                            />
+                        </div>
+                        <div className="flex gap-3 px-4 py-3 overflow-x-auto">
+                            <button onClick={() => setFilterCategory('all')} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 ${filterCategory === 'all' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                <p className="text-sm font-medium">Toutes catégories</p>
+                            </button>
+                            {categories.slice(0, 5).map(cat => (
+                                <button key={cat.id} onClick={() => setFilterCategory(cat.id.toString())} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 ${filterCategory === cat.id.toString() ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                    <p className="text-sm font-medium">{cat.name}</p>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-3 px-4 pb-3 overflow-x-auto">
+                            <button onClick={() => setFilterDestination('all')} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 ${filterDestination === 'all' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                <p className="text-sm font-medium">Toutes destinations</p>
+                            </button>
+                            <button onClick={() => setFilterDestination('bar')} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 ${filterDestination === 'bar' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                <p className="text-sm font-medium">Bar</p>
+                            </button>
+                            <button onClick={() => setFilterDestination('cuisine')} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 ${filterDestination === 'cuisine' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                <p className="text-sm font-medium">Cuisine</p>
+                            </button>
+                        </div>
+                        <div className="px-4 pb-3">
+                            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full h-12 px-4 rounded-lg bg-white/10 text-white border border-white/20 focus:outline-none">
+                                <option value="name">Trier par nom</option>
+                                <option value="price">Trier par prix</option>
+                                <option value="availability">Trier par disponibilité</option>
+                            </select>
+                        </div>
+                    </header>
+                    <main className="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-4 p-4 pb-24">
+                        {filteredProducts.map(product => {
+                            const categoryName = categories.find(c => c.id === product.categoryId)?.name || 'Inconnue';
+                            const statusColor = product.isAvailable ? 'text-success' : 'text-error';
+                            return (
+                                <div key={product.id} className="flex flex-col gap-3 pb-3 bg-white dark:bg-primary/5 rounded-xl p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEdit(product)}>
+                                    <div className={`w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg ${!product.isAvailable ? 'opacity-50' : ''}`} style={{backgroundImage: `url(${product.imageUrl})`}}></div>
+                                    <div>
+                                        <p className="text-slate-900 dark:text-white text-base font-medium leading-normal">{product.name}</p>
+                                        <p className="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">{categoryName} - {product.destinations}</p>
+                                        <p className={`text-sm font-normal leading-normal ${statusColor}`}>{product.isAvailable ? 'Disponible' : 'Indisponible'}</p>
+                                        <p className="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">{(product.price / 100).toFixed(2)} €</p>
+                                    </div>
+                                    <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-300 dark:bg-slate-700 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary self-end">
+                                        <input checked={product.isAvailable} onChange={() => toggleAvailability(product.id)} className="invisible absolute" type="checkbox"/>
+                                        <div className="h-full w-[27px] rounded-full bg-white transition-transform" style={{boxShadow: 'rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px'}}></div>
+                                    </label>
+                                </div>
+                            );
+                        })}
+                    </main>
+                    <div className="fixed bottom-0 left-0 right-0 p-4 z-20 flex justify-center">
+                        <div className="w-full max-w-md">
+                            <button className="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 bg-primary text-dark-bg text-base font-bold leading-normal tracking-[0.015em] min-w-0 gap-4 pl-4 pr-6 shadow-lg" onClick={() => alert('Ajouter au panier (simulation)')}>
+                                <span className="material-symbols-outlined">shopping_cart</span>
+                                <span className="truncate">Voir la commande (3)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Autres composants inchangés pour brevité, mais avec ajouts similaires pour modals et erreurs
+        function CategoryTab({ categories, products, onUpdateCategory, onUpdateProduct }) {
+            const [activeSubTab, setActiveSubTab] = useState('categories');
+            return (
+                <div className="flex flex-col h-full">
+                    <div className="flex border-b border-slate-200 dark:border-slate-700">
+                        <button onClick={() => setActiveSubTab('categories')} className={`flex-1 py-3 font-medium ${activeSubTab === 'categories' ? 'border-b-2 border-primary text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
+                            Catégories
+                        </button>
+                        <button onClick={() => setActiveSubTab('products')} className={`flex-1 py-3 font-medium ${activeSubTab === 'products' ? 'border-b-2 border-primary text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
+                            Produits
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        {activeSubTab === 'categories' ? (
+                            <CategoriesSubPage categories={categories} onUpdateCategory={onUpdateCategory} />
+                        ) : (
+                            <ProductsSubPage products={products} categories={categories} onUpdateProduct={onUpdateProduct} />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function TablesSubPage({ tables, onUpdateTable }) {
+            const [filterArea, setFilterArea] = useState('all');
+            const [editModal, setEditModal] = useState({ open: false, table: null });
+            const filteredTables = tables.filter(t => filterArea === 'all' || t.area === filterArea);
+            const updateStatus = (id, newStatus) => {
+                if (newStatus === 'Indisponible' && !confirm('Confirmer le statut Indisponible?')) return;
+                onUpdateTable(id, { status: newStatus });
+            };
+            const openEdit = (table) => setEditModal({ open: true, table });
+            const saveEdit = (updated) => {
+                onUpdateTable(updated.id, updated);
+                setEditModal({ open: false, table: null });
+            };
+            return (
+                <div className="relative flex h-auto min-h-screen w-full flex-col">
+                    <Modal isOpen={editModal.open} onClose={() => setEditModal({ open: false, table: null })} title="Éditer Table">
+                        <input type="text" defaultValue={editModal.table?.name} placeholder="Nom" className="w-full p-2 mb-2 border rounded" id="tname" />
+                        <input type="number" defaultValue={editModal.table?.capacity} placeholder="Capacité" className="w-full p-2 mb-2 border rounded" id="tcap" />
+                        <select defaultValue={editModal.table?.status} className="w-full p-2 mb-2 border rounded" id="tstatus">
+                            <option value="Libre">Libre</option>
+                            <option value="Occupée">Occupée</option>
+                            <option value="Réservée">Réservée</option>
+                            <option value="Indisponible">Indisponible</option>
+                        </select>
+                        <button onClick={() => {
+                            const name = document.getElementById('tname').value;
+                            const cap = parseInt(document.getElementById('tcap').value);
+                            const status = document.getElementById('tstatus').value;
+                            saveEdit({ ...editModal.table, name, capacity: cap, status });
+                        }} className="w-full py-2 bg-primary text-dark-bg rounded">Sauvegarder</button>
+                    </Modal>
+                    <header className="sticky top-0 z-10 bg-background-light dark:bg-background-dark/80 backdrop-blur-sm">
+                        <div className="flex items-center p-4">
+                            <div className="flex size-12 shrink-0 items-center justify-start text-slate-900 dark:text-white">
+                                <span className="material-symbols-outlined text-2xl">menu</span>
+                            </div>
+                            <h1 className="flex-1 text-center text-lg font-bold leading-tight tracking-[-0.015em] text-slate-900 dark:text-white">Plan de salle</h1>
+                            <div className="flex w-12 items-center justify-end">
+                                <button className="flex h-12 max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-transparent p-0 text-slate-900 dark:text-white">
+                                    <span className="material-symbols-outlined text-2xl">search</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex gap-3 overflow-x-auto px-4 pb-4">
+                            {['all', 'Terrasse', 'Salle Principale', 'Bar'].map(area => (
+                                <button key={area} onClick={() => setFilterArea(area)} className={`flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full px-4 ${filterArea === area ? 'bg-primary' : 'bg-primary/20'}`}>
+                                    <p className="text-sm font-medium leading-normal text-dark-bg dark:text-white">{area === 'all' ? 'Toutes' : area}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </header>
+                    <main className="flex-grow">
+                        <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 p-4">
+                            {filteredTables.map(table => {
+                                const getStatusColor = (status) => {
+                                    switch (status) {
+                                        case 'Libre': return 'border-success bg-success/20 text-success';
+                                        case 'Occupée': return 'border-warning bg-warning/20 text-warning';
+                                        case 'Réservée': return 'border-primary bg-primary/20 text-primary';
+                                        case 'Indisponible': return 'border-error bg-error/20 text-error';
+                                        default: return 'border-gray-500 bg-gray-500/20 text-gray-500';
+                                    }
+                                };
+                                const statusClass = getStatusColor(table.status);
+                                return (
+                                    <div key={table.id} className={`relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 ${statusClass} bg-slate-200 p-3 dark:bg-slate-800 hover:scale-105 transition-transform`} onClick={() => openEdit(table)}>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-base font-bold leading-tight text-slate-900 dark:text-white">{table.name}</p>
+                                            <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
+                                                <span className="material-symbols-outlined text-base">group</span>
+                                                <span className="text-sm font-medium">{table.capacity}</span>
+                                            </div>
+                                        </div>
+                                        <div className={`flex items-center gap-2 rounded-md p-2 ${statusClass.replace('border-', '').replace('text-', 'bg-')}`}>
+                                            <div className={`h-2 w-2 rounded-full bg-${statusClass.split(' ')[1]}`}></div>
+                                            <p className={`text-sm font-medium ${statusClass.includes('success') ? 'text-success' : statusClass.includes('warning') ? 'text-warning' : statusClass.includes('primary') ? 'text-primary' : 'text-error'}`}>{table.status}</p>
+                                        </div>
+                                        <button className="absolute top-2 right-2 p-1 rounded-full bg-white/20 text-white" onClick={(e) => { e.stopPropagation(); updateStatus(table.id, 'Libre'); }}>
+                                            <span className="material-symbols-outlined text-sm">edit</span>
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <div className="p-4">
+                            <h3 className="mb-2 text-sm font-bold text-slate-500 dark:text-slate-400">Légende</h3>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-slate-100 p-4 dark:bg-slate-900/50">
+                                <div className="flex items-center gap-2"><div className="h-2 w-2 flex-shrink-0 rounded-full bg-success"></div><p className="text-sm text-slate-800 dark:text-slate-200">Libre</p></div>
+                                <div className="flex items-center gap-2"><div className="h-2 w-2 flex-shrink-0 rounded-full bg-warning"></div><p className="text-sm text-slate-800 dark:text-slate-200">Occupée</p></div>
+                                <div className="flex items-center gap-2"><div className="h-2 w-2 flex-shrink-0 rounded-full bg-primary"></div><p className="text-sm text-slate-800 dark:text-slate-200">Réservée</p></div>
+                                <div className="flex items-center gap-2"><div className="h-2 w-2 flex-shrink-0 rounded-full bg-error"></div><p className="text-sm text-slate-800 dark:text-slate-200">Indisponible</p></div>
+                            </div>
+                        </div>
+                    </main>
+                    <div className="sticky bottom-0 right-0 p-4">
+                        <div className="flex justify-end">
+                            <button className="flex h-14 max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full bg-primary pl-4 pr-5 text-dark-bg shadow-lg" onClick={() => alert('Nouvelle commande')}>
+                                <span className="material-symbols-outlined text-2xl">add</span>
+                                <span className="text-base font-bold leading-normal tracking-[0.015em]">Commande</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function OrdersSubPage({ orders, orderItems, products, onUpdateOrder }) {
+            const [filterStatus, setFilterStatus] = useState('all');
+            const [filterDestination, setFilterDestination] = useState('all');
+            const filteredOrders = orders.filter(order => {
+                const hasItems = orderItems.filter(item => item.orderId === order.id).length > 0;
+                const destinations = orderItems.filter(item => item.orderId === order.id).map(item => products.find(p => p.id === item.productId)?.destinations).filter(d => d);
+                const hasDestination = destinations.length > 0;
+                return (filterStatus === 'all' || order.status === filterStatus) &&
+                       (filterDestination === 'all' || (hasDestination && destinations.includes(filterDestination)));
+            });
+            const routeItem = (itemId, destination) => {
+                onUpdateOrder(itemId, { destinations: destination });
+                alert(`Item routé vers ${destination === 'cuisine' ? 'Cuisine' : 'Bar'}`);
+            };
+            return (
+                <div className="relative flex h-auto min-h-screen w-full flex-col">
+                    <header className="sticky top-0 z-10 flex flex-col bg-background-light dark:bg-background-dark pt-4">
+                        <div className="flex items-center px-4 pb-2">
+                            <button className="flex size-10 shrink-0 items-center justify-center text-slate-800 dark:text-white">
+                                <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                            </button>
+                            <h1 className="text-xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center text-slate-900 dark:text-white">Commandes</h1>
+                            <div className="flex w-10 shrink-0 items-center justify-end"></div>
+                        </div>
+                        <div className="px-4 py-3">
+                            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="w-full h-12 px-4 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white">
+                                <option value="all">Toutes statuts</option>
+                                <option value="En cours">En cours</option>
+                                <option value="Prête">Prête</option>
+                                <option value="Servie">Servie</option>
+                                <option value="Attente">Attente</option>
+                            </select>
+                        </div>
+                        <div className="flex gap-3 p-4 pt-0 overflow-x-auto">
+                            <button onClick={() => setFilterDestination('all')} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 ${filterDestination === 'all' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                <p className="text-sm font-medium">Toutes destinations</p>
+                            </button>
+                            <button onClick={() => setFilterDestination('bar')} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 ${filterDestination === 'bar' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                <p className="text-sm font-medium">Bar</p>
+                            </button>
+                            <button onClick={() => setFilterDestination('cuisine')} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 ${filterDestination === 'cuisine' ? 'bg-primary/20' : 'bg-slate-200 dark:bg-slate-800'}`}>
+                                <p className="text-sm font-medium">Cuisine</p>
+                            </button>
+                        </div>
+                    </header>
+                    <main className="flex-1 pb-24 pt-4">
+                        <div className="flex flex-col gap-2 p-4">
+                            {filteredOrders.map(order => {
+                                const items = orderItems.filter(item => item.orderId === order.id);
+                                const priorityColor = order.priority === 'Haute' || order.priority === 'Urgente' ? 'text-error' : order.priority === 'Basse' ? 'text-warning' : 'text-success';
+                                return (
+                                    <div key={order.id} className={`bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm ${order.priority === 'Urgente' ? 'ring-2 ring-error/20' : ''}`}>
+                                        <div className="flex justify-between items-center mb-2">
+                                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Commande #{order.id} - {order.customerName}</h2>
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'En cours' ? 'bg-warning/20 text-warning' : order.status === 'Prête' ? 'bg-success/20 text-success' : 'bg-primary/20 text-primary'}`}>
+                                                {order.status}
+                                            </span>
+                                        </div>
+                                        <p className={`text-sm ${priorityColor} mb-2`}>Priorité: {order.priority}</p>
+                                        <div className="space-y-2 mb-4">
+                                            {items.map(item => {
+                                                const product = products.find(p => p.id === item.productId);
+                                                if (!product.isAvailable) {
+                                                    return <p key={item.id} className="text-error text-sm">⚠️ {product?.name} x{item.quantity} - Indisponible</p>;
+                                                }
+                                                return (
+                                                    <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-700">
+                                                        <div>
+                                                            <p className="font-medium">{product?.name} x{item.quantity}</p>
+                                                            <p className="text-sm text-slate-500 dark:text-slate-400">{item.notes || 'Aucune note'}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-bold">{(item.subtotal / 100).toFixed(2)} €</p>
+                                                            <select value={product?.destinations || 'cuisine'} onChange={(e) => routeItem(item.id, e.target.value)} className="h-8 px-2 rounded bg-slate-200 dark:bg-slate-800 text-sm">
+                                                                <option value="cuisine">Cuisine</option>
+                                                                <option value="bar">Bar</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="flex justify-between pt-2">
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">Total: {(order.total / 100).toFixed(2)} €</p>
+                                            <button onClick={() => onUpdateOrder(order.id, { status: 'Servie' })} className="px-4 py-2 bg-success text-white rounded-lg font-medium">Marquer servie</button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </main>
+                </div>
+            );
+        }
+
+        function TableTab({ tables, orders, orderItems, products, onUpdateTable, onUpdateOrder }) {
+            const [activeSubTab, setActiveSubTab] = useState('tables');
+            return (
+                <div className="flex flex-col h-full">
+                    <div className="flex border-b border-slate-200 dark:border-slate-700">
+                        <button onClick={() => setActiveSubTab('tables')} className={`flex-1 py-3 font-medium ${activeSubTab === 'tables' ? 'border-b-2 border-primary text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
+                            Tables
+                        </button>
+                        <button onClick={() => setActiveSubTab('orders')} className={`flex-1 py-3 font-medium ${activeSubTab === 'orders' ? 'border-b-2 border-primary text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
+                            Commandes
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        {activeSubTab === 'tables' ? (
+                            <TablesSubPage tables={tables} onUpdateTable={onUpdateTable} />
+                        ) : (
+                            <OrdersSubPage orders={orders} orderItems={orderItems} products={products} onUpdateOrder={onUpdateOrder} />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Composant Kitchen redesigné pour friendly: Grandes cartes, timers, boutons larges
+        function KitchenPage({ orders, orderItems, products, onUpdateOrderItem }) {
+            const kitchenItems = orderItems.filter(item => {
+                const product = products.find(p => p.id === item.productId);
+                return product?.destinations === 'cuisine' && ['En cours', 'En préparation'].includes(item.status);
+            }).map(item => ({
+                ...item,
+                order: orders.find(o => o.id === item.orderId),
+                productName: products.find(p => p.id === item.productId)?.name,
+                remainingTime: Math.max(0, item.preparationTime - Math.floor((new Date() - new Date(item.order?.createdAt)) / 1000 / 60))
+            })).sort((a, b) => new Date(b.order?.createdAt) - new Date(a.order?.createdAt));
+
+            const markReady = (itemId) => {
+                onUpdateOrderItem(itemId, { status: 'Prêt' });
+            };
+
+            const startPrep = (itemId) => {
+                onUpdateOrderItem(itemId, { status: 'En préparation' });
+            };
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    // Simulation timer tick
+                }, 60000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="flex flex-1 flex-col p-4 space-y-6 bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Cuisine</h1>
+                        <div className="text-2xl font-bold text-primary">{kitchenItems.length} commandes</div>
+                    </div>
+                    <div className="space-y-6">
+                        {kitchenItems.map(item => (
+                            <div key={item.id} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-l-4 border-primary animate-in slide-in-from-bottom-2 duration-300">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">#{item.order.id} - Table {item.order.tableId}</h2>
+                                        <p className="text-slate-600 dark:text-slate-400">Priorité: {item.order.priority}</p>
+                                    </div>
+                                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${item.status === 'En préparation' ? 'bg-warning text-warning' : 'bg-primary/20 text-primary'}`}>
+                                        {item.status}
+                                    </span>
+                                </div>
+                                <div className="mb-4">
+                                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">{item.productName}</p>
+                                    <p className="text-lg text-slate-600 dark:text-slate-400">x{item.quantity} • {item.notes || 'Aucune note'}</p>
+                                    <div className="mt-2 bg-primary/10 rounded-full h-2">
+                                        <div className="bg-primary h-2 rounded-full" style={{width: `${Math.max(0, (item.remainingTime / item.preparationTime) * 100)}%`}}></div>
+                                    </div>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{item.remainingTime} min restantes</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    {item.status === 'En cours' && (
+                                        <button onClick={() => startPrep(item.id)} className="flex-1 py-4 bg-primary text-dark-bg rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-shadow">Démarrer Prépa</button>
+                                    )}
+                                    {item.status === 'En préparation' && (
+                                        <button onClick={() => markReady(item.id)} className="flex-1 py-4 bg-success text-white rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-shadow">Prêt !</button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        {kitchenItems.length === 0 && (
+                            <div className="text-center py-12">
+                                <span className="material-symbols-outlined text-6xl text-slate-400 mb-4">kitchen</span>
+                                <p className="text-xl text-slate-500 dark:text-slate-400">Aucune commande en cuisine</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Composant Bar redesigné similairement
+        function BarPage({ orders, orderItems, products, onUpdateOrderItem }) {
+            const barItems = orderItems.filter(item => {
+                const product = products.find(p => p.id === item.productId);
+                return product?.destinations === 'bar' && ['En cours', 'En préparation'].includes(item.status);
+            }).map(item => ({
+                ...item,
+                order: orders.find(o => o.id === item.orderId),
+                productName: products.find(p => p.id === item.productId)?.name,
+                remainingTime: Math.max(0, item.preparationTime - Math.floor((new Date() - new Date(item.order?.createdAt)) / 1000 / 60))
+            })).sort((a, b) => new Date(b.order?.createdAt) - new Date(a.order?.createdAt));
+
+            const markReady = (itemId) => {
+                onUpdateOrderItem(itemId, { status: 'Prêt' });
+            };
+
+            const startPrep = (itemId) => {
+                onUpdateOrderItem(itemId, { status: 'En préparation' });
+            };
+
+            return (
+                <div className="flex flex-1 flex-col p-4 space-y-6 bg-gradient-to-b from-amber-50 to-white dark:from-slate-900 dark:to-slate-800">
+                    <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Bar</h1>
+                        <div className="text-2xl font-bold text-accent">{barItems.length} commandes</div>
+                    </div>
+                    <div className="space-y-6">
+                        {barItems.map(item => (
+                            <div key={item.id} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-l-4 border-accent animate-in slide-in-from-bottom-2 duration-300">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">#{item.order.id} - {item.order.customerName}</h2>
+                                        <p className="text-slate-600 dark:text-slate-400">Table {item.order.tableId}</p>
+                                    </div>
+                                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${item.status === 'En préparation' ? 'bg-warning text-warning' : 'bg-accent/20 text-accent'}`}>
+                                        {item.status}
+                                    </span>
+                                </div>
+                                <div className="mb-4">
+                                    <p className="text-2xl font-semibold text-slate-900 dark:text-white">{item.productName}</p>
+                                    <p className="text-lg text-slate-600 dark:text-slate-400">x{item.quantity} • {item.notes || 'Aucune note'}</p>
+                                    <div className="mt-2 bg-accent/10 rounded-full h-2">
+                                        <div className="bg-accent h-2 rounded-full" style={{width: `${Math.max(0, (item.remainingTime / item.preparationTime) * 100)}%`}}></div>
+                                    </div>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{item.remainingTime} min restantes</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    {item.status === 'En cours' && (
+                                        <button onClick={() => startPrep(item.id)} className="flex-1 py-4 bg-accent text-white rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-shadow">Démarrer</button>
+                                    )}
+                                    {item.status === 'En préparation' && (
+                                        <button onClick={() => markReady(item.id)} className="flex-1 py-4 bg-success text-white rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-shadow">Prêt !</button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        {barItems.length === 0 && (
+                            <div className="text-center py-12">
+                                <span className="material-symbols-outlined text-6xl text-slate-400 mb-4">local_bar</span>
+                                <p className="text-xl text-slate-500 dark:text-slate-400">Aucun commande au bar</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Reste des composants (History, Profile, MenuTab) inchangés pour brevité
+        function HistorySubPage({ history }) {
+            const [filterType, setFilterType] = useState('all');
+            const [dateFilter, setDateFilter] = useState('today');
+            const filteredHistory = history.filter(h => {
+                const histDate = new Date(h.timestamp).toDateString();
+                const today = new Date('2025-11-05').toDateString();
+                const yesterday = new Date('2025-11-04').toDateString();
+                if (dateFilter === 'today' && histDate !== today) return false;
+                if (dateFilter === 'yesterday' && histDate !== yesterday) return false;
+                if (filterType !== 'all' && h.type !== filterType) return false;
+                return true;
+            });
+            return (
+                <div className="relative flex h-auto min-h-screen w-full flex-col">
+                    <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-background-light dark:bg-background-dark p-4 pb-3">
+                        <div className="flex size-12 shrink-0 items-center">
+                            <span className="material-symbols-outlined text-slate-900 dark:text-white">arrow_back</span>
+                        </div>
+                        <h1 className="flex-1 text-center text-lg font-bold leading-tight tracking-[-0.015em] text-slate-900 dark:text-white">Historique</h1>
+                        <div className="flex w-12 items-center justify-end">
+                            <button className="flex h-12 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-transparent text-slate-900 dark:text-white">
+                                <span className="material-symbols-outlined">filter_list</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="px-4 py-3">
+                        <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} className="w-full h-12 px-4 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white">
+                            <option value="today">Aujourd'hui</option>
+                            <option value="yesterday">Hier</option>
+                            <option value="week">Cette semaine</option>
+                        </select>
+                    </div>
+                    <div className="flex gap-3 p-4 pt-0 overflow-x-auto">
+                        {['all', 'Vente', 'Modification', 'Remboursement', 'Stock', 'Login', 'Logout'].map(type => (
+                            <button key={type} onClick={() => setFilterType(type)} className={`flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 ${filterType === type ? 'bg-primary text-dark-bg' : 'bg-white/10 text-white'}`}>
+                                {type}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex flex-col gap-1 pb-24">
+                        {filteredHistory.map(hist => (
+                            <div key={hist.id} className={`flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2 border-b border-slate-200 dark:border-slate-700`}>
+                                <div className={`flex size-12 shrink-0 items-center justify-center rounded-lg ${hist.type === 'Vente' ? 'bg-primary/20' : hist.type === 'Modification' ? 'bg-warning/20' : hist.type === 'Remboursement' ? 'bg-error/20' : hist.type === 'Stock' ? 'blue-light-dark/20' : 'bg-gray-500/20'}`}>
+                                    <span className={`material-symbols-outlined ${hist.type === 'Vente' ? 'text-primary' : hist.type === 'Modification' ? 'text-warning' : hist.type === 'Remboursement' ? 'text-error' : hist.type === 'Stock' ? 'text-blue-light-dark' : 'text-gray-500 dark:text-gray-400'}`}>
+                                        {hist.type === 'Vente' ? 'shopping_cart' : hist.type === 'Modification' ? 'edit' : hist.type === 'Remboursement' ? 'undo' : hist.type === 'Stock' ? 'inventory_2' : hist.type === 'Login' ? 'login' : 'logout'}
+                                    </span>
+                                </div>
+                                <div className="flex flex-1 flex-col justify-center">
+                                    <p className="line-clamp-1 text-base font-medium text-slate-900 dark:text-white">{hist.description}</p>
+                                    <p className="line-clamp-2 text-sm font-normal text-slate-500 dark:text-slate-400">par {hist.userName} ({hist.userRole}) • {hist.details} • {new Date(hist.timestamp).toLocaleString('fr-FR')}</p>
+                                </div>
+                                {hist.amount && <div className={`shrink-0 text-base font-medium ${hist.amount > 0 ? 'text-success dark:text-success' : 'text-error dark:text-error'}`}>{hist.amount > 0 ? `+${(hist.amount / 100).toFixed(2)}€` : `${(hist.amount / 100).toFixed(2)}€`}</div>}
+                                {(hist.type === 'Modification' || hist.type === 'Stock') && <div className="shrink-0"><button className="text-sm font-semibold text-primary" onClick={() => alert(`Détails ${hist.type}`)}>Voir détail</button></div>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        function ProfileSubPage({ employees, currentUserId }) {
+            const currentUser = employees.find(e => e.id === currentUserId) || employees[0];
+            const logout = () => {
+                alert('Déconnexion');
+                // Simulation logout
+            };
+            return (
+                <div className="flex flex-1 flex-col p-4 space-y-4">
+                    <div className="text-center">
+                        <div className="relative inline-block mx-auto">
+                            <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-24 w-24" style={{backgroundImage: `url(${currentUser.imageUrl})`}}></div>
+                            <span className={`absolute bottom-0 right-0 block h-6 w-6 rounded-full border-2 border-background-dark ${currentUser.status ? 'bg-success' : 'bg-gray-500'}`}></span>
+                        </div>
+                        <h1 className="text-2xl font-bold mt-4">{currentUser.name}</h1>
+                        <p className="text-slate-500 dark:text-slate-400">{currentUser.role}</p>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-xl p-4 space-y-4">
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">PIN</p>
+                            <p className="font-mono">****{currentUser.pin.slice(-1)}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Appareil assigné</p>
+                            <p>{currentUser.deviceId ? `ID: ${currentUser.deviceId}` : 'Aucun'}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Statut</p>
+                            <span className={`px-2 py-1 rounded-full text-xs ${currentUser.status ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>
+                                {currentUser.status ? 'Actif' : 'Inactif'}
+                            </span>
+                        </div>
+                        <button onClick={logout} className="w-full py-3 bg-secondary text-white rounded-lg font-medium">Déconnexion</button>
+                    </div>
+                </div>
+            );
+        }
+
+        function MenuTab({ history, employees, currentUserId, notifications, onDismissNotification }) {
+            const [activeSubTab, setActiveSubTab] = useState('history');
+            return (
+                <div className="flex flex-col h-full">
+                    <div className="flex border-b border-slate-200 dark:border-slate-700">
+                        <button onClick={() => setActiveSubTab('history')} className={`flex-1 py-3 font-medium ${activeSubTab === 'history' ? 'border-b-2 border-primary text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
+                            Historique
+                        </button>
+                        <button onClick={() => setActiveSubTab('profile')} className={`flex-1 py-3 font-medium ${activeSubTab === 'profile' ? 'border-b-2 border-primary text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
+                            Profil
+                        </button>
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                        {activeSubTab === 'history' ? (
+                            <HistorySubPage history={history} />
+                        ) : (
+                            <ProfileSubPage employees={employees} currentUserId={currentUserId} />
+                        )}
+                    </div>
+                    <Toast notifications={notifications} onDismiss={onDismissNotification} />
+                </div>
+            );
+        }
+
+        // Composant principal App (amélioré avec notifications et updates)
+        function App() {
+            const [currentPage, setCurrentPage] = useState('login');
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [currentUserId, setCurrentUserId] = useState(null);
+            const [data, setData] = useState({
+                employees: [...mockEmployees],
+                posDevices: [...mockPosDevices],
+                productCategories: [...mockProductCategories],
+                products: [...mockProducts],
+                posTables: [...mockPosTables],
+                orders: [...mockOrders],
+                orderItems: [...mockOrderItems],
+                posHistory: [...mockPosHistory],
+                paymentMethods: [...mockPaymentMethods],
+                notifications: [...mockNotifications]
+            });
+            const [toasts, setToasts] = useState([]);
+
+            const handleLogin = () => {
+                setIsLoggedIn(true);
+                setCurrentUserId(1); // Simulation login comme Jean Dupont
+                setCurrentPage('dashboard');
+                // Ajout toast de bienvenue
+                setToasts(prev => [...prev, { id: Date.now(), type: 'success', message: 'Connexion réussie !', timestamp: new Date().toISOString() }]);
+            };
+
+            const updateCategory = (id, updates) => {
+                setData(prev => ({
+                    ...prev,
+                    productCategories: prev.productCategories.map(c => c.id === id ? {...c, ...updates} : c)
+                }));
+                setToasts(prev => [...prev, { id: Date.now(), type: 'success', message: 'Catégorie mise à jour', timestamp: new Date().toISOString() }]);
+            };
+
+            const updateProduct = (id, updates) => {
+                const product = data.products.find(p => p.id === id);
+                if (updates.isAvailable === false && !confirm('Confirmer indisponibilité ?')) return;
+                setData(prev => ({
+                    ...prev,
+                    products: prev.products.map(p => p.id === id ? {...p, ...updates} : p)
+                }));
+                if (updates.isAvailable === false) {
+                    setToasts(prev => [...prev, { id: Date.now(), type: 'error', message: `Produit ${product.name} indisponible`, timestamp: new Date().toISOString() }]);
+                } else {
+                    setToasts(prev => [...prev, { id: Date.now(), type: 'success', message: 'Produit mis à jour', timestamp: new Date().toISOString() }]);
+                }
+            };
+
+            const updateTable = (id, updates) => {
+                setData(prev => ({
+                    ...prev,
+                    posTables: prev.posTables.map(t => t.id === id ? {...t, ...updates} : t)
+                }));
+                setToasts(prev => [...prev, { id: Date.now(), type: 'info', message: 'Table mise à jour', timestamp: new Date().toISOString() }]);
+            };
+
+            const updateOrder = (id, updates) => {
+                if (typeof id === 'string' && id.includes('orderItem')) {
+                    // Pour orderItems
+                    const itemId = parseInt(id.split('-')[1]);
+                    setData(prev => ({
+                        ...prev,
+                        orderItems: prev.orderItems.map(item => item.id === itemId ? {...item, ...updates} : item)
+                    }));
+                } else {
+                    // Pour orders
+                    setData(prev => ({
+                        ...prev,
+                        orders: prev.orders.map(o => o.id === id ? {...o, ...updates} : o)
+                    }));
+                }
+                setToasts(prev => [...prev, { id: Date.now(), type: 'success', message: 'Commande mise à jour', timestamp: new Date().toISOString() }]);
+            };
+
+            const dismissToast = (id) => {
+                setToasts(prev => prev.map(t => t.id === id ? {...t, dismissed: true} : t));
+            };
+
+            const dismissNotification = (id) => {
+                setData(prev => ({
+                    ...prev,
+                    notifications: prev.notifications.map(n => n.id === id ? {...n, read: true} : n)
+                }));
+            };
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    // Simulation: Ajout notification aléatoire
+                    if (Math.random() > 0.7) {
+                        setData(prev => ({
+                            ...prev,
+                            notifications: [...prev.notifications, {
+                                id: Date.now(),
+                                type: 'order',
+                                message: `Nouvelle commande #${Math.floor(Math.random() * 1000)}`,
+                                timestamp: new Date().toISOString(),
+                                read: false,
+                                priority: 'Normale'
+                            }]
+                        }));
+                    }
+                }, 30000);
+                return () => clearInterval(interval);
+            }, []);
+
+            const renderPage = () => {
+                switch (currentPage) {
+                    case 'login':
+                        return <LoginPage onLogin={handleLogin} />;
+                    case 'dashboard':
+                        return <DashboardPage orders={data.orders} tables={data.posTables} history={data.posHistory} notifications={data.notifications} onDismissNotification={dismissNotification} />;
+                    case 'category':
+                        return <CategoryTab categories={data.productCategories} products={data.products} onUpdateCategory={updateCategory} onUpdateProduct={updateProduct} />;
+                    case 'table':
+                        return <TableTab tables={data.posTables} orders={data.orders} orderItems={data.orderItems} products={data.products} onUpdateTable={updateTable} onUpdateOrder={updateOrder} />;
+                    case 'kitchen':
+                        return <KitchenPage orders={data.orders} orderItems={data.orderItems} products={data.products} onUpdateOrderItem={updateOrder} />;
+                    case 'bar':
+                        return <BarPage orders={data.orders} orderItems={data.orderItems} products={data.products} onUpdateOrderItem={updateOrder} />;
+                    case 'menu':
+                        return <MenuTab history={data.posHistory} employees={data.employees} currentUserId={currentUserId} notifications={data.notifications} onDismissNotification={dismissNotification} />;
+                    default:
+                        return <LoginPage onLogin={handleLogin} />;
+                }
+            };
+
+            if (!isLoggedIn && currentPage !== 'login') {
+                setCurrentPage('login');
+                return <LoginPage onLogin={handleLogin} />;
+            }
+
+            return (
+                <div className="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark text-white">
+                    <div className="flex flex-1 flex-col overflow-hidden">
+                        {renderPage()}
+                    </div>
+                    <Toast notifications={toasts} onDismiss={dismissToast} />
+                    {isLoggedIn && (
+                        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-dark-bg border-t border-white/10">
+                            <div className="flex justify-around items-center h-16 px-4">
+                                <button onClick={() => setCurrentPage('dashboard')} className="flex flex-col items-center text-white/60 hover:text-primary transition-colors p-1">
+                                    <span className="material-symbols-outlined text-xl">dashboard</span>
+                                    <span className="text-xs font-medium">Dashboard</span>
+                                </button>
+                                <button onClick={() => setCurrentPage('category')} className="flex flex-col items-center text-white/60 hover:text-primary transition-colors p-1">
+                                    <span className="material-symbols-outlined text-xl">category</span>
+                                    <span className="text-xs font-medium">Catégorie</span>
+                                </button>
+                                <button onClick={() => setCurrentPage('table')} className="flex flex-col items-center text-white/60 hover:text-primary transition-colors p-1">
+                                    <span className="material-symbols-outlined text-xl">table_restaurant</span>
+                                    <span className="text-xs font-medium">Tables</span>
+                                </button>
+                                <button onClick={() => setCurrentPage('kitchen')} className="flex flex-col items-center text-white/60 hover:text-primary transition-colors p-1">
+                                    <span className="material-symbols-outlined text-xl">kitchen</span>
+                                    <span className="text-xs font-medium">Cuisine</span>
+                                </button>
+                                <button onClick={() => setCurrentPage('bar')} className="flex flex-col items-center text-white/60 hover:text-primary transition-colors p-1">
+                                    <span className="material-symbols-outlined text-xl">local_bar</span>
+                                    <span className="text-xs font-medium">Bar</span>
+                                </button>
+                                <button onClick={() => setCurrentPage('menu')} className="flex flex-col items-center text-white/60 hover:text-primary transition-colors p-1">
+                                    <span className="material-symbols-outlined text-xl">menu</span>
+                                    <span className="text-xs font-medium">Menu</span>
+                                </button>
+                            </div>
+                        </nav>
+                    )}
+                </div>
+            );
+        }
+        // Render l'app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout POS - Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* 🎨 Variables */
+        :root {
+            --primary-bg: #110B1C;
+            --secondary-bg: #1B1229;
+            --accent-red: #FE2F58;
+            --accent-cyan: #26DADF;
+            --text-light: #F0F0F0;
+            --text-subtle: #9E9BCB;
+            --sidebar-width: 250px; /* Largeur Développée */
+            --sidebar-collapsed-width: 80px; /* Largeur Réduite */
+            --header-height: 80px; 
+            --mobile-nav-height: 60px;
+        }
+
+        /* 🌍 Styles Généraux */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-light);
+            min-height: 100vh;
+        }
+
+        /* ----------------------- 1. Header (Fixe) ----------------------- */
+        .header {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width); 
+            right: 0;
+            height: var(--header-height);
+            z-index: 999; 
+            
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--secondary-bg);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            transition: left 0.3s ease; 
+        }
+
+        .header-left-section {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Bouton de bascule (dans le Header) */
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 20px;
+            transition: color 0.2s;
+            /* Masqué sur mobile par défaut, car il n'y a pas de sidebar à réduire */
+        }
+        .sidebar-toggle:hover {
+            color: var(--accent-cyan);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info i {
+            font-size: 24px;
+            color: #ec4899; 
+            margin-right: 15px;
+        }
+
+        /* Conteneur des rôles */
+        .user-info-roles {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Badge Admin (Nouveau style) */
+        .admin-badge {
+            background-color: var(--accent-red);
+            color: var(--text-light);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 8px; 
+            text-transform: uppercase;
+        }
+        
+        .user-role-default {
+            font-size: 12px;
+            color: var(--text-subtle);
+        }
+
+        .status-badge {
+            background-color: var(--accent-red);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* ----------------------- 2. Navigation (Sidebar) ----------------------- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--secondary-bg);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 1000;
+            
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            overflow-y: auto; 
+            transition: width 0.3s ease; 
+        }
+
+        .sidebar .logo-text {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 20px;
+            font-weight: 800;
+            padding: 0 15px;
+            transition: opacity 0.3s;
+        }
+        .sidebar .logo-text i {
+            color: #ec4899; 
+            margin-right: 5px;
+        }
+        .sidebar .logo-text .be {
+            color: #ec4899;
+        }
+        .sidebar .logo-text .bit {
+            color: var(--accent-cyan);
+        }
+        .sidebar .logo-text .pos {
+            color: var(--accent-red);
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px; 
+            color: var(--text-subtle);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.2s, color 0.2s, justify-content 0.3s;
+        }
+        
+        .nav-link i {
+            width: 30px;
+            font-size: 18px;
+            text-align: center;
+            margin-right: 15px;
+            transition: margin-right 0.3s;
+        }
+        
+        .nav-link span {
+            transition: opacity 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: var(--primary-bg);
+            color: var(--text-light);
+            border-left: 4px solid var(--accent-red);
+        }
+        
+        .logout-link {
+            margin-top: auto; 
+            padding: 20px 0;
+        }
+        
+        .logout-link .nav-link {
+            color: var(--accent-red);
+            border-left: none !important;
+        }
+
+        /* ----------------------- 3. Contenu Principal ----------------------- */
+        .content-area {
+            margin-left: var(--sidebar-width); 
+            padding: calc(var(--header-height) + 20px) 20px 20px 20px; 
+            flex-grow: 1;
+            transition: margin-left 0.3s ease; 
+        }
+        
+        .content-block {
+            background-color: var(--secondary-bg); 
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: calc(100vh - var(--header-height) - 40px);
+        }
+
+        /* ======================== 4. État Réduit (body.is-collapsed) ======================== */
+        body.is-collapsed {
+            /* 1. Sidebar */
+            .sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+            
+            /* 2. Header/Content Décalage */
+            .header {
+                left: var(--sidebar-collapsed-width);
+            }
+            .content-area {
+                margin-left: var(--sidebar-collapsed-width);
+            }
+            
+            /* 3. Masquer le texte */
+            .sidebar .logo-text,
+            .sidebar .nav-link span,
+            .sidebar .logout-link .nav-link span {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+            }
+
+            /* 4. Centrer les icônes (Liens) */
+            .sidebar .nav-link {
+                justify-content: center;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .sidebar .nav-link i {
+                margin-right: 0;
+            }
+            
+            /* 5. Afficher l'icône du logo au centre */
+            .sidebar .logo-text {
+                padding: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .sidebar .logo-text i {
+                margin: 0;
+                font-size: 24px;
+            }
+        }
+        
+        /* ----------------------- 5. Responsiveness (Mobile) ----------------------- */
+        @media (max-width: 900px) {
+            
+            .sidebar {
+                display: none; 
+            }
+            
+            /* S'assurer que le header/contenu n'est pas affecté par is-collapsed sur mobile */
+            .header, .content-area {
+                left: 0 !important;
+                margin-left: 0 !important;
+            }
+            
+            .header {
+                height: 70px; 
+                padding: 10px 15px;
+            }
+            
+            .header-left-section {
+                /* S'assure que les éléments du Header sont bien alignés sur une seule ligne */
+                flex-grow: 1;
+                justify-content: space-between;
+                min-width: 0;
+            }
+
+            /* Le bouton toggle n'est pas utilisé sur mobile */
+            .sidebar-toggle {
+                display: none;
+            }
+            
+            /* Réduit la taille des informations utilisateur pour le mobile */
+            .user-info > div {
+                min-width: 0;
+            }
+            .user-info p {
+                font-size: 14px !important;
+                /* Ajout de ceci pour éviter que le nom ne prenne trop de place */
+                white-space: nowrap; 
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .content-area {
+                padding-top: 70px; 
+                padding-bottom: var(--mobile-nav-height); 
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+            
+            /* --- Correction du Bottom Nav --- */
+            .bottom-nav {
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: var(--mobile-nav-height);
+                background-color: var(--secondary-bg);
+                border-top: 1px solid var(--primary-bg);
+                z-index: 1000;
+            }
+
+            .bottom-nav .nav-link {
+                 flex-direction: column;
+                 padding: 5px 0; /* Padding ajusté */
+                 font-size: 11px; /* Légèrement plus grand */
+                 border-left: none; 
+                 border-top: 2px solid transparent; 
+                 flex: 1; 
+                 min-width: 0;
+                 text-align: center;
+             }
+             
+             .bottom-nav .nav-link i {
+                 margin: 0;
+                 margin-bottom: 3px;
+                 font-size: 20px;
+             }
+             
+             .bottom-nav .nav-link.active {
+                 border-top: 2px solid var(--accent-red);
+                 border-left: none;
+                 background-color: transparent;
+             }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2 class="logo-text">
+            <i class="fas fa-cash-register"></i> <span class="be">Be</span><span class="bit">Bit</span> <span class="pos">POS</span>
+        </h2>
+        
+        <nav>
+            <a href="#" class="nav-link active">
+                <i class="fas fa-desktop"></i> <span>Dashboard</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="fas fa-boxes"></i> <span>Produits</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="fas fa-utensils"></i> <span>Tables</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="fas fa-bell"></i> <span>Cuisine</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="fas fa-history"></i> <span>Historique</span>
+            </a>
+
+        </nav>
+        
+        <div class="logout-link">
+             <a href="#" class="nav-link">
+                <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
+            </a>
+        </div>
+    </aside>
+
+    <div>
+        
+        <header class="header">
+            <div class="header-left-section">
+                <button id="sidebarToggle" class="sidebar-toggle" aria-label="Réduire la barre latérale">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 2px;">Alexandre Dubois</p> 
+                        <div class="user-info-roles">
+                            <span class="admin-badge">Admin</span>
+                            <span class="user-role-default">Caisse 1</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-badge">
+                <i class="fas fa-circle" style="font-size: 10px; margin-right: 5px;"></i> En Service
+            </div>
+        </header>
+
+        <main class="content-area">
+            <section class="content-block">
+                <h1>Dashboard</h1>
+                <p>Le Header est fixe, la Sidebar est réductible et la navigation mobile est corrigée.</p>
+                <i class="fas fa-check-circle" style="font-size: 50px; color: var(--accent-cyan); margin-top: 20px;"></i>
+            </section>
+        </main>
+        
+    </div>
+    
+     <div class="bottom-nav">
+         <a href="#" class="nav-link active">
+            <i class="fas fa-desktop"></i> <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-boxes"></i> <span>Produits</span>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-utensils"></i> <span>Tables</span>
+        </a>
+        <a href="#" class="nav-link">
+            <i class="fas fa-bell"></i> <span>Cuisine</span>
+        </a>
+         <a href="#" class="nav-link">
+            <i class="fas fa-history"></i> <span>Historique</span>
+        </a>
+    </div>
+
+    <script>
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            // Bascule la classe 'is-collapsed' sur le <body> pour déclencher la réduction CSS
+            document.body.classList.toggle('is-collapsed');
+            
+            // (Optionnel) Changer l'icône de toggle pour indiquer l'état
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('is-collapsed')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-align-right');
+            } else {
+                icon.classList.remove('fa-align-right');
+                icon.classList.add('fa-bars');
+            }
+        });
+    </script>
+    
+</body>
+</html>

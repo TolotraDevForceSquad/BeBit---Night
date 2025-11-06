@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+    <!-- Configuration commune pour toutes les pages -->
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Application de Gestion Restaurant - Écrans Fusionnés</title>
+    <!-- Tailwind CSS CDN avec plugins -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Liens pour les polices Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- Configuration Tailwind personnalisée commune à toutes les pages -->
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Work Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <!-- Styles pour les icônes Material Symbols -->
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+    <!-- Style pour la hauteur minimale du body -->
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+    <!-- Conteneur principal pour toute l'application -->
+    <div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark text-white">
+        <!-- Contenu des pages : Chaque page est un div caché par défaut, affiché via JS -->
+        <div id="pages-container" class="flex flex-1 flex-col overflow-hidden">
+            <!-- Page 1: Écran de Connexion PIN -->
+            <div id="page-login" class="flex flex-1 flex-col items-center justify-center p-4 hidden">
+                <div class="w-full max-w-sm mx-auto flex flex-col items-center">
+                    <!-- Composant Logo -->
+                    <div class="mb-8">
+                        <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
+                            <span class="material-symbols-outlined text-4xl text-primary">storefront</span>
+                        </div>
+                    </div>
+                    <!-- Titre Principal -->
+                    <h1 class="text-white tracking-light text-[32px] font-bold leading-tight px-4 text-center pb-1 pt-6 font-display">Bienvenue</h1>
+                    <!-- Texte descriptif -->
+                    <p class="text-white/80 text-base font-normal leading-normal pb-3 pt-1 px-4 text-center font-display">Veuillez entrer votre code PIN</p>
+                    <!-- Affichage du PIN (points) -->
+                    <div class="flex justify-center items-center space-x-3 my-6 h-8">
+                        <div class="h-4 w-4 rounded-full bg-primary"></div>
+                        <div class="h-4 w-4 rounded-full bg-primary"></div>
+                        <div class="h-4 w-4 rounded-full bg-primary"></div>
+                        <div class="h-4 w-4 rounded-full bg-white/20"></div>
+                        <div class="h-4 w-4 rounded-full bg-white/20"></div>
+                        <div class="h-4 w-4 rounded-full bg-white/20"></div>
+                    </div>
+                    <!-- Pavé numérique -->
+                    <div class="grid grid-cols-3 gap-4 w-full max-w-xs mt-4">
+                        <!-- Rangée 1 -->
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">1</button>
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">2</button>
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">3</button>
+                        <!-- Rangée 2 -->
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">4</button>
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">5</button>
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">6</button>
+                        <!-- Rangée 3 -->
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">7</button>
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">8</button>
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">9</button>
+                        <!-- Rangée 4 -->
+                        <div class="flex items-center justify-center h-20 w-full"></div> <!-- Espace vide -->
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-white/10 text-white text-3xl font-medium transition-colors hover:bg-white/20 active:bg-white/30 font-display">0</button>
+                        <button class="flex items-center justify-center h-20 w-full rounded-xl bg-transparent text-white transition-colors hover:bg-white/10 active:bg-white/20">
+                            <span class="material-symbols-outlined text-3xl">backspace</span>
+                        </button>
+                    </div>
+                    <!-- Message d'erreur (commenté par défaut) -->
+                    <!-- <p class="text-red-400 text-sm font-normal leading-normal py-3 px-4 text-center font-display">Code PIN incorrect. Veuillez réessayer.</p> -->
+                    <!-- Bouton d'action -->
+                    <div class="w-full max-w-xs mt-8">
+                        <button class="w-full h-14 px-6 rounded-xl bg-primary text-background-dark font-bold text-lg transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed font-display">Se connecter</button>
+                    </div>
+                    <!-- Lien footer -->
+                    <div class="mt-8">
+                        <button class="text-primary/80 text-sm font-medium hover:text-primary transition-colors font-display">Changer d'utilisateur</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2: Détail de la Commande #123 -->
+            <div id="page-order-detail" class="relative flex h-auto min-h-screen w-full flex-col hidden">
+                <!-- Barre supérieure -->
+                <header class="sticky top-0 z-10 flex flex-col bg-background-light dark:bg-background-dark/80 pt-4 backdrop-blur-sm">
+                    <div class="flex items-center px-4 pb-2">
+                        <button class="flex size-10 shrink-0 items-center justify-center text-slate-800 dark:text-white">
+                            <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                        </button>
+                        <h1 class="text-xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center text-slate-900 dark:text-white">Commande #123</h1>
+                        <div class="flex w-10 shrink-0 items-center justify-end"></div>
+                    </div>
+                    <div class="flex items-center justify-between px-4 pb-3">
+                        <h2 class="text-lg font-bold leading-tight tracking-[-0.015em] text-slate-900 dark:text-white">Table 5</h2>
+                        <div class="shrink-0 rounded-full bg-orange-400/20 px-3 py-1">
+                            <p class="text-sm font-bold leading-normal text-orange-400">En cours</p>
+                        </div>
+                    </div>
+                    <div class="h-px w-full bg-slate-200 dark:bg-slate-800"></div>
+                </header>
+                <!-- Contenu principal -->
+                <main class="flex-1 pb-60 pt-4">
+                    <!-- Liste des articles -->
+                    <div class="flex flex-col gap-2">
+                        <!-- Article 1 -->
+                        <div class="flex gap-4 bg-background-light dark:bg-background-dark px-4 py-3">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-[70px] shrink-0" data-alt="Photo of a classic burger" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAWGdri-6Ac3uOiy8BED1E_dAX8Vbgp2Qo64FjrEfnNnEdtTAS5QoqXavlKeCp0Z1kcZHFCrPiLyC_MOUNjpFvhXpZmJ4sonDlFJ5OmPz2PBzFZnEd7cbgQ2SrzweYMo-aKApbKaapCJpzCrz2I36WIUVkLeEm6At055VWayAv5RF-9-9B4Nr1lQjKgiuOwkiqpk_sby1q-6eqn3fh0tTYPJvBAgLRxLXPKKYYdzg_FKiLrQeYgwSwdllMI6gTgxczKfmg26ao6EQh3");'></div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal text-slate-900 dark:text-white">Burger Classique</p>
+                                <p class="text-sm font-normal leading-normal text-slate-500 dark:text-slate-400">Note: Sans oignons</p>
+                                <p class="text-sm font-normal leading-normal text-slate-500 dark:text-slate-400">2 x 12.50€</p>
+                            </div>
+                            <div class="flex flex-col items-end justify-between">
+                                <p class="text-base font-bold text-slate-900 dark:text-white">25.00€</p>
+                                <div class="flex items-center gap-2 text-slate-900 dark:text-white">
+                                    <button class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 cursor-pointer text-lg">-</button>
+                                    <span class="w-4 text-center text-base font-medium">2</span>
+                                    <button class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 cursor-pointer text-lg">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Article 2 -->
+                        <div class="flex gap-4 bg-background-light dark:bg-background-dark px-4 py-3">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-[70px] shrink-0" data-alt="Photo of french fries" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCe9qOg8s9YF-OD5ksT52KvHhuPJWBnJG7iWn0z_FSohoO9oh9e6xm86JsyHaOkgfBKyaLEF-RTTiCm9DxiV2UXMS54QZcckUkjc48uYzhYODTVwrAhimO-DW59SuG5prOWw06eto7bg2qsKik8Yjc_0_-ts0XIr7P9ZJrSlN9vTaZEDLul41R7kML7d-_z1zHaczuahaFWMj_kM7PRNtX1b5JcEAQHXLW6GdEC2__1a-y62hnVqMsPcHckfRxpbbwoxmaPTVFS3P-a");'></div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal text-slate-900 dark:text-white">Frites Maison</p>
+                                <p class="text-sm font-normal leading-normal text-slate-500 dark:text-slate-400">1 x 4.50€</p>
+                            </div>
+                            <div class="flex flex-col items-end justify-between">
+                                <p class="text-base font-bold text-slate-900 dark:text-white">4.50€</p>
+                                <div class="flex items-center gap-2 text-slate-900 dark:text-white">
+                                    <button class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 cursor-pointer text-lg">-</button>
+                                    <span class="w-4 text-center text-base font-medium">1</span>
+                                    <button class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 cursor-pointer text-lg">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Article 3 -->
+                        <div class="flex gap-4 bg-background-light dark:bg-background-dark px-4 py-3">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-[70px] shrink-0" data-alt="Photo of a soda can" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDQTjHm4wKIFj3fGtPFMRO1XjGUb9-iX6lSinM4fkxkebbMEU6sUA5A4NR_FaAzOxma5prTMG8-TXEDH9UbDC1UKSh8gNSAV226N4dxYeBckcFLaIPCErKWi455vEGfP-F8gjoTIyysggEl4tiHbcE2KabnnQnRjYO1oNfN4VU5ZMxHFtr9vYT1dlNUNuJRXLI1IVvmhLHy2MrW4kEGRHHMu5NE1oBU6oSzLK02P6YLDuv5GhnRYs08vP83CrARcPgAAwh1CSAbla2M");'></div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal text-slate-900 dark:text-white">Soda Cola</p>
+                                <p class="text-sm font-normal leading-normal text-slate-500 dark:text-slate-400">2 x 3.00€</p>
+                            </div>
+                            <div class="flex flex-col items-end justify-between">
+                                <p class="text-base font-bold text-slate-900 dark:text-white">6.00€</p>
+                                <div class="flex items-center gap-2 text-slate-900 dark:text-white">
+                                    <button class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 cursor-pointer text-lg">-</button>
+                                    <span class="w-4 text-center text-base font-medium">2</span>
+                                    <button class="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 cursor-pointer text-lg">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <!-- Bouton flottant d'ajout -->
+                <div class="fixed bottom-32 right-6 z-20">
+                    <button class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg">
+                        <span class="material-symbols-outlined text-3xl">add</span>
+                    </button>
+                </div>
+                <!-- Footer de résumé -->
+                <footer class="fixed bottom-0 left-0 right-0 z-10 flex flex-col bg-slate-100 dark:bg-slate-900/80 p-4 pt-3 backdrop-blur-sm border-t border-slate-200 dark:border-slate-800">
+                    <!-- Résumé des prix -->
+                    <div class="flex flex-col gap-1 pb-4">
+                        <div class="flex justify-between text-base text-slate-600 dark:text-slate-400">
+                            <span>Sous-total</span>
+                            <span>35.50€</span>
+                        </div>
+                        <div class="flex justify-between text-base text-slate-600 dark:text-slate-400">
+                            <span>TVA (10%)</span>
+                            <span>3.55€</span>
+                        </div>
+                        <div class="flex justify-between text-xl font-bold text-slate-900 dark:text-white">
+                            <span>Total</span>
+                            <span>39.05€</span>
+                        </div>
+                    </div>
+                    <!-- Boutons d'action -->
+                    <div class="flex items-center gap-3">
+                        <button class="flex-1 rounded-lg bg-slate-200 dark:bg-slate-800 px-4 py-3.5 text-base font-bold text-slate-900 dark:text-white">Marquer comme servie</button>
+                        <button class="flex-1 rounded-lg bg-primary px-4 py-3.5 text-base font-bold text-black">Payer</button>
+                    </div>
+                </footer>
+            </div>
+
+            <!-- Page 3: Gestion des Catégories -->
+            <div id="page-categories" class="relative flex min-h-screen w-full flex-col hidden">
+                <!-- Barre supérieure -->
+                <header class="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-background-dark px-4 shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white">
+                            <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                        </button>
+                    </div>
+                    <h1 class="text-lg font-bold text-white">Gestion des catégories</h1>
+                    <div class="flex items-center gap-2">
+                        <button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white">
+                            <span class="material-symbols-outlined text-2xl">search</span>
+                        </button>
+                    </div>
+                </header>
+                <!-- Contenu principal -->
+                <main class="flex-1 overflow-y-auto p-4 pb-24">
+                    <div class="space-y-3">
+                        <!-- Élément de liste 1 -->
+                        <div class="flex items-center gap-4 rounded-lg bg-white/5 p-3 text-white">
+                            <div class="flex items-center justify-center text-white/50">
+                                <span class="material-symbols-outlined cursor-grab">drag_indicator</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal">Entrées</p>
+                                <p class="text-sm font-normal leading-normal text-white/60">15 produits</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-black/30 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <input checked="" class="invisible absolute" type="checkbox"/>
+                                    <div class="h-full w-[27px] rounded-full bg-white" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                                </label>
+                                <button class="flex h-10 w-10 items-center justify-center text-white/70">
+                                    <span class="material-symbols-outlined text-2xl">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Élément de liste 2 -->
+                        <div class="flex items-center gap-4 rounded-lg bg-white/5 p-3 text-white">
+                            <div class="flex items-center justify-center text-white/50">
+                                <span class="material-symbols-outlined cursor-grab">drag_indicator</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal">Plats principaux</p>
+                                <p class="text-sm font-normal leading-normal text-white/60">25 produits</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-black/30 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <input checked="" class="invisible absolute" type="checkbox"/>
+                                    <div class="h-full w-[27px] rounded-full bg-white" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                                </label>
+                                <button class="flex h-10 w-10 items-center justify-center text-white/70">
+                                    <span class="material-symbols-outlined text-2xl">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Élément de liste 3 -->
+                        <div class="flex items-center gap-4 rounded-lg bg-white/5 p-3 text-white">
+                            <div class="flex items-center justify-center text-white/50">
+                                <span class="material-symbols-outlined cursor-grab">drag_indicator</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal">Desserts</p>
+                                <p class="text-sm font-normal leading-normal text-white/60">12 produits</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-black/30 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <input checked="" class="invisible absolute" type="checkbox"/>
+                                    <div class="h-full w-[27px] rounded-full bg-white" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                                </label>
+                                <button class="flex h-10 w-10 items-center justify-center text-white/70">
+                                    <span class="material-symbols-outlined text-2xl">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Élément de liste 4 (Inactif) -->
+                        <div class="flex items-center gap-4 rounded-lg bg-white/5 p-3 text-white opacity-60">
+                            <div class="flex items-center justify-center text-white/50">
+                                <span class="material-symbols-outlined cursor-grab">drag_indicator</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal">Boissons chaudes</p>
+                                <p class="text-sm font-normal leading-normal text-white/60">8 produits</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-black/30 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <input class="invisible absolute" type="checkbox"/>
+                                    <div class="h-full w-[27px] rounded-full bg-white" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                                </label>
+                                <button class="flex h-10 w-10 items-center justify-center text-white/70">
+                                    <span class="material-symbols-outlined text-2xl">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Élément de liste 5 -->
+                        <div class="flex items-center gap-4 rounded-lg bg-white/5 p-3 text-white">
+                            <div class="flex items-center justify-center text-white/50">
+                                <span class="material-symbols-outlined cursor-grab">drag_indicator</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-base font-medium leading-normal">Boissons froides</p>
+                                <p class="text-sm font-normal leading-normal text-white/60">22 produits</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-black/30 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <input checked="" class="invisible absolute" type="checkbox"/>
+                                    <div class="h-full w-[27px] rounded-full bg-white" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                                </label>
+                                <button class="flex h-10 w-10 items-center justify-center text-white/70">
+                                    <span class="material-symbols-outlined text-2xl">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <!-- Bouton flottant d'ajout -->
+                <div class="fixed bottom-6 right-6 z-20">
+                    <button class="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-background-dark shadow-lg">
+                        <span class="material-symbols-outlined text-3xl">add</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 4: Gestion des Dispositifs -->
+            <div id="page-devices" class="relative flex h-auto min-h-screen w-full flex-col hidden">
+                <!-- Barre supérieure -->
+                <div class="sticky top-0 z-10 flex flex-col bg-background-light dark:bg-background-dark pt-4">
+                    <div class="flex items-center px-4 pb-2 justify-between">
+                        <div class="flex size-12 shrink-0 items-center">
+                            <span class="material-symbols-outlined text-gray-800 dark:text-white">arrow_back</span>
+                        </div>
+                        <h1 class="text-gray-900 dark:text-white text-lg font-bold leading-tight flex-1 text-center">Gestion des dispositifs</h1>
+                        <div class="flex w-12 items-center justify-end">
+                            <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 bg-transparent text-gray-800 dark:text-white gap-2 text-base font-bold leading-normal min-w-0 p-0">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Barre de recherche -->
+                    <div class="px-4 py-3">
+                        <label class="flex flex-col min-w-40 h-12 w-full">
+                            <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                                <div class="text-gray-400 dark:text-primary/70 flex border-none bg-gray-200 dark:bg-gray-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
+                                    <span class="material-symbols-outlined">search</span>
+                                </div>
+                                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-gray-200 dark:bg-gray-800 focus:border-none h-full placeholder:text-gray-400 dark:placeholder:text-primary/70 px-4 pl-2 text-base font-normal leading-normal" placeholder="Rechercher par nom, emplacement..."/>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Filtres en chips -->
+                    <div class="flex gap-3 p-4 pt-0 overflow-x-auto">
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/20 dark:bg-primary/20 px-4">
+                            <p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Tous</p>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-800 pl-4 pr-2">
+                            <p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Actif</p>
+                            <span class="material-symbols-outlined text-gray-900 dark:text-white text-base">expand_more</span>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-800 pl-4 pr-2">
+                            <p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Inactif</p>
+                            <span class="material-symbols-outlined text-gray-900 dark:text-white text-base">expand_more</span>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-200 dark:bg-gray-800 pl-4 pr-2">
+                            <p class="text-gray-900 dark:text-white text-sm font-medium leading-normal">Emplacement</p>
+                            <span class="material-symbols-outlined text-gray-900 dark:text-white text-base">expand_more</span>
+                        </button>
+                    </div>
+                    <hr class="border-gray-200 dark:border-gray-800"/>
+                </div>
+                <!-- Liste des dispositifs -->
+                <div class="flex flex-col gap-px pb-24">
+                    <!-- Dispositif 1 -->
+                    <div class="flex gap-4 bg-background-light dark:bg-background-dark px-4 py-4 justify-between items-center border-b border-gray-200 dark:border-gray-800">
+                        <div class="flex items-center gap-4">
+                            <div class="text-gray-800 dark:text-white flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-800 shrink-0 size-12">
+                                <span class="material-symbols-outlined">desktop_windows</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Caisse principale</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Terrasse</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Dernière activité : Aujourd'hui à 14h32</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-300 dark:bg-gray-700 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                <input checked="" class="invisible absolute" type="checkbox"/>
+                                <div class="h-full w-[27px] rounded-full bg-white transition-transform" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Dispositif 2 -->
+                    <div class="flex gap-4 bg-background-light dark:bg-background-dark px-4 py-4 justify-between items-center border-b border-gray-200 dark:border-gray-800">
+                        <div class="flex items-center gap-4">
+                            <div class="text-gray-800 dark:text-white flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-800 shrink-0 size-12">
+                                <span class="material-symbols-outlined">smartphone</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Terminal mobile 1</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Salle 1</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Dernière activité : Hier à 21:15</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-300 dark:bg-gray-700 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                <input checked="" class="invisible absolute" type="checkbox"/>
+                                <div class="h-full w-[27px] rounded-full bg-white transition-transform" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Dispositif 3 (Inactif) -->
+                    <div class="flex gap-4 bg-background-light dark:bg-background-dark px-4 py-4 justify-between items-center border-b border-gray-200 dark:border-gray-800">
+                        <div class="flex items-center gap-4">
+                            <div class="text-gray-800 dark:text-white flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-800 shrink-0 size-12">
+                                <span class="material-symbols-outlined">tablet_mac</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Tablette Cuisine</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Cuisine</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Dernière activité : 2j</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-300 dark:bg-gray-700 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                <input class="invisible absolute" type="checkbox"/>
+                                <div class="h-full w-[27px] rounded-full bg-white transition-transform" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Dispositif 4 -->
+                    <div class="flex gap-4 bg-background-light dark:bg-background-dark px-4 py-4 justify-between items-center border-b border-gray-200 dark:border-gray-800">
+                        <div class="flex items-center gap-4">
+                            <div class="text-gray-800 dark:text-white flex items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-800 shrink-0 size-12">
+                                <span class="material-symbols-outlined">desktop_windows</span>
+                            </div>
+                            <div class="flex flex-1 flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal">Caisse Bar</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Bar</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">Dernière activité : Aujourd'hui à 18:05</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-300 dark:bg-gray-700 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                <input checked="" class="invisible absolute" type="checkbox"/>
+                                <div class="h-full w-[27px] rounded-full bg-white transition-transform" style="box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 8px, rgba(0, 0, 0, 0.06) 0px 3px 1px;"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <!-- Bouton flottant d'ajout -->
+                <div class="fixed bottom-6 right-6">
+                    <button class="flex items-center justify-center w-14 h-14 rounded-xl bg-primary text-white shadow-lg">
+                        <span class="material-symbols-outlined text-3xl">add</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 5: Gestion des Employés -->
+            <div id="page-employees" class="relative flex h-screen min-h-screen w-full flex-col bg-background-light dark:bg-background-dark hidden">
+                <!-- Barre supérieure -->
+                <header class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10 border-b border-gray-200/10">
+                    <div class="flex size-12 shrink-0 items-center">
+                        <span class="material-symbols-outlined text-gray-800 dark:text-white text-2xl">arrow_back</span>
+                    </div>
+                    <h1 class="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Gestion des Employés</h1>
+                    <div class="flex w-12 items-center justify-end">
+                        <button class="flex cursor-pointer items-center justify-center rounded-lg h-12 bg-transparent text-gray-800 dark:text-white min-w-0 p-0">
+                            <span class="material-symbols-outlined text-2xl">search</span>
+                        </button>
+                    </div>
+                </header>
+                <!-- Liste des employés -->
+                <main class="flex-1 overflow-y-auto px-4 pt-4 pb-24 space-y-3">
+                    <!-- Employé 1 -->
+                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14" data-alt="Photo de profil de Jean Dupont" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD0puKKykqsrFqQa0TGp59cz0xbZFAp5fkCThWpNDHmruMfDKROwORQUld7YlLPzV7L4pvR9rTbub9hvC3bd4zwtiAm7PnfHyjEadob9CVdrr0sOH59aFa4jrjI2qFecm47b-PUR_5OoUNfUiqJF3O-dzoE_3XudGOGkaVEineG7Lk2dOjnxmQzR66uKfrgId8nZrmmhAxdgljJmZ7yN99mk2yTF-NGS_fZz4aYqB8arkjVnMnHbboJkaraG-zADQXuWj3pAUrVjfx5");'></div>
+                                <span class="absolute bottom-0 right-0 block h-4 w-4 rounded-full bg-green-500 border-2 border-background-dark"></span>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Jean Dupont</p>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Manager</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <button class="flex size-9 items-center justify-center text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Employé 2 -->
+                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14" data-alt="Photo de profil de Marie Curie" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCEYJvHxFBnVJiBQD3wDWbWmBUL0woFEDd7apDTadFRxZBztHsuPXQBV3lF_-Fxwr67cPzkr3dLKhfoO1CiQysp-ZfmCrXtFcAiojxlzFwavM5m7AOzQwGYdoYeCP64WMdyDrYal8fxMETID8yTmGPrPPtqYIjKHS0KbjBlpUbGoRGUt_RAtAIkMnmkIvpkl89xslr9ACQtnrmwHqoaxFXCioDowiuITY4Mv7aGXPF6v5YfCYl834IBQcfJ1Mk1WWr50HmEdURxjT5E");'></div>
+                                <span class="absolute bottom-0 right-0 block h-4 w-4 rounded-full bg-green-500 border-2 border-background-dark"></span>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Marie Curie</p>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Serveur</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <button class="flex size-9 items-center justify-center text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Employé 3 -->
+                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14" data-alt="Photo de profil de Paul Martin" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAu0OMs8MuZPGtXDHClBNJ8am1n61gDTEUcqfRRdAPCAdc8v-14VoNqXG5TFpZEY8PmA6b8NBYzsUfKS-6pbBnmJVuV1c2uzdPHsmcx71YP10doXmX0iOvfYf4s1ZBKThFdIe084pVoa-tVgJZ8rPqnFSpbdEjBevM1ZUU9bIZr7zl8pHQ8kZ5Jvo2AOQb65uVPxHynRed16HEHU-I3-mrL2OtUPEsREaK9OdrmgkTC_ACDoOSFb6Mm2_9PLvNkoU8R-GkwZhCtIs_u");'></div>
+                                <span class="absolute bottom-0 right-0 block h-4 w-4 rounded-full bg-gray-500 border-2 border-background-dark"></span>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Paul Martin</p>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Serveur</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <button class="flex size-9 items-center justify-center text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Employé 4 -->
+                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14" data-alt="Photo de profil de Sophie Lemoine" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDGsjl44H-mQDsoXyLujylsXNibi7vKZW-YAsZ4zj9_zxZRR737lu_bNtJluUbVQSeFfCtsxku2F9IvUaicVV0XZnZOWi3m2T1J-Iw9shXBEprKigiCnSUxBCJ4YANWOV__YugT62VWfZtbOwIElR3NT5r-vjxYWlxpACNAfkBaKIhbmuVgN4Zbj79Ii2uHJMQD-sk3DGaszNq-FkDnPe_y8-cNq0GMihQu8V--He9-VzBLRS1r1Yd5W5rhAutjX1dSB5Kz4NQO4I63");'></div>
+                                <span class="absolute bottom-0 right-0 block h-4 w-4 rounded-full bg-green-500 border-2 border-background-dark"></span>
+                            </div>
+                            <div class="flex flex-col justify-center">
+                                <p class="text-gray-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Sophie Lemoine</p>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal line-clamp-2">Cuisinier</p>
+                            </div>
+                        </div>
+                        <div class="shrink-0">
+                            <button class="flex size-9 items-center justify-center text-gray-600 dark:text-gray-400">
+                                <span class="material-symbols-outlined">more_vert</span>
+                            </button>
+                        </div>
+                    </div>
+                </main>
+                <!-- Bouton flottant d'ajout -->
+                <div class="absolute bottom-6 right-6">
+                    <button class="flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary text-background-dark shadow-lg">
+                        <span class="material-symbols-outlined text-4xl">add</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 6: Gestion des Méthodes de Paiement -->
+            <div id="page-payments" class="relative flex min-h-screen w-full flex-col hidden">
+                <!-- Barre supérieure -->
+                <header class="sticky top-0 z-10 flex items-center bg-background-light/80 dark:bg-background-dark/80 p-4 pb-2 backdrop-blur-sm justify-between">
+                    <button class="text-slate-800 dark:text-white flex size-12 shrink-0 items-center justify-center">
+                        <span class="material-symbols-outlined text-2xl">arrow_back</span>
+                    </button>
+                    <h1 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Méthodes de Paiement</h1>
+                    <div class="size-12 shrink-0"></div> <!-- Espaceur -->
+                </header>
+                <!-- Contenu principal -->
+                <main class="flex-grow px-4 pt-4 pb-24">
+                    <div class="space-y-3">
+                        <!-- Méthode 1: Espèces (Active) -->
+                        <div class="flex items-center gap-4 bg-white dark:bg-[#1A2D21] p-4 rounded-lg min-h-[72px] justify-between shadow-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="text-slate-800 dark:text-white flex items-center justify-center rounded-lg bg-primary/20 dark:bg-[#23482f] shrink-0 size-12">
+                                    <span class="material-symbols-outlined text-2xl">payments</span>
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Espèces</p>
+                                    <p class="text-slate-500 dark:text-[#92c9a4] text-sm font-normal leading-normal line-clamp-2">CASH</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-slate-500 dark:text-slate-400 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 dark:bg-[#23482f] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <div class="h-full w-[27px] rounded-full bg-white transition-transform" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px, rgba(0, 0, 0, 0.04) 0px 3px 1px;"></div>
+                                    <input checked="" class="invisible absolute" type="checkbox"/>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Méthode 2: Carte Bancaire (Active) -->
+                        <div class="flex items-center gap-4 bg-white dark:bg-[#1A2D21] p-4 rounded-lg min-h-[72px] justify-between shadow-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="text-slate-800 dark:text-white flex items-center justify-center rounded-lg bg-primary/20 dark:bg-[#23482f] shrink-0 size-12">
+                                    <span class="material-symbols-outlined text-2xl">credit_card</span>
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Carte Bancaire</p>
+                                    <p class="text-slate-500 dark:text-[#92c9a4] text-sm font-normal leading-normal line-clamp-2">CARD</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-slate-500 dark:text-slate-400 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 dark:bg-[#23482f] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <div class="h-full w-[27px] rounded-full bg-white transition-transform" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px, rgba(0, 0, 0, 0.04) 0px 3px 1px;"></div>
+                                    <input checked="" class="invisible absolute" type="checkbox"/>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Méthode 3: Chèque Cadeau (Inactif) -->
+                        <div class="flex items-center gap-4 bg-white dark:bg-[#1A2D21] p-4 rounded-lg min-h-[72px] justify-between shadow-sm opacity-60">
+                            <div class="flex items-center gap-4">
+                                <div class="text-slate-800 dark:text-white flex items-center justify-center rounded-lg bg-slate-200 dark:bg-[#23482f] shrink-0 size-12">
+                                    <span class="material-symbols-outlined text-2xl">redeem</span>
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <p class="text-slate-900 dark:text-white text-base font-medium leading-normal line-clamp-1">Chèque Cadeau</p>
+                                    <p class="text-slate-500 dark:text-[#92c9a4] text-sm font-normal leading-normal line-clamp-2">GIFT_CARD</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="text-slate-500 dark:text-slate-400 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 dark:bg-[#23482f] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary">
+                                    <div class="h-full w-[27px] rounded-full bg-white transition-transform" style="box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 8px, rgba(0, 0, 0, 0.04) 0px 3px 1px;"></div>
+                                    <input class="invisible absolute" type="checkbox"/>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <!-- Bouton flottant d'ajout -->
+                <div class="fixed bottom-0 right-0 p-6">
+                    <button class="flex h-14 w-14 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary text-black shadow-lg hover:bg-primary/90">
+                        <span class="material-symbols-outlined text-3xl">add</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 7: Gestion de l'Inventaire -->
+            <div id="page-inventory" class="relative flex h-auto min-h-screen w-full flex-col hidden">
+                <!-- Barre supérieure avec recherche et filtres -->
+                <header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+                    <div class="flex items-center p-4 justify-between">
+                        <h1 class="text-zinc-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em] flex-1 font-display">Inventaire</h1>
+                        <div class="flex items-center justify-end gap-2">
+                            <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 w-12 bg-transparent text-zinc-900 dark:text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0 hover:bg-zinc-200 dark:hover:bg-white/10">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
+                            <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 w-12 bg-transparent text-zinc-900 dark:text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0 hover:bg-zinc-200 dark:hover:bg-white/10">
+                                <span class="material-symbols-outlined">filter_list</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Barre de recherche -->
+                    <div class="px-4 pb-3">
+                        <label class="flex flex-col min-w-40 h-12 w-full">
+                            <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                                <div class="text-zinc-500 dark:text-zinc-400 flex border border-zinc-300 dark:border-zinc-700 bg-background-light dark:bg-zinc-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
+                                    <span class="material-symbols-outlined">search</span>
+                                </div>
+                                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-zinc-900 dark:text-white focus:outline-0 focus:ring-primary/50 border border-zinc-300 dark:border-zinc-700 bg-background-light dark:bg-zinc-800 focus:border-primary h-full placeholder:text-zinc-500 dark:placeholder:text-zinc-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Rechercher un produit..." value=""/>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Chips de filtres -->
+                    <div class="flex gap-2 p-3 overflow-x-auto scrollbar-hide px-4">
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/20 dark:bg-primary/30 pl-3 pr-3 text-primary dark:text-primary font-medium">
+                            <p class="text-sm leading-normal">Tous</p>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 pl-3 pr-3 text-zinc-700 dark:text-zinc-300">
+                            <p class="text-sm font-medium leading-normal">En stock</p>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 pl-3 pr-3 text-zinc-700 dark:text-zinc-300">
+                            <p class="text-sm font-medium leading-normal">Stock faible</p>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 pl-3 pr-3 text-zinc-700 dark:text-zinc-300">
+                            <p class="text-sm font-medium leading-normal">Épuisé</p>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 pl-3 pr-3 text-zinc-700 dark:text-zinc-300">
+                            <p class="text-sm font-medium leading-normal">Boissons</p>
+                        </button>
+                        <button class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-zinc-200 dark:bg-zinc-800 pl-3 pr-3 text-zinc-700 dark:text-zinc-300">
+                            <p class="text-sm font-medium leading-normal">Pâtisseries</p>
+                        </button>
+                    </div>
+                </header>
+                <!-- Grille des produits -->
+                <main class="p-4 flex flex-col gap-3">
+                    <!-- Carte produit 1 -->
+                    <div class="flex flex-col gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl shadow-sm dark:shadow-none border border-transparent dark:border-zinc-800">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-[70px] shrink-0" data-alt="Une tasse blanche de café Americano vue de dessus" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAfTmQkzH-p6oeGrLhLHwoQ_bsfpIhGtGhpxpK4ugTAqtTn4VNNsR5SWHAx3FRGbDTZUgfIrvLK62CCymYbqfDH0mH9S2AnCuRffNWSCCygKDUgI5wGXEWW8fEyk5df94htpxGhVsU0wqO1IB34crYmg4qCkfIzuwYgUTQW-W9vmG4SM7q8-Dg9NKwQnzON9eTSwb-98m9gyeiHt3zkvtZlGAX-yN3hSf0Gh7mZGdIDYPg1JZcuL2MbQGruRfsMAbIanX8zlC9WC48q");'></div>
+                            <div class="flex flex-1 flex-col justify-center min-w-0">
+                                <p class="text-zinc-900 dark:text-white text-base font-semibold leading-normal truncate">Café Americano</p>
+                                <p class="text-zinc-500 dark:text-zinc-400 text-sm font-normal leading-normal">Boissons</p>
+                                <p class="text-zinc-900 dark:text-white text-sm font-medium leading-normal mt-1">3.50 €</p>
+                            </div>
+                            <div class="shrink-0">
+                                <button class="flex h-10 w-10 items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-start">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-green-100 dark:bg-green-900/50 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-300">
+                                <span class="size-2 rounded-full bg-green-500"></span>
+                                En stock
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Carte produit 2 -->
+                    <div class="flex flex-col gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl shadow-sm dark:shadow-none border border-transparent dark:border-zinc-800">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-[70px] shrink-0" data-alt="Un croissant au beurre doré sur une surface blanche" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC2FtosHyJ1yoDE-F62xP4JU7gssIk6w2R71EgWS9pwUgvV9jyD6OwtQl0AlpPM-mUSJVQmCAwSg1uF9PDSeeyckKPcZuG4zez2lx8E0SwOd9HExpXhKDoPzFXYgtc8HlOIbbg1DY2VHCPh_sM6BXx-M8fPgQ5yL4WcpIHNDVGy6OsbE264OVjP68i5VMjygnvbqM7gooZ44cxIau_Q2JmfbY8Dp4rk-vKTMAet_FSPGllIwZafB7gDpBe64d_alkdM231-8wYxY-CL");'></div>
+                            <div class="flex flex-1 flex-col justify-center min-w-0">
+                                <p class="text-zinc-900 dark:text-white text-base font-semibold leading-normal truncate">Croissant au beurre</p>
+                                <p class="text-zinc-500 dark:text-zinc-400 text-sm font-normal leading-normal">Pâtisseries</p>
+                                <p class="text-zinc-900 dark:text-white text-sm font-medium leading-normal mt-1">2.00 €</p>
+                            </div>
+                            <div class="shrink-0">
+                                <button class="flex h-10 w-10 items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-start">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-orange-100 dark:bg-orange-900/50 px-3 py-1 text-xs font-medium text-orange-700 dark:text-orange-300">
+                                <span class="size-2 rounded-full bg-orange-500"></span>
+                                Stock faible
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Carte produit 3 -->
+                    <div class="flex flex-col gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl shadow-sm dark:shadow-none border border-transparent dark:border-zinc-800">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-[70px] shrink-0" data-alt="Un muffin aux myrtilles sur un papier de cuisson" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBZmmv2GbS5PtHdn7d7AfXQdqPLQD7iW-OWNJ31xlgU5zs8iza7uP7fq3zFSl6zLQlJouyLKuu8P9IOA20g6LQ5N0r_Aiggzvt7r0Hku30MU2D6m6IawPODzaAEmZ-f2r2HWGx0cweoc2XNLrT3yV2K9aEmwLFeWyjKaur4brORLZIOCHizaXvF9iZuio9sE7ssVCzQj1AdP6xvjxTgXZ1oNx6Vt8hRHMohgO88sSAo1auEBCkntGhjagspN4ge161WM2RDq5RRKOOw");'></div>
+                            <div class="flex flex-1 flex-col justify-center min-w-0">
+                                <p class="text-zinc-900 dark:text-white text-base font-semibold leading-normal truncate">Muffin Myrtille</p>
+                                <p class="text-zinc-500 dark:text-zinc-400 text-sm font-normal leading-normal">Pâtisseries</p>
+                                <p class="text-zinc-900 dark:text-white text-sm font-medium leading-normal mt-1">2.75 €</p>
+                            </div>
+                            <div class="shrink-0">
+                                <button class="flex h-10 w-10 items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-start">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-red-100 dark:bg-red-900/50 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-300">
+                                <span class="size-2 rounded-full bg-red-500"></span>
+                                Épuisé
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Carte produit 4 -->
+                    <div class="flex flex-col gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl shadow-sm dark:shadow-none border border-transparent dark:border-zinc-800">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-lg size-[70px] shrink-0" data-alt="Un verre de jus d'orange frais avec une paille" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBso6gzqlOZjsrMKGllC1NnSOsU_DsKPS_d9J_2i6-EvPfiyARA81LbxPXjqqtef0HAp5MjcGsz4cpnSVNOq5fv6XbJkfGCamru6wZvohrlOROn7wIcY2W-xYqqvhwWSWXTWPwDxbS72stgXqON89XFc909fWhX-wyizm3WJBO6_iumfTwYowIcplgQForzCXG_jSJQuMsJ8R8uqMVSw-TjUElJDHd0m0VF5tG4UW0cZTNEdXQrHMQlKYy_wIMzH84HbnNUbwgYJfQw");'></div>
+                            <div class="flex flex-1 flex-col justify-center min-w-0">
+                                <p class="text-zinc-900 dark:text-white text-base font-semibold leading-normal truncate">Jus d'orange pressé</p>
+                                <p class="text-zinc-500 dark:text-zinc-400 text-sm font-normal leading-normal">Boissons</p>
+                                <p class="text-zinc-900 dark:text-white text-sm font-medium leading-normal mt-1">4.00 €</p>
+                            </div>
+                            <div class="shrink-0">
+                                <button class="flex h-10 w-10 items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
+                                    <span class="material-symbols-outlined">more_vert</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-start">
+                            <span class="inline-flex items-center gap-2 rounded-full bg-green-100 dark:bg-green-900/50 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-300">
+                                <span class="size-2 rounded-full bg-green-500"></span>
+                                En stock
+                            </span>
+                        </div>
+                    </div>
+                </main>
+                <!-- Bouton flottant d'ajout -->
+                <div class="fixed bottom-6 right-6">
+                    <button class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-background-dark shadow-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-background-dark">
+                        <span class="material-symbols-outlined text-3xl">add</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Page 8: Plan de Salle -->
+            <div id="page-floorplan" class="relative flex h-auto min-h-screen w-full flex-col hidden">
+                <!-- Barre supérieure -->
+                <header class="sticky top-0 z-10 bg-background-light dark:bg-background-dark/80 backdrop-blur-sm">
+                    <div class="flex items-center p-4">
+                        <div class="flex size-12 shrink-0 items-center justify-start text-zinc-900 dark:text-white">
+                            <span class="material-symbols-outlined text-2xl">menu</span>
+                        </div>
+                        <h1 class="flex-1 text-center text-lg font-bold leading-tight tracking-[-0.015em] text-zinc-900 dark:text-white">Plan de salle</h1>
+                        <div class="flex w-12 items-center justify-end">
+                            <button class="flex h-12 max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full bg-transparent p-0 text-zinc-900 dark:text-white">
+                                <span class="material-symbols-outlined text-2xl">search</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Chips de filtres -->
+                    <div class="flex gap-3 overflow-x-auto px-4 pb-4">
+                        <div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary pl-4 pr-4">
+                            <p class="text-zinc-900 text-sm font-medium leading-normal">Toutes</p>
+                        </div>
+                        <div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary/20 pl-4 pr-4">
+                            <p class="text-zinc-900 dark:text-white text-sm font-medium leading-normal">Terrasse</p>
+                        </div>
+                        <div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary/20 pl-4 pr-4">
+                            <p class="text-zinc-900 dark:text-white text-sm font-medium leading-normal">Salle Principale</p>
+                        </div>
+                        <div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-full bg-primary/20 pl-4 pr-4">
+                            <p class="text-zinc-900 dark:text-white text-sm font-medium leading-normal">Bar</p>
+                        </div>
+                    </div>
+                </header>
+                <main class="flex-grow">
+                    <!-- Grille des tables -->
+                    <div class="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4 p-4">
+                        <!-- Table 1 - Libre -->
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-green-500 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Table 1</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">4</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-green-500/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                                <p class="text-sm font-medium text-green-500">Libre</p>
+                            </div>
+                        </div>
+                        <!-- Table 2 - Occupée -->
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-orange-400 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Table 2</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">2</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-orange-400/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-orange-400"></div>
+                                <p class="text-sm font-medium text-orange-400">Occupée</p>
+                            </div>
+                        </div>
+                        <!-- Table 3 - Réservée -->
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-blue-500 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Table 3</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">6</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-blue-500/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-blue-500"></div>
+                                <p class="text-sm font-medium text-blue-500">Réservée</p>
+                            </div>
+                        </div>
+                        <!-- Table 4 - Indisponible -->
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-red-500 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Table 4</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">4</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-red-500/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-red-500"></div>
+                                <p class="text-sm font-medium text-red-500">Indisponible</p>
+                            </div>
+                        </div>
+                        <!-- Autres tables (exemples) -->
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-green-500 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Bar 1</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">1</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-green-500/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                                <p class="text-sm font-medium text-green-500">Libre</p>
+                            </div>
+                        </div>
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-orange-400 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Table 5</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">8</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-orange-400/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-orange-400"></div>
+                                <p class="text-sm font-medium text-orange-400">Occupée</p>
+                            </div>
+                        </div>
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-green-500 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Table 6</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">2</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-green-500/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                                <p class="text-sm font-medium text-green-500">Libre</p>
+                            </div>
+                        </div>
+                        <div class="relative flex aspect-square cursor-pointer flex-col justify-end gap-2 overflow-hidden rounded-lg border-2 border-green-500 bg-zinc-200 p-3 dark:bg-zinc-800">
+                            <div class="flex items-center justify-between">
+                                <p class="text-base font-bold leading-tight text-zinc-900 dark:text-white">Table 7</p>
+                                <div class="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
+                                    <span class="material-symbols-outlined text-base">group</span>
+                                    <span class="text-sm font-medium">4</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 rounded-md bg-green-500/20 p-2">
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                                <p class="text-sm font-medium text-green-500">Libre</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Légende des statuts -->
+                    <div class="p-4">
+                        <h3 class="mb-2 text-sm font-bold text-zinc-500 dark:text-zinc-400">Légende</h3>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg bg-zinc-100 p-4 dark:bg-zinc-900/50">
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 flex-shrink-0 rounded-full bg-green-500"></div>
+                                <p class="text-sm text-zinc-800 dark:text-zinc-200">Libre</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 flex-shrink-0 rounded-full bg-orange-400"></div>
+                                <p class="text-sm text-zinc-800 dark:text-zinc-200">Occupée</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 flex-shrink-0 rounded-full bg-blue-500"></div>
+                                <p class="text-sm text-zinc-800 dark:text-zinc-200">Réservée</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-2 w-2 flex-shrink-0 rounded-full bg-red-500"></div>
+                                <p class="text-sm text-zinc-800 dark:text-zinc-200">Indisponible</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <!-- Bouton flottant pour commande -->
+                <div class="sticky bottom-0 right-0 p-4">
+                    <div class="flex justify-end">
+                        <button class="flex h-14 max-w-[480px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full bg-primary pl-4 pr-5 text-zinc-900 shadow-lg">
+                            <span class="material-symbols-outlined text-2xl">add</span>
+                            <span class="text-base font-bold leading-normal tracking-[0.015em]">Commande</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 9: Journal d'Activité -->
+            <div id="page-activity-log" class="relative flex h-auto min-h-screen w-full flex-col hidden">
+                <!-- Barre supérieure -->
+                <div class="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-background-light dark:bg-background-dark p-4 pb-3">
+                    <div class="flex size-12 shrink-0 items-center">
+                        <span class="material-symbols-outlined text-black dark:text-white">arrow_back</span>
+                    </div>
+                    <h1 class="flex-1 text-center text-lg font-bold leading-tight tracking-[-0.015em] text-black dark:text-white">Journal d'activité</h1>
+                    <div class="flex w-12 items-center justify-end">
+                        <button class="flex h-12 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-transparent text-black dark:text-white">
+                            <span class="material-symbols-outlined">filter_list</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Séparateur de date -->
+                <div class="px-4 pt-6 pb-2">
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Aujourd'hui, 24 Octobre</p>
+                </div>
+                <!-- Liste des activités -->
+                <div class="flex flex-col gap-1">
+                    <!-- Activité: Vente -->
+                    <div class="flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/20">
+                            <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                        </div>
+                        <div class="flex flex-1 flex-col justify-center">
+                            <p class="line-clamp-1 text-base font-medium text-black dark:text-white">Vente - Table 5</p>
+                            <p class="line-clamp-2 text-sm font-normal text-gray-500 dark:text-gray-400">par Jean Dupont • 3 articles • 14:32</p>
+                        </div>
+                        <div class="shrink-0"><p class="text-base font-medium text-green-500 dark:text-green-400">+45.50€</p></div>
+                    </div>
+                    <!-- Activité: Commande modifiée -->
+                    <div class="flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-yellow-500/20">
+                            <span class="material-symbols-outlined text-yellow-500">edit</span>
+                        </div>
+                        <div class="flex flex-1 flex-col justify-center">
+                            <p class="line-clamp-1 text-base font-medium text-black dark:text-white">Commande #124 modifiée</p>
+                            <p class="line-clamp-2 text-sm font-normal text-gray-500 dark:text-gray-400">par Sophie Martin • 1 article ajouté • 14:28</p>
+                        </div>
+                        <div class="shrink-0">
+                            <button class="text-sm font-semibold text-primary">Voir détail</button>
+                        </div>
+                    </div>
+                    <!-- Activité: Remboursement -->
+                    <div class="flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-red-500/20">
+                            <span class="material-symbols-outlined text-red-500">undo</span>
+                        </div>
+                        <div class="flex flex-1 flex-col justify-center">
+                            <p class="line-clamp-1 text-base font-medium text-black dark:text-white">Remboursement</p>
+                            <p class="line-clamp-2 text-sm font-normal text-gray-500 dark:text-gray-400">par Jean Dupont • 1 article • 14:15</p>
+                        </div>
+                        <div class="shrink-0"><p class="text-base font-medium text-red-500 dark:text-red-400">-12.00€</p></div>
+                    </div>
+                    <!-- Activité: Gestion de stock -->
+                    <div class="flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-blue-500/20">
+                            <span class="material-symbols-outlined text-blue-500">inventory_2</span>
+                        </div>
+                        <div class="flex flex-1 flex-col justify-center">
+                            <p class="line-clamp-1 text-base font-medium text-black dark:text-white">Produit 'Café' ajouté au stock</p>
+                            <p class="line-clamp-2 text-sm font-normal text-gray-500 dark:text-gray-400">par Sophie Martin • Quantité : +50 • 13:50</p>
+                        </div>
+                        <div class="shrink-0">
+                            <button class="text-sm font-semibold text-primary">Voir détail</button>
+                        </div>
+                    </div>
+                    <!-- Activité: Début de service -->
+                    <div class="flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-gray-500/20">
+                            <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">login</span>
+                        </div>
+                        <div class="flex flex-1 flex-col justify-center">
+                            <p class="line-clamp-1 text-base font-medium text-black dark:text-white">Début de service</p>
+                            <p class="line-clamp-2 text-sm font-normal text-gray-500 dark:text-gray-400">par Jean Dupont • 09:01</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Séparateur de date -->
+                <div class="px-4 pt-6 pb-2">
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">Hier, 23 Octobre</p>
+                </div>
+                <div class="flex flex-col gap-1 pb-4">
+                    <!-- Activité: Vente -->
+                    <div class="flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/20">
+                            <span class="material-symbols-outlined text-primary">shopping_cart</span>
+                        </div>
+                        <div class="flex flex-1 flex-col justify-center">
+                            <p class="line-clamp-1 text-base font-medium text-black dark:text-white">Vente - Table 2</p>
+                            <p class="line-clamp-2 text-sm font-normal text-gray-500 dark:text-gray-400">par Sophie Martin • 5 articles • 21:12</p>
+                        </div>
+                        <div class="shrink-0"><p class="text-base font-medium text-green-500 dark:text-green-400">+88.20€</p></div>
+                    </div>
+                    <!-- Activité: Fin de service -->
+                    <div class="flex min-h-[72px] items-center gap-4 bg-background-light dark:bg-background-dark px-4 py-2">
+                        <div class="flex size-12 shrink-0 items-center justify-center rounded-lg bg-gray-500/20">
+                            <span class="material-symbols-outlined text-gray-500 dark:text-gray-400">logout</span>
+                        </div>
+                        <div class="flex flex-1 flex-col justify-center">
+                            <p class="line-clamp-1 text-base font-medium text-black dark:text-white">Fin de service</p>
+                            <p class="line-clamp-2 text-sm font-normal text-gray-500 dark:text-gray-400">par Sophie Martin • 22:05</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 10: Sélection de Produits -->
+            <div id="page-products" class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden hidden">
+                <!-- Barre supérieure -->
+                <div class="sticky top-0 z-10 bg-background-light dark:bg-background-dark pt-4">
+                    <div class="flex items-center p-4 pb-2">
+                        <h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1">Produits</h2>
+                        <div class="text-slate-900 dark:text-white flex size-12 shrink-0 items-center justify-end">
+                            <span class="material-symbols-outlined">menu</span>
+                        </div>
+                    </div>
+                    <!-- Barre de recherche -->
+                    <div class="px-4 py-3">
+                        <label class="flex flex-col min-w-40 h-12 w-full">
+                            <div class="flex w-full flex-1 items-stretch rounded-xl h-full">
+                                <div class="text-slate-400 dark:text-slate-400 flex border-none bg-slate-200 dark:bg-[#203928] items-center justify-center pl-4 rounded-l-xl border-r-0">
+                                    <span class="material-symbols-outlined">search</span>
+                                </div>
+                                <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none bg-slate-200 dark:bg-[#203928] focus:border-none h-full placeholder:text-slate-400 dark:placeholder:text-slate-400 px-4 rounded-l-none border-l-0 pl-2 text-base font-normal leading-normal" placeholder="Rechercher un produit..." value=""/>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Carousel de catégories -->
+                    <div class="flex gap-3 px-4 py-3 overflow-x-auto">
+                        <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/20 dark:bg-primary/30 pl-4 pr-4 cursor-pointer">
+                            <p class="text-slate-900 dark:text-white text-sm font-medium leading-normal">Entrées</p>
+                        </div>
+                        <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-[#203928] pl-4 pr-4 cursor-pointer">
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-medium leading-normal">Plats</p>
+                        </div>
+                        <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-[#203928] pl-4 pr-4 cursor-pointer">
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-medium leading-normal">Desserts</p>
+                        </div>
+                        <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-[#203928] pl-4 pr-4 cursor-pointer">
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-medium leading-normal">Boissons</p>
+                        </div>
+                        <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 dark:bg-[#203928] pl-4 pr-4 cursor-pointer">
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-medium leading-normal">Vins</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Grille d'images produits -->
+                <main class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-4 p-4 pb-24">
+                    <div class="flex flex-col gap-3 pb-3 bg-white dark:bg-[#203928] rounded-xl p-3 shadow-sm cursor-pointer">
+                        <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg" data-alt="A fresh Caesar salad with croutons and parmesan cheese" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAPlF8yzCwU0prtaUA3GuatzMG0zd9wFO672aG7Md6etTKBmhe_ZkI2F5O-eYaWfWlqX7NwGMvyw6NieBzBVQVXJ5E_z2KOVRy6q94FM19ERZnIfVMOy5sYuvGcXyb1-omXUPNy0K2QbhS59hRpJoIgUpuzfG72AJjZwCaOeYkyyhNX795HvP0iGuhjowxk9YTflYYELYI9t1RVF8R7udgOuV9Bi0vNKIuCaMuODYfs-7QnFXelhkCboXr9EHqIso6eWpib_N3IrWnu");'></div>
+                        <div>
+                            <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Salade César</p>
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">12,50 €</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 pb-3 bg-white dark:bg-[#203928] rounded-xl p-3 shadow-sm cursor-pointer">
+                        <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg" data-alt="A juicy classic beef burger with lettuce, tomato, and cheese" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBJIhk2EEQopoAAmUFzjwVa2KQdiBypTORN6_jcu3c_9cZq0ihGH_mOIlGQu0GA6hEVWZOUxD18hz_k8a710hkV9p4_Vj_ccSGbbUerdyOiBqY5C1WSqOhQz3TCrryyGbjDwW7p9L_xUPaZKh-CVeacLGTsCYv5kCJZ92YA0TIZ0BoKwnb36frXrDIio1i-a7pMeQpehXCmV59FYcWr15VeypmK8h08vosQp7CYKW80iIBHL_8NREVQiGe_hAnE9CjtuqoL4EMw9Nw8");'></div>
+                        <div>
+                            <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Burger Classique</p>
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">15,00 €</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 pb-3 bg-white dark:bg-[#203928] rounded-xl p-3 shadow-sm cursor-pointer">
+                        <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg" data-alt="A slice of creamy homemade tiramisu dusted with cocoa powder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC_TcUNJUBgAl-QYI7FyUNUpz5MZOrmhG3yAnF35aybE4H7KlESe1ZGmNfjNi9n-WyQEQX1hSeHIN1VbcQiqNDrrLRrmRihrDF74d9qjRpn0Br5FWscLHB4mneUfZ8W9VHvyWwYcwi0Uk-pXltOHcxJGGdl3hvqpLrj0kFrroJiA4ibZ7mddman1VTkfRlgitMxcaWSfu2tfYljWxXJjvWCMExNj8-PNHSfI5n-KWBRCyO6t_qL4M6JoWT90euh3B5LieU7aF6r-UHg");'></div>
+                        <div>
+                            <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Tiramisu Maison</p>
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">8,00 €</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 pb-3 bg-white dark:bg-[#203928] rounded-xl p-3 shadow-sm cursor-pointer">
+                        <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg" data-alt="Perfectly grilled salmon fillet with a side of asparagus" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB0uNaQQQ7S9ijljUKsnrGALOXT3d_SU6u6nAukPxr6rBTy23SaT3vLh4iCwAclPjLIDLYviJ1GGO2kiSbGeusAg04cWvgCw7OXRSNHAK9HbKwukcsWApH9YV_4JWps7p5lGib-QNAERrFNtPx0ikBlCjS6bfNR1NMcE9yfcy5ooWmR5VipfqLjaS2eaLqaGhoR3Hv60SziTqO8D7dned56AdyQL-9kR2B7Uk0GBwXJH18A-DF5TIsAMdA_HsoHJTZwW_CETLID7mtt");'></div>
+                        <div>
+                            <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Saumon Grillé</p>
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">18,50 €</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 pb-3 bg-white dark:bg-[#203928] rounded-xl p-3 shadow-sm cursor-pointer">
+                        <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg" data-alt="A classic Margherita pizza with fresh basil and mozzarella" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCVo9sjzUIqxQUXBWafunNhFx11XzrLk5KpfV7-IRmHigjYS2JsaH8GS6o6-Ilq2e_XgwmpIVbUYTNfdws5QviCBndtKMueGw9QBxudd6fj-8I0LiksyfzJQZ0jcTnscS9hf3hPvPJ6_wiI-PpwA8kzGgybhNKb3GAY1rnbZxu0J1oMJ30-hr7EsS5i_6lZW_0oaOQHD3dCCxWKwrDmLpWhDf3FAgnJ7SYaioAIMWuzjwF35r_-B1taXdIyJnUj8Vv1ESCxt-bbhA47");'></div>
+                        <div>
+                            <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Pizza Margherita</p>
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">14,00 €</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-3 pb-3 bg-white dark:bg-[#203928] rounded-xl p-3 shadow-sm cursor-pointer">
+                        <div class="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg" data-alt="Creamy mushroom risotto in a white bowl" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDGqdJmEbNBALov7FxGIdYwGS8osM9wz50QsUe0W3rWufK20HBWsfbPtke-IvSwdja0Dm78JCW3Poc6jHKppBuxshPvW1Qm-Xh9sq8E7EmX0lk0QKRR3mXOR1BR65N6lT487YVghXVry4c4-gRDw6NdkNwIjfA-I6o2J4Ng-e3NmcL9mw-3W058aZX8MZ0l_tEGEvTfQZqvqyxSuY7T4vUgkQXMznuvGOVVj6UQ55gxuNo9CGofeh4z6nval6T45OQvdZuaf1ecAWD5");'></div>
+                        <div>
+                            <p class="text-slate-900 dark:text-white text-base font-medium leading-normal">Risotto Champignons</p>
+                            <p class="text-slate-500 dark:text-slate-300 text-sm font-normal leading-normal">16,00 €</p>
+                        </div>
+                    </div>
+                </main>
+                <!-- Bouton flottant pour la commande -->
+                <div class="fixed bottom-0 left-0 right-0 p-4 z-20 flex justify-center">
+                    <div class="w-full max-w-md">
+                        <button class="flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 bg-primary text-background-dark text-base font-bold leading-normal tracking-[0.015em] min-w-0 gap-4 pl-4 pr-6 shadow-lg">
+                            <span class="material-symbols-outlined">shopping_cart</span>
+                            <span class="truncate">Voir la commande (3)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barre de navigation inférieure fixe avec icônes -->
+        <nav class="fixed bottom-0 left-0 right-0 z-50 bg-background-light dark:bg-background-dark border-t border-white/10">
+            <div class="flex justify-around items-center h-16 px-4">
+                <!-- Navigation vers Login (icône : lock) -->
+                <button onclick="showPage('page-login')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">lock</span>
+                    <span class="text-xs font-medium">Login</span>
+                </button>
+                <!-- Navigation vers Détail Commande (icône : receipt) -->
+                <button onclick="showPage('page-order-detail')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">receipt</span>
+                    <span class="text-xs font-medium">Commande</span>
+                </button>
+                <!-- Navigation vers Catégories (icône : category) -->
+                <button onclick="showPage('page-categories')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">category</span>
+                    <span class="text-xs font-medium">Catégories</span>
+                </button>
+                <!-- Navigation vers Dispositifs (icône : devices) -->
+                <button onclick="showPage('page-devices')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">devices</span>
+                    <span class="text-xs font-medium">Appareils</span>
+                </button>
+                <!-- Navigation vers Employés (icône : people) -->
+                <button onclick="showPage('page-employees')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">people</span>
+                    <span class="text-xs font-medium">Employés</span>
+                </button>
+                <!-- Navigation vers Paiements (icône : payment) -->
+                <button onclick="showPage('page-payments')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">payment</span>
+                    <span class="text-xs font-medium">Paiements</span>
+                </button>
+                <!-- Navigation vers Inventaire (icône : inventory_2) -->
+                <button onclick="showPage('page-inventory')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">inventory_2</span>
+                    <span class="text-xs font-medium">Stock</span>
+                </button>
+                <!-- Navigation vers Plan de Salle (icône : map) -->
+                <button onclick="showPage('page-floorplan')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">map</span>
+                    <span class="text-xs font-medium">Salle</span>
+                </button>
+                <!-- Navigation vers Journal (icône : history) -->
+                <button onclick="showPage('page-activity-log')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">history</span>
+                    <span class="text-xs font-medium">Journal</span>
+                </button>
+                <!-- Navigation vers Produits (icône : store) -->
+                <button onclick="showPage('page-products')" class="flex flex-col items-center text-white/60 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-2xl">store</span>
+                    <span class="text-xs font-medium">Produits</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Script JavaScript pour la navigation entre pages -->
+    <script>
+        // Fonction pour afficher une page spécifique et cacher les autres
+        function showPage(pageId) {
+            // Cacher toutes les pages
+            const pages = document.querySelectorAll('#pages-container > div');
+            pages.forEach(page => page.classList.add('hidden'));
+            // Afficher la page sélectionnée
+            document.getElementById(pageId).classList.remove('hidden');
+            // Optionnel : Ajouter une classe active à l'icône cliquée (à implémenter si besoin)
+        }
+
+        // Afficher la première page par défaut (Login)
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('page-login');
+        });
+    </script>
+</body>
+</html>
