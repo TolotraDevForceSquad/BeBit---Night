@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Mobile - Système de Point de Vente</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .table-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.5rem; }
+        .order-item { border-bottom: 1px solid #e5e7eb; padding: 0.5rem 0; }
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .modal-content { background: white; padding: 1rem; border-radius: 0.5rem; max-width: 90%; max-height: 90%; overflow-y: auto; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Données fictives complètes
+        const initialData = {
+            employees: [
+                { id: 1, name: "Alice Dupont", role: "Serveuse", pin: "1234", status: true, deviceId: 1, imageUrl: "https://via.placeholder.com/50?text=A" },
+                { id: 2, name: "Bob Martin", role: "Cuisinier", pin: "5678", status: true, deviceId: 2, imageUrl: "https://via.placeholder.com/50?text=B" },
+                { id: 3, name: "Claire Lefevre", role: "Manager", pin: "9999", status: true, deviceId: 1, imageUrl: "https://via.placeholder.com/50?text=C" },
+                { id: 4, name: "David Roux", role: "Barman", pin: "4321", status: false, deviceId: 3, imageUrl: "https://via.placeholder.com/50?text=D" },
+                { id: 5, name: "Eva Blanc", role: "Serveuse", pin: "8765", status: true, deviceId: 2, imageUrl: "https://via.placeholder.com/50?text=E" },
+                { id: 6, name: "Frank Noir", role: "Cuisinier", pin: "1111", status: true, deviceId: 1, imageUrl: "https://via.placeholder.com/50?text=F" }
+            ],
+            posDevices: [
+                { id: 1, name: "Tablette Salle 1", location: "Salle Principale", status: true, lastActive: "2025-11-06T20:00:00Z", sales: 1500, imageUrl: "https://via.placeholder.com/100?text=Device1" },
+                { id: 2, name: "iPad Bar", location: "Bar", status: true, lastActive: "2025-11-06T19:45:00Z", sales: 800, imageUrl: "https://via.placeholder.com/100?text=Device2" },
+                { id: 3, name: "Android Cuisine", location: "Cuisine", status: false, lastActive: "2025-11-06T18:30:00Z", sales: 1200, imageUrl: "https://via.placeholder.com/100?text=Device3" },
+                { id: 4, name: "Tablette Terrasse", location: "Terrasse", status: true, lastActive: "2025-11-06T21:00:00Z", sales: 600, imageUrl: "https://via.placeholder.com/100?text=Device4" }
+            ],
+            productCategories: [
+                { id: 1, name: "Entrées", description: "Plats d'ouverture", isActive: true, imageUrl: "https://via.placeholder.com/80?text=Entrées" },
+                { id: 2, name: "Plats Principaux", description: "Repas complets", isActive: true, imageUrl: "https://via.placeholder.com/80?text=Principaux" },
+                { id: 3, name: "Desserts", description: "Sucrés", isActive: true, imageUrl: "https://via.placeholder.com/80?text=Desserts" },
+                { id: 4, name: "Boissons", description: "À boire", isActive: true, imageUrl: "https://via.placeholder.com/80?text=Boissons" },
+                { id: 5, name: "Snacks", description: "Petits en-cas", isActive: false, imageUrl: "https://via.placeholder.com/80?text=Snacks" }
+            ],
+            products: [
+                { id: 1, name: "Salade César", description: "Salade avec poulet grillé", price: 12, categoryId: 1, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Salade" },
+                { id: 2, name: "Steak Frites", description: "Steak juteux avec frites", price: 25, categoryId: 2, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Steak" },
+                { id: 3, name: "Tiramisu", description: "Dessert italien classique", price: 8, categoryId: 3, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Tiramisu" },
+                { id: 4, name: "Coca-Cola", description: "Boisson gazeuse", price: 3, categoryId: 4, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Coca" },
+                { id: 5, name: "Burger Végé", description: "Burger végétarien", price: 18, categoryId: 2, isAvailable: false, imageUrl: "https://via.placeholder.com/60?text=Burger" },
+                { id: 6, name: "Soupe du Jour", description: "Soupe maison", price: 7, categoryId: 1, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Soupe" },
+                { id: 7, name: "Crème Brûlée", description: "Dessert caramélisé", price: 9, categoryId: 3, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Crème" },
+                { id: 8, name: "Bière Locale", description: "Bière artisanale", price: 5, categoryId: 4, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Bière" },
+                { id: 9, name: "Pâtes Carbonara", description: "Pâtes à l'italienne", price: 20, categoryId: 2, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Pâtes" },
+                { id: 10, name: "Eau Minérale", description: "Bouteille d'eau", price: 2, categoryId: 4, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Eau" },
+                { id: 11, name: "Nachos", description: "Nachos au fromage", price: 10, categoryId: 5, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Nachos" },
+                { id: 12, name: "Pizza Margherita", description: "Pizza basique", price: 15, categoryId: 2, isAvailable: true, imageUrl: "https://via.placeholder.com/60?text=Pizza" }
+            ],
+            posTables: [
+                { id: 1, name: "Table 1", number: 1, area: "Salle Principale", capacity: 4, status: "Libre", currentOrderId: null, imageUrl: "https://via.placeholder.com/80?text=T1" },
+                { id: 2, name: "Table 2", number: 2, area: "Salle Principale", capacity: 2, status: "Occupée", currentOrderId: 1, imageUrl: "https://via.placeholder.com/80?text=T2" },
+                { id: 3, name: "Table 3", number: 3, area: "Terrasse", capacity: 6, status: "Réservée", currentOrderId: null, imageUrl: "https://via.placeholder.com/80?text=T3" },
+                { id: 4, name: "Table 4", number: 4, area: "Bar", capacity: 3, status: "Libre", currentOrderId: null, imageUrl: "https://via.placeholder.com/80?text=T4" },
+                { id: 5, name: "Table 5", number: 5, area: "Salle Privée", capacity: 8, status: "Occupée", currentOrderId: 2, imageUrl: "https://via.placeholder.com/80?text=T5" },
+                { id: 6, name: "Table 6", number: 6, area: "Terrasse", capacity: 4, status: "En Service", currentOrderId: 3, imageUrl: "https://via.placeholder.com/80?text=T6" },
+                { id: 7, name: "Table 7", number: 7, area: "Salle Principale", capacity: 2, status: "Libre", currentOrderId: null, imageUrl: "https://via.placeholder.com/80?text=T7" },
+                { id: 8, name: "Table 8", number: 8, area: "Bar", capacity: 5, status: "Réservée", currentOrderId: null, imageUrl: "https://via.placeholder.com/80?text=T8" }
+            ],
+            orders: [
+                { id: 1, tableId: 2, customerName: "Famille Martin", status: "En Préparation", total: 45, createdAt: "2025-11-06T19:30:00Z", updatedAt: "2025-11-06T19:45:00Z", paymentMethod: "Carte", priority: "Normale", estimatedCompletionTime: "2025-11-06T20:00:00Z" },
+                { id: 2, tableId: 5, customerName: "Groupe d'Amis", status: "Servi", total: 120, createdAt: "2025-11-06T18:00:00Z", updatedAt: "2025-11-06T19:00:00Z", paymentMethod: "Espèces", priority: "Haute", estimatedCompletionTime: "2025-11-06T18:45:00Z" },
+                { id: 3, tableId: 6, customerName: "M. Dupont", status: "Payé", total: 30, createdAt: "2025-11-06T20:00:00Z", updatedAt: "2025-11-06T20:15:00Z", paymentMethod: "Carte", priority: "Basse", estimatedCompletionTime: "2025-11-06T20:20:00Z" },
+                { id: 4, tableId: 3, customerName: "Réservation Even", status: "En Attente", total: 0, createdAt: "2025-11-06T21:00:00Z", updatedAt: "2025-11-06T21:00:00Z", paymentMethod: null, priority: "Normale", estimatedCompletionTime: null },
+                { id: 5, tableId: 2, customerName: "Mme. Blanc", status: "En Préparation", total: 25, createdAt: "2025-11-06T20:10:00Z", updatedAt: "2025-11-06T20:12:00Z", paymentMethod: "Espèces", priority: "Haute", estimatedCompletionTime: "2025-11-06T20:25:00Z" }
+            ],
+            orderItems: [
+                { id: 1, orderId: 1, productId: 1, quantity: 2, price: 12, notes: "Sans anchois", subtotal: 24, status: "En Cours", category: "Entrées", preparationTime: 5 },
+                { id: 2, orderId: 1, productId: 2, quantity: 1, price: 25, notes: "", subtotal: 25, status: "Prêt", category: "Plats Principaux", preparationTime: 15 },
+                { id: 3, orderId: 2, productId: 3, quantity: 3, price: 8, notes: "Extra crème", subtotal: 24, status: "Servi", category: "Desserts", preparationTime: 3 },
+                { id: 4, orderId: 2, productId: 4, quantity: 4, price: 3, notes: "", subtotal: 12, status: "Servi", category: "Boissons", preparationTime: 1 },
+                { id: 5, orderId: 3, productId: 6, quantity: 1, price: 7, notes: "Végétarien", subtotal: 7, status: "Payé", category: "Entrées", preparationTime: 4 },
+                { id: 6, orderId: 3, productId: 8, quantity: 2, price: 5, notes: "", subtotal: 10, status: "Payé", category: "Boissons", preparationTime: 2 },
+                { id: 7, orderId: 5, productId: 9, quantity: 1, price: 20, notes: "Sans oignons", subtotal: 20, status: "En Cours", category: "Plats Principaux", preparationTime: 12 },
+                { id: 8, orderId: 5, productId: 10, quantity: 1, price: 2, notes: "", subtotal: 2, status: "Prêt", category: "Boissons", preparationTime: 1 },
+                { id: 9, orderId: 1, productId: 12, quantity: 1, price: 15, notes: "Extra fromage", subtotal: 15, status: "En Cours", category: "Plats Principaux", preparationTime: 10 },
+                { id: 10, orderId: 2, productId: 7, quantity: 2, price: 9, notes: "", subtotal: 18, status: "Servi", category: "Desserts", preparationTime: 4 }
+            ],
+            posHistory: [
+                { id: 1, type: "Commande", description: "Nouvelle commande ouverte", userId: 1, userName: "Alice Dupont", userRole: "Serveuse", timestamp: "2025-11-06T19:30:00Z", amount: 0, orderId: 1, tableId: 2, tableName: "Table 2", details: "Table occupée", status: "Ouverte" },
+                { id: 2, type: "Paiement", description: "Paiement effectué", userId: 3, userName: "Claire Lefevre", userRole: "Manager", timestamp: "2025-11-06T19:00:00Z", amount: 120, orderId: 2, tableId: 5, tableName: "Table 5", details: "Espèces reçues", status: "Payé" },
+                { id: 3, type: "Article Ajouté", description: "Ajout de Tiramisu x3", userId: 1, userName: "Alice Dupont", userRole: "Serveuse", timestamp: "2025-11-06T18:30:00Z", amount: 24, orderId: 2, tableId: 5, tableName: "Table 5", details: "Notes: Extra crème", status: "Ajouté" },
+                { id: 4, type: "Table Réservée", description: "Réservation pour Even", userId: 2, userName: "Bob Martin", userRole: "Cuisinier", timestamp: "2025-11-06T21:00:00Z", amount: 0, orderId: 4, tableId: 3, tableName: "Table 3", details: "Groupe de 4", status: "Réservée" },
+                { id: 5, type: "Statut Mis à Jour", description: "Commande servie", userId: 5, userName: "Eva Blanc", userRole: "Serveuse", timestamp: "2025-11-06T20:15:00Z", amount: 0, orderId: 3, tableId: 6, tableName: "Table 6", details: "Tout servi", status: "Servi" },
+                { id: 6, type: "Paiement", description: "Paiement par carte", userId: 3, userName: "Claire Lefevre", userRole: "Manager", timestamp: "2025-11-06T20:15:00Z", amount: 30, orderId: 3, tableId: 6, tableName: "Table 6", details: "Carte acceptée", status: "Payé" },
+                { id: 7, type: "Article Ajouté", description: "Ajout de Pâtes Carbonara", userId: 1, userName: "Alice Dupont", userRole: "Serveuse", timestamp: "2025-11-06T20:10:00Z", amount: 20, orderId: 5, tableId: 2, tableName: "Table 2", details: "Sans oignons", status: "Ajouté" },
+                { id: 8, type: "Device Connecté", description: "Connexion tablette", userId: 4, userName: "David Roux", userRole: "Barman", timestamp: "2025-11-06T20:05:00Z", amount: 0, orderId: null, tableId: null, tableName: null, details: "Salle 1", status: "Connecté" },
+                { id: 9, type: "Commande Fermée", description: "Clôture de commande", userId: 6, userName: "Frank Noir", userRole: "Cuisinier", timestamp: "2025-11-06T19:45:00Z", amount: 45, orderId: 1, tableId: 2, tableName: "Table 2", details: "En attente paiement", status: "Fermée" },
+                { id: 10, type: "Erreur", description: "Produit indisponible", userId: 2, userName: "Bob Martin", userRole: "Cuisinier", timestamp: "2025-11-06T18:45:00Z", amount: 0, orderId: 2, tableId: 5, tableName: "Table 5", details: "Burger Végé out of stock", status: "Erreur" }
+            ],
+            paymentMethods: [
+                { id: 1, name: "Espèces", value: 1 },
+                { id: 2, name: "Carte Bancaire", value: 2 },
+                { id: 3, name: "Chèque", value: 3 },
+                { id: 4, name: "Mobile Pay", value: 4 },
+                { id: 5, name: "Virement", value: 5 }
+            ]
+        };
+
+        // Composant principal App
+        function App() {
+            const [currentUser, setCurrentUser] = useState(null);
+            const [data, setData] = useState(initialData);
+            const [currentView, setCurrentView] = useState('login');
+            const [selectedTable, setSelectedTable] = useState(null);
+            const [selectedOrder, setSelectedOrder] = useState(null);
+            const [selectedCategory, setSelectedCategory] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [modalContent, setModalContent] = useState(null);
+            const [searchTerm, setSearchTerm] = useState('');
+
+            // Fonctions utilitaires pour relations
+            const getTableById = (id) => data.posTables.find(t => t.id === id);
+            const getOrderById = (id) => data.orders.find(o => o.id === id);
+            const getProductById = (id) => data.products.find(p => p.id === id);
+            const getCategoryById = (id) => data.productCategories.find(c => c.id === id);
+            const getEmployeeById = (id) => data.employees.find(e => e.id === id);
+            const getOrderItemsByOrder = (orderId) => data.orderItems.filter(oi => oi.orderId === orderId);
+            const getProductsByCategory = (catId) => data.products.filter(p => p.categoryId === catId && p.isAvailable);
+            const getHistoryForOrder = (orderId) => data.posHistory.filter(h => h.orderId === orderId);
+            const getDeviceById = (id) => data.posDevices.find(d => d.id === id);
+
+            // Fonction de login
+            const handleLogin = (pin) => {
+                const employee = data.employees.find(e => e.pin === pin && e.status);
+                if (employee) {
+                    setCurrentUser(employee);
+                    setCurrentView('dashboard');
+                } else {
+                    alert('PIN incorrect ou employé inactif');
+                }
+            };
+
+            // Fonction pour ouvrir une table
+            const openTable = (table) => {
+                let order = getOrderById(table.currentOrderId);
+                if (!order) {
+                    order = {
+                        id: Date.now(),
+                        tableId: table.id,
+                        customerName: '',
+                        status: 'En Attente',
+                        total: 0,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString(),
+                        paymentMethod: null,
+                        priority: 'Normale',
+                        estimatedCompletionTime: null
+                    };
+                    setData(prev => ({ ...prev, orders: [...prev.orders, order] }));
+                    table.currentOrderId = order.id;
+                    setData(prev => ({ ...prev, posTables: prev.posTables.map(t => t.id === table.id ? table : t) }));
+                }
+                setSelectedTable(table);
+                setSelectedOrder(order);
+                setCurrentView('tableDetail');
+            };
+
+            // Ajouter un item à une commande
+            const addOrderItem = (product, quantity = 1, notes = '') => {
+                if (!selectedOrder) return;
+                const existing = getOrderItemsByOrder(selectedOrder.id).find(oi => oi.productId === product.id);
+                let newItem;
+                if (existing) {
+                    newItem = { ...existing, quantity: existing.quantity + quantity, subtotal: (existing.price * (existing.quantity + quantity)), notes };
+                } else {
+                    newItem = {
+                        id: Date.now(),
+                        orderId: selectedOrder.id,
+                        productId: product.id,
+                        quantity,
+                        price: product.price,
+                        notes,
+                        subtotal: product.price * quantity,
+                        status: 'En Cours',
+                        category: getCategoryById(product.categoryId)?.name || '',
+                        preparationTime: Math.floor(Math.random() * 20) + 5
+                    };
+                }
+                setData(prev => ({ ...prev, orderItems: [...prev.orderItems.filter(oi => !(oi.orderId === selectedOrder.id && oi.productId === product.id)), newItem] }));
+                updateOrderTotal(selectedOrder.id);
+                addHistory('Article Ajouté', `Ajout de ${product.name} x${quantity}`, product.price * quantity, selectedOrder.id, selectedTable.id, selectedTable.name);
+            };
+
+            // Mettre à jour total commande
+            const updateOrderTotal = (orderId) => {
+                const items = getOrderItemsByOrder(orderId);
+                const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+                setData(prev => ({ ...prev, orders: prev.orders.map(o => o.id === orderId ? { ...o, total, updatedAt: new Date().toISOString() } : o) }));
+            };
+
+            // Changer statut commande
+            const updateOrderStatus = (status) => {
+                if (!selectedOrder) return;
+                setData(prev => ({ ...prev, orders: prev.orders.map(o => o.id === selectedOrder.id ? { ...o, status } : o) }));
+                addHistory('Statut Mis à Jour', `Statut changé en ${status}`, 0, selectedOrder.id, selectedTable.id, selectedTable.name);
+                if (status === 'Payé') {
+                    setCurrentView('dashboard');
+                }
+            };
+
+            // Ajouter à l'historique
+            const addHistory = (type, description, amount, orderId, tableId, tableName) => {
+                const history = {
+                    id: Date.now(),
+                    type,
+                    description,
+                    userId: currentUser?.id,
+                    userName: currentUser?.name,
+                    userRole: currentUser?.role,
+                    timestamp: new Date().toISOString(),
+                    amount,
+                    orderId,
+                    tableId,
+                    tableName,
+                    details: '',
+                    status: 'Enregistré'
+                };
+                setData(prev => ({ ...prev, posHistory: [history, ...prev.posHistory] }));
+            };
+
+            // Modal générique
+            const Modal = ({ isOpen, onClose, children }) => {
+                if (!isOpen) return null;
+                return (
+                    <div className="modal">
+                        <div className="modal-content">
+                            <button onClick={onClose} className="float-right text-red-500">✕</button>
+                            {children}
+                        </div>
+                    </div>
+                );
+            };
+
+            // Composant Login
+            const Login = () => {
+                const [pin, setPin] = useState('');
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+                        <h1 className="text-2xl font-bold mb-8">Connexion POS</h1>
+                        <input
+                            type="password"
+                            value={pin}
+                            onChange={(e) => setPin(e.target.value)}
+                            placeholder="Entrez votre PIN"
+                            className="p-3 border rounded mb-4 w-full max-w-md text-center text-lg"
+                            maxLength={4}
+                        />
+                        <button onClick={() => handleLogin(pin)} className="bg-blue-500 text-white p-3 rounded w-full max-w-md">Se Connecter</button>
+                    </div>
+                );
+            };
+
+            // Composant Dashboard (Tables)
+            const Dashboard = () => {
+                const tables = data.posTables.map(table => ({
+                    ...table,
+                    order: getOrderById(table.currentOrderId)
+                })).filter(t => !searchTerm || t.name.toLowerCase().includes(searchTerm.toLowerCase()) || t.area.toLowerCase().includes(searchTerm.toLowerCase()));
+
+                return (
+                    <div className="p-4">
+                        <h1 className="text-xl font-bold mb-4">Tableau de Bord</h1>
+                        <input
+                            type="text"
+                            placeholder="Rechercher tables..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="p-2 border rounded mb-4 w-full"
+                        />
+                        <div className="table-grid">
+                            {tables.map(table => (
+                                <div key={table.id} className={`p-2 rounded border ${table.status === 'Libre' ? 'bg-green-100' : table.status === 'Occupée' ? 'bg-yellow-100' : 'bg-red-100'}`}>
+                                    <img src={table.imageUrl} alt={table.name} className="w-full h-20 object-cover rounded mb-2" />
+                                    <h3 className="font-semibold">{table.name}</h3>
+                                    <p className="text-sm">{table.area} - Cap: {table.capacity}</p>
+                                    <p className="text-sm font-bold">{table.status}</p>
+                                    {table.order && <p className="text-sm">Total: {table.order.total}€</p>}
+                                    <button onClick={() => openTable(table)} className="mt-2 bg-blue-500 text-white p-1 rounded text-sm w-full">Ouvrir</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
+
+            // Composant Détail Table
+            const TableDetail = () => {
+                if (!selectedTable || !selectedOrder) return <div>Chargement...</div>;
+                const items = getOrderItemsByOrder(selectedOrder.id);
+                const total = items.reduce((sum, i) => sum + i.subtotal, 0);
+
+                return (
+                    <div className="p-4">
+                        <h1 className="text-xl font-bold mb-4">Table {selectedTable.name}</h1>
+                        <input
+                            placeholder="Nom Client"
+                            value={selectedOrder.customerName}
+                            onChange={(e) => setData(prev => ({ ...prev, orders: prev.orders.map(o => o.id === selectedOrder.id ? { ...o, customerName: e.target.value } : o) }))}
+                            className="p-2 border rounded mb-4 w-full"
+                        />
+                        <div className="mb-4">
+                            <h2 className="font-semibold mb-2">Articles ({items.length})</h2>
+                            <div className="product-grid">
+                                {data.productCategories.filter(c => c.isActive).map(cat => (
+                                    <div key={cat.id} className="bg-gray-200 p-2 rounded">
+                                        <h3 className="font-bold text-xs">{cat.name}</h3>
+                                        {getProductsByCategory(cat.id).map(prod => (
+                                            <button
+                                                key={prod.id}
+                                                onClick={() => addOrderItem(prod)}
+                                                className="block w-full text-left p-1 bg-white rounded mt-1 text-xs"
+                                            >
+                                                {prod.name} - {prod.price}€
+                                            </button>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="mb-4">
+                            <h2 className="font-semibold mb-2">Commande Actuelle</h2>
+                            {items.map(item => (
+                                <div key={item.id} className="order-item flex justify-between">
+                                    <span>{getProductById(item.productId)?.name} x{item.quantity}</span>
+                                    <span>{item.subtotal}€</span>
+                                    {item.notes && <span className="text-xs italic">({item.notes})</span>}
+                                </div>
+                            ))}
+                            <div className="font-bold mt-2">Total: {total}€</div>
+                        </div>
+                        <div className="flex space-x-2 mb-4">
+                            <select
+                                value={selectedOrder.priority}
+                                onChange={(e) => setData(prev => ({ ...prev, orders: prev.orders.map(o => o.id === selectedOrder.id ? { ...o, priority: e.target.value } : o) }))}
+                                className="p-2 border rounded"
+                            >
+                                <option value="Basse">Basse</option>
+                                <option value="Normale">Normale</option>
+                                <option value="Haute">Haute</option>
+                            </select>
+                            <select
+                                value={selectedOrder.paymentMethod || ''}
+                                onChange={(e) => setData(prev => ({ ...prev, orders: prev.orders.map(o => o.id === selectedOrder.id ? { ...o, paymentMethod: e.target.value || null } : o) }))}
+                                className="p-2 border rounded"
+                            >
+                                <option value="">Méthode Paiement</option>
+                                {data.paymentMethods.map(pm => <option key={pm.id} value={pm.name}>{pm.name}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex space-x-2">
+                            <button onClick={() => updateOrderStatus('En Préparation')} className="flex-1 bg-yellow-500 text-white p-2 rounded">Préparation</button>
+                            <button onClick={() => updateOrderStatus('Servi')} className="flex-1 bg-green-500 text-white p-2 rounded">Servi</button>
+                            <button onClick={() => updateOrderStatus('Payé')} className="flex-1 bg-blue-500 text-white p-2 rounded">Payé</button>
+                        </div>
+                        <button onClick={() => { setSelectedTable(null); setSelectedOrder(null); setCurrentView('dashboard'); }} className="mt-4 bg-gray-500 text-white p-2 rounded w-full">Retour</button>
+                    </div>
+                );
+            };
+
+            // Composant Liste Ordres
+            const OrdersList = () => {
+                const ordersList = data.orders
+                    .map(order => ({
+                        ...order,
+                        table: getTableById(order.tableId),
+                        items: getOrderItemsByOrder(order.id).length
+                    }))
+                    .filter(o => !searchTerm || o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.status.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                return (
+                    <div className="p-4">
+                        <h1 className="text-xl font-bold mb-4">Commandes</h1>
+                        <input
+                            type="text"
+                            placeholder="Rechercher commandes..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="p-2 border rounded mb-4 w-full"
+                        />
+                        {ordersList.map(order => (
+                            <div key={order.id} className="bg-white p-3 rounded mb-2 shadow">
+                                <div className="flex justify-between">
+                                    <span>{order.customerName} - {order.table?.name}</span>
+                                    <span className={`px-2 py-1 rounded text-sm ${order.status === 'Payé' ? 'bg-green-200' : order.status === 'En Préparation' ? 'bg-yellow-200' : 'bg-red-200'}`}>
+                                        {order.status}
+                                    </span>
+                                </div>
+                                <p className="text-sm">Total: {order.total}€ | Articles: {order.items}</p>
+                                <p className="text-xs">Créé: {new Date(order.createdAt).toLocaleString()}</p>
+                                <button onClick={() => { setSelectedOrder(order); setSelectedTable(order.table); setCurrentView('tableDetail'); }} className="text-blue-500 text-sm mt-1">Détails</button>
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            // Composant Produits
+            const Products = () => {
+                const categories = data.productCategories.filter(c => c.isActive || !searchTerm || c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+                return (
+                    <div className="p-4">
+                        <h1 className="text-xl font-bold mb-4">Produits</h1>
+                        <input
+                            type="text"
+                            placeholder="Rechercher produits/catégories..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="p-2 border rounded mb-4 w-full"
+                        />
+                        {categories.map(cat => (
+                            <div key={cat.id} className="mb-4">
+                                <h2 className="font-semibold flex items-center">
+                                    <img src={cat.imageUrl} alt={cat.name} className="w-8 h-8 mr-2 rounded" />
+                                    {cat.name}
+                                </h2>
+                                <p className="text-sm text-gray-600 mb-2">{cat.description}</p>
+                                <div className="product-grid">
+                                    {getProductsByCategory(cat.id).map(prod => (
+                                        <div key={prod.id} className="bg-white p-2 rounded shadow">
+                                            <img src={prod.imageUrl} alt={prod.name} className="w-full h-16 object-cover rounded mb-1" />
+                                            <h3 className="font-semibold text-sm">{prod.name}</h3>
+                                            <p className="text-xs">{prod.description}</p>
+                                            <p className="font-bold text-sm">{prod.price}€</p>
+                                            <p className={`text-xs ${prod.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                                                {prod.isAvailable ? 'Disponible' : 'Indisponible'}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            // Composant Historique
+            const History = () => {
+                const history = data.posHistory
+                    .filter(h => !searchTerm || h.description.toLowerCase().includes(searchTerm.toLowerCase()) || h.userName.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                return (
+                    <div className="p-4">
+                        <h1 className="text-xl font-bold mb-4">Historique</h1>
+                        <input
+                            type="text"
+                            placeholder="Rechercher historique..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="p-2 border rounded mb-4 w-full"
+                        />
+                        {history.map(entry => (
+                            <div key={entry.id} className="bg-white p-3 rounded mb-2 shadow">
+                                <div className="flex justify-between">
+                                    <span className="font-semibold">{entry.type}</span>
+                                    <span className="text-sm text-gray-600">{new Date(entry.timestamp).toLocaleString()}</span>
+                                </div>
+                                <p>{entry.description}</p>
+                                {entry.userName && <p className="text-sm">Par: {entry.userName} ({entry.userRole})</p>}
+                                {entry.amount > 0 && <p className="font-bold">Montant: {entry.amount}€</p>}
+                                {entry.tableName && <p className="text-sm">Table: {entry.tableName}</p>}
+                                <span className={`px-1 py-0.5 rounded text-xs ${entry.status === 'Payé' ? 'bg-green-200' : entry.status === 'Erreur' ? 'bg-red-200' : 'bg-gray-200'}`}>
+                                    {entry.status}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            // Composant Employés
+            const Employees = () => (
+                <div className="p-4">
+                    <h1 className="text-xl font-bold mb-4">Employés</h1>
+                    <input
+                        type="text"
+                        placeholder="Rechercher employés..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="p-2 border rounded mb-4 w-full"
+                    />
+                    {data.employees.filter(e => !searchTerm || e.name.toLowerCase().includes(searchTerm.toLowerCase())).map(emp => (
+                        <div key={emp.id} className="bg-white p-3 rounded mb-2 shadow flex items-center">
+                            <img src={emp.imageUrl} alt={emp.name} className="w-12 h-12 rounded-full mr-3" />
+                            <div className="flex-1">
+                                <h3 className="font-semibold">{emp.name}</h3>
+                                <p className="text-sm">{emp.role}</p>
+                                <p className={`text-xs ${emp.status ? 'text-green-600' : 'text-red-600'}`}>{emp.status ? 'Actif' : 'Inactif'}</p>
+                            </div>
+                            <div className="device">{getDeviceById(emp.deviceId)?.name || 'Aucun'}</div>
+                        </div>
+                    ))}
+                </div>
+            );
+
+            // Composant Appareils
+            const Devices = () => (
+                <div className="p-4">
+                    <h1 className="text-xl font-bold mb-4">Appareils POS</h1>
+                    <input
+                        type="text"
+                        placeholder="Rechercher appareils..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="p-2 border rounded mb-4 w-full"
+                    />
+                    {data.posDevices.filter(d => !searchTerm || d.name.toLowerCase().includes(searchTerm.toLowerCase())).map(dev => (
+                        <div key={dev.id} className="bg-white p-3 rounded mb-2 shadow">
+                            <h3 className="font-semibold">{dev.name}</h3>
+                            <p className="text-sm">Emplacement: {dev.location}</p>
+                            <p className="text-sm">Ventes: {dev.sales}€</p>
+                            <p className={`text-sm ${dev.status ? 'text-green-600' : 'text-red-600'}`}>{dev.status ? 'Actif' : 'Inactif'}</p>
+                            <p className="text-xs">Dernière activité: {new Date(dev.lastActive).toLocaleString()}</p>
+                            <img src={dev.imageUrl} alt={dev.name} className="mt-2 w-full h-20 object-cover rounded" />
+                        </div>
+                    ))}
+                </div>
+            );
+
+            // Composant Paramètres
+            const Settings = () => (
+                <div className="p-4">
+                    <h1 className="text-xl font-bold mb-4">Paramètres</h1>
+                    <div>
+                        <h2 className="font-semibold mb-2">Méthodes de Paiement</h2>
+                        {data.paymentMethods.map(pm => (
+                            <div key={pm.id} className="bg-white p-2 rounded mb-1 flex justify-between">
+                                <span>{pm.name}</span>
+                                <span className="text-sm">Valeur: {pm.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="mt-4">
+                        <h2 className="font-semibold mb-2">Utilisateur Connecté</h2>
+                        <p>{currentUser?.name} - {currentUser?.role}</p>
+                        <button onClick={() => { setCurrentUser(null); setCurrentView('login'); }} className="bg-red-500 text-white p-2 rounded mt-2 w-full">Déconnexion</button>
+                    </div>
+                </div>
+            );
+
+            // Navigation inférieure
+            const Nav = () => (
+                <nav className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-2">
+                    <button onClick={() => setCurrentView('dashboard')} className={`p-2 ${currentView === 'dashboard' ? 'text-blue-500' : 'text-gray-500'}`}>🏠 Accueil</button>
+                    <button onClick={() => setCurrentView('orders')} className={`p-2 ${currentView === 'orders' ? 'text-blue-500' : 'text-gray-500'}`}>📋 Commandes</button>
+                    <button onClick={() => setCurrentView('products')} className={`p-2 ${currentView === 'products' ? 'text-blue-500' : 'text-gray-500'}`}>🍽️ Produits</button>
+                    <button onClick={() => setCurrentView('history')} className={`p-2 ${currentView === 'history' ? 'text-blue-500' : 'text-gray-500'}`}>📊 Historique</button>
+                    <button onClick={() => setCurrentView('settings')} className={`p-2 ${currentView === 'settings' ? 'text-blue-500' : 'text-gray-500'}`}>⚙️ Paramètres</button>
+                </nav>
+            );
+
+            // Vues conditionnelles
+            const renderView = () => {
+                if (currentView === 'login') return <Login />;
+                if (currentView === 'dashboard') return <Dashboard />;
+                if (currentView === 'tableDetail') return <TableDetail />;
+                if (currentView === 'orders') return <OrdersList />;
+                if (currentView === 'products') return <Products />;
+                if (currentView === 'history') return <History />;
+                if (currentView === 'employees') return <Employees />;
+                if (currentView === 'devices') return <Devices />;
+                if (currentView === 'settings') return <Settings />;
+                return <div>Vue non trouvée</div>;
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {currentUser && <Nav />}
+                    {renderView()}
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                        {modalContent}
+                    </Modal>
+                </div>
+            );
+        }
+
+        // Rendu
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

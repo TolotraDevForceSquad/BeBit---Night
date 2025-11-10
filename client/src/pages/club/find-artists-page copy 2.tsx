@@ -1,4 +1,3 @@
-// V1
 "use client";
 
 import { useState, useEffect } from "react";
@@ -1250,5 +1249,3 @@ const ArtistsPage = () => {
 };
 
 export default ArtistsPage;
-
-// V2

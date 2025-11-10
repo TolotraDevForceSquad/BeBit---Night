@@ -1,9 +1,3 @@
-// MA MEMOIRE M2 - MASTER2
-
-Redige moi ma memoir de fin d'annees en master suivant le model de l'ancien etudiant mais mon theme sera 
-
-Conception et developpement d'un plateforme evenementielle appaler bebit et voici son schema de donnees (web et mobile)
-
 // D:\Projet\BeBit\bebit - new\shared\schema.ts
 import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -116,16 +110,11 @@ export const clubTables = pgTable("club_tables", {
 });
 
 // ======================
-// Events table (MODIFIÉE)
+// Events table
 // ======================
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
-  // Organisation flexible (peut être club, artiste ou utilisateur)
-  organizerType: text("organizer_type", { enum: ["club", "artist", "user"] }).notNull(),
-  organizerId: integer("organizer_id").notNull(),
-  // Utilisateur qui crée l'événement
-  createdBy: integer("created_by").references(() => users.id).notNull(),
- 
+  clubId: integer("club_id").references(() => clubs.id).notNull(),
   title: text("title").notNull(),
   description: text("description"),
   date: timestamp("date").notNull(),
@@ -172,7 +161,7 @@ export const eventArtists = pgTable("event_artists", {
 export const eventParticipants = pgTable("event_participants", {
   eventId: integer("event_id").references(() => events.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
-  status: text("status", { enum: ["pending", "confirmed", "cancel"] }).notNull().default("pending"),
+  status: text("status", { enum: ["pending", "confirmed"] }).notNull().default("pending"),
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 }, (t) => ({
   pk: primaryKey({ columns: [t.eventId, t.userId] }),
@@ -347,6 +336,7 @@ export const drinkTypes = pgTable("drink_types", {
 });
 
 export const customerTags = pgTable("customer_tags", {
+  id: serial("id").primaryKey(),
   customerId: integer("customer_id").references(() => customerProfiles.id).notNull(),
   tag: text("tag").notNull(),
 }, (t) => ({
@@ -517,8 +507,7 @@ export const insertClubTableSchema = createInsertSchema(clubTables, {
 });
 
 export const insertEventSchema = createInsertSchema(events, {
-  // date: (schema) => schema.refine((val) => val > new Date(), "Date doit être future"),
-  date: z.coerce.date().refine((val) => val > new Date(), "Date doit être future"),
+  date: (schema) => schema.refine((val) => val > new Date(), "Date doit être future"),
   startTime: (schema) => schema.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Format heure invalide"),
   endTime: (schema) => schema.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Format heure invalide"),
   price: (schema) => schema.min(0, "Prix non négatif"),
@@ -530,7 +519,7 @@ export const insertEventArtistSchema = createInsertSchema(eventArtists);
 export const insertEventReservedTableSchema = createInsertSchema(eventReservedTables);
 
 export const insertEventParticipantSchema = createInsertSchema(eventParticipants, {
-  status: (schema) => schema.refine((val) => ["pending", "confirmed", "cancel"].includes(val), "Status participant invalide"),
+  status: (schema) => schema.refine((val) => ["pending", "confirmed"].includes(val), "Status participant invalide"),
 });
 
 export const insertInvitationSchema = createInsertSchema(invitations, {
@@ -566,8 +555,6 @@ export const insertFeedbackCommentSchema = createInsertSchema(feedbackComments, 
 });
 
 export const insertCollaborationMilestoneSchema = createInsertSchema(collaborationMilestones, {
-  dueDate: z.coerce.date().optional(),  // Handles string ISO dates
-  completedAt: z.coerce.date().optional(),  // Handles string ISO dates if provided
   status: (schema) => schema.refine((val) => ["pending", "in_progress", "completed"].includes(val), "Statut milestone invalide"),
   assignedTo: (schema) => schema.refine((val) => ["artist", "club", "both"].includes(val), "Assigné invalide"),
   priority: (schema) => schema.refine((val) => ["low", "medium", "high"].includes(val), "Priorité invalide"),
@@ -588,8 +575,6 @@ export const insertDrinkTypeSchema = createInsertSchema(drinkTypes);
 export const insertCustomerTagSchema = createInsertSchema(customerTags);
 
 export const insertPromotionSchema = createInsertSchema(promotions, {
-  validFrom: z.coerce.date(),
-  validTo: z.coerce.date(),
   discountType: (schema) => schema.refine((val) => ["percentage", "fixed"].includes(val), "Type de discount invalide"),
   status: (schema) => schema.refine((val) => ["active", "inactive", "expired"].includes(val), "Statut invalide"),
   channels: (schema) => schema.refine((val) => Array.isArray(val), "Channels doit être un array"),
@@ -601,8 +586,6 @@ export const insertPaymentMethodSchema = createInsertSchema(paymentMethods, {
 });
 
 export const insertInvoiceSchema = createInsertSchema(invoices, {
-  dueDate: z.coerce.date().optional(),  // Handles string ISO dates
-  paidAt: z.coerce.date().optional(),   // Handles string ISO dates if provided
   status: (schema) => schema.refine((val) => ["paid", "pending", "overdue"].includes(val), "Statut de facture invalide"),
 });
 
@@ -723,13 +706,3 @@ export type CollaborationMilestone = typeof collaborationMilestones.$inferSelect
 export type InsertCollaborationMilestone = z.infer<typeof insertCollaborationMilestoneSchema>;
 export type CollaborationMessage = typeof collaborationMessages.$inferSelect;
 export type InsertCollaborationMessage = z.infer<typeof insertCollaborationMessageSchema>;
-
-Donc avant de rediger le memoir au complet tu doit analyse mon application et trouver ces fonctionnaliter etc.. tous ce qui pourrai le concernet.
-
-Note : Tu peux mettre vide le presentation de l'ENI et de hello Tana, car mon etablissement d'accuil est Hello Mada Technologie, et la presentation de l'ENI actuel n'est pas mise a jour
-
-Tu ne dois pas utiliser le meme phrase que dans l'autre memoir, mais tu doit plus ou moin garder le meme nombre de mot pour ne pas trop dire n'importe quoi
-
-Mon projet : [Web -> (React) Mobile -> (ReactNative)],  Express, Postgresql, UML, 2UTP (Y), Ordinateur, VSCode, Git
-
-Je compte sur toi

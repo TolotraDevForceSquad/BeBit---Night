@@ -1,14 +1,14 @@
-// V1
 "use client";
 
 import { useState, useEffect } from "react";
 import { Search, Filter, Grid3X3, List, MapPin, Calendar, Users, Star, Mail, Music, Eye, Edit, MoreVertical, X, Check, Send, Image, MessageCircle, Heart, Share, Play, DollarSign } from "lucide-react";
-import { Artist, Event, Invitation, Feedback, Photo, CollaborationMessage, CollaborationMilestone, ArtistPortfolio } from "@shared/schema";
-import { mockArtists, mockEvents, mockInvitations, mockFeedback, mockPhotos, mockCollaborationMessages, mockCollaborationMilestones, mockArtistPortfolios } from "@/data/club-events-data";
+import { Artist, Event, Invitation, Feedback, Photo, CollaborationMessage, CollaborationMilestone, ArtistPortfolio, User } from "@shared/schema";
+import { mockArtists, mockEvents, mockInvitations, mockFeedback, mockPhotos, mockCollaborationMessages, mockCollaborationMilestones, mockArtistPortfolios, mockUsers } from "@/data/club-events-data";
 import AlertModal from "@/components/AlertModal";
 
 // Types étendus pour les artistes
 interface ArtistWithDetails extends Artist {
+  user?: User;
   eventsOrganized?: Event[];
   eventsPerformed?: Event[];
   invitations?: Invitation[];
@@ -17,17 +17,29 @@ interface ArtistWithDetails extends Artist {
   collaborationMessages?: CollaborationMessage[];
   collaborationMilestones?: CollaborationMilestone[];
   portfolio?: ArtistPortfolio[];
+  isAvailable?: boolean;
+  availabilityReason?: string;
 }
 
 const ArtistsPage = () => {
-  const [artists, setArtists] = useState<ArtistWithDetails[]>(mockArtists);
-  const [filteredArtists, setFilteredArtists] = useState<ArtistWithDetails[]>(mockArtists);
+  const [artists, setArtists] = useState<ArtistWithDetails[]>([]);
+  const [filteredArtists, setFilteredArtists] = useState<ArtistWithDetails[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedArtist, setSelectedArtist] = useState<ArtistWithDetails | null>(null);
   const [activeTab, setActiveTab] = useState<"portfolio" | "events" | "organized" | "invitations" | "collaborations" | "feedback" | "photos">("portfolio");
+
+  // États pour les filtres avancés
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [minRating, setMinRating] = useState(0);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
+  const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [availabilityDateRange, setAvailabilityDateRange] = useState<{ start: string; end: string }>({
+    start: "",
+    end: ""
+  });
 
   // États pour les modals
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -40,7 +52,7 @@ const ArtistsPage = () => {
     title: "",
     description: "",
     type: "info" as const,
-    onConfirm: () => {},
+    onConfirm: () => { },
     confirmLabel: "OK",
     cancelLabel: "Fermer"
   });
@@ -61,9 +73,45 @@ const ArtistsPage = () => {
     setShowAlert(true);
   };
 
+  // Récupérer les informations utilisateur pour chaque artiste
+  const getArtistUser = (artistId: number) => {
+    const artist = mockArtists.find(a => a.id === artistId);
+    if (!artist) return null;
+    return mockUsers.find(user => user.id === artist.userId) || null;
+  };
+
+  // Vérifier la disponibilité d'un artiste
+  const checkArtistAvailability = (artistId: number): { isAvailable: boolean; reason: string } => {
+    const artistInvitations = mockInvitations.filter(inv =>
+      inv.userId === artistId &&
+      ["confirmed", "preparation", "negotiation"].includes(inv.status)
+    );
+
+    const upcomingEvents = artistInvitations.map(inv =>
+      mockEvents.find(event => event.id === inv.eventId)
+    ).filter(event => event && new Date(event.date) > new Date());
+
+    if (upcomingEvents.length === 0) {
+      return { isAvailable: true, reason: "Disponible" };
+    }
+
+    const nextEvent = upcomingEvents.sort((a, b) =>
+      new Date(a!.date).getTime() - new Date(b!.date).getTime()
+    )[0];
+
+    if (nextEvent) {
+      return {
+        isAvailable: false,
+        reason: `Occupé jusqu'au ${formatDate(new Date(nextEvent.date))} - ${nextEvent.title}`
+      };
+    }
+
+    return { isAvailable: true, reason: "Disponible" };
+  };
+
   // Récupérer les événements organisés par l'artiste
   const getEventsOrganizedByArtist = (artistId: number) => {
-    return mockEvents.filter(event => 
+    return mockEvents.filter(event =>
       event.organizerType === "artist" && event.organizerId === artistId
     );
   };
@@ -71,7 +119,7 @@ const ArtistsPage = () => {
   // Récupérer les événements où l'artiste performe
   const getEventsPerformedByArtist = (artistId: number) => {
     const artistInvitations = mockInvitations.filter(inv => inv.userId === artistId);
-    return mockEvents.filter(event => 
+    return mockEvents.filter(event =>
       artistInvitations.some(inv => inv.eventId === event.id && inv.status === "confirmed")
     );
   };
@@ -88,10 +136,10 @@ const ArtistsPage = () => {
 
   // Récupérer les photos de l'artiste
   const getArtistPhotos = (artistId: number) => {
-    return mockPhotos.filter(photo => 
-      mockEvents.some(event => 
-        event.id === photo.eventId && 
-        mockInvitations.some(inv => 
+    return mockPhotos.filter(photo =>
+      mockEvents.some(event =>
+        event.id === photo.eventId &&
+        mockInvitations.some(inv =>
           inv.eventId === event.id && inv.userId === artistId && inv.status === "confirmed"
         )
       )
@@ -100,8 +148,8 @@ const ArtistsPage = () => {
 
   // Récupérer les messages de collaboration
   const getArtistCollaborationMessages = (artistId: number) => {
-    return mockCollaborationMessages.filter(msg => 
-      mockInvitations.some(inv => 
+    return mockCollaborationMessages.filter(msg =>
+      mockInvitations.some(inv =>
         inv.id === msg.invitationId && inv.userId === artistId
       )
     );
@@ -109,8 +157,8 @@ const ArtistsPage = () => {
 
   // Récupérer les milestones de collaboration
   const getArtistCollaborationMilestones = (artistId: number) => {
-    return mockCollaborationMilestones.filter(milestone => 
-      mockInvitations.some(inv => 
+    return mockCollaborationMilestones.filter(milestone =>
+      mockInvitations.some(inv =>
         inv.id === milestone.invitationId && inv.userId === artistId
       )
     );
@@ -123,8 +171,10 @@ const ArtistsPage = () => {
 
   // Charger les détails complets d'un artiste
   const loadArtistDetails = (artist: Artist): ArtistWithDetails => {
+    const availability = checkArtistAvailability(artist.id);
     return {
       ...artist,
+      user: getArtistUser(artist.id) || undefined,
       eventsOrganized: getEventsOrganizedByArtist(artist.id),
       eventsPerformed: getEventsPerformedByArtist(artist.id),
       invitations: getArtistInvitations(artist.id),
@@ -132,9 +182,24 @@ const ArtistsPage = () => {
       photos: getArtistPhotos(artist.id),
       collaborationMessages: getArtistCollaborationMessages(artist.id),
       collaborationMilestones: getArtistCollaborationMilestones(artist.id),
-      portfolio: getArtistPortfolio(artist.id)
+      portfolio: getArtistPortfolio(artist.id),
+      isAvailable: availability.isAvailable,
+      availabilityReason: availability.reason
     };
   };
+
+  // Initialiser les artistes avec leurs données utilisateur
+  useEffect(() => {
+    const artistsWithDetails = mockArtists.map(artist => loadArtistDetails(artist));
+    setArtists(artistsWithDetails);
+    setFilteredArtists(artistsWithDetails);
+
+    // Calculer la fourchette de prix automatiquement
+    const rates = artistsWithDetails.map(a => parseFloat(a.rate));
+    const minRate = Math.min(...rates);
+    const maxRate = Math.max(...rates);
+    setPriceRange([minRate, maxRate]);
+  }, []);
 
   // Ouvrir le modal de détails d'un artiste
   const handleViewDetails = (artist: Artist) => {
@@ -146,13 +211,13 @@ const ArtistsPage = () => {
 
   // Ouvrir le modal d'invitation
   const handleOpenInvitation = (artist: Artist) => {
-    setSelectedArtist(artist);
+    setSelectedArtist(loadArtistDetails(artist));
     setIsInvitationModalOpen(true);
   };
 
   // Ouvrir le modal de message
   const handleOpenMessage = (artist: Artist) => {
-    setSelectedArtist(artist);
+    setSelectedArtist(loadArtistDetails(artist));
     setIsMessageModalOpen(true);
   };
 
@@ -165,7 +230,9 @@ const ArtistsPage = () => {
         artist.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         artist.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         artist.bio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        artist.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        artist.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        artist.user?.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        artist.user?.lastName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -177,8 +244,28 @@ const ArtistsPage = () => {
       filtered = filtered.filter(artist => artist.location.includes(selectedLocation));
     }
 
+    // Filtre par note minimale
+    if (minRating > 0) {
+      filtered = filtered.filter(artist => parseFloat(artist.rating) >= minRating);
+    }
+
+    // Filtre par fourchette de prix
+    filtered = filtered.filter(artist => {
+      const rate = parseFloat(artist.rate);
+      return rate >= priceRange[0] && rate <= priceRange[1];
+    });
+
+    // Filtre par disponibilité
+    if (availabilityFilter !== "all") {
+      filtered = filtered.filter(artist => {
+        if (availabilityFilter === "available") return artist.isAvailable;
+        if (availabilityFilter === "unavailable") return !artist.isAvailable;
+        return true;
+      });
+    }
+
     setFilteredArtists(filtered);
-  }, [artists, searchTerm, selectedGenre, selectedLocation]);
+  }, [artists, searchTerm, selectedGenre, selectedLocation, minRating, priceRange, availabilityFilter]);
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('fr-FR', {
@@ -243,6 +330,10 @@ const ArtistsPage = () => {
     }
   };
 
+  const getProfileImage = (artist: ArtistWithDetails) => {
+    return artist.user?.profileImage || "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500&h=300&fit=crop";
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
@@ -253,7 +344,7 @@ const ArtistsPage = () => {
               <h1 className="text-2xl font-bold">Artistes</h1>
               <p className="text-gray-400">Découvrez et collaborez avec des artistes talentueux</p>
             </div>
-            
+
             <div className="flex items-center gap-4 w-full sm:w-auto">
               {/* Barre de recherche */}
               <div className="relative flex-1 sm:flex-initial">
@@ -266,10 +357,22 @@ const ArtistsPage = () => {
                   className="w-full sm:w-64 bg-gray-900 border border-gray-700 rounded-full py-2 pl-10 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-pink-500"
                 />
               </div>
+
+              {/* Bouton filtres avancés */}
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors ${showAdvancedFilters
+                  ? "bg-pink-500 text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  }`}
+              >
+                <Filter className="w-4 h-4" />
+                Filtres avancés
+              </button>
             </div>
           </div>
 
-          {/* Filtres */}
+          {/* Filtres de base */}
           <div className="flex items-end sm:items-center justify-between mt-4 gap-4">
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               {/* Filtre par genre */}
@@ -277,11 +380,10 @@ const ArtistsPage = () => {
                 <span className="text-gray-400 text-sm whitespace-nowrap">Genre:</span>
                 <button
                   onClick={() => setSelectedGenre("all")}
-                  className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
-                    selectedGenre === "all" 
-                      ? "bg-pink-500 text-white" 
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${selectedGenre === "all"
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    }`}
                 >
                   Tous
                 </button>
@@ -289,11 +391,10 @@ const ArtistsPage = () => {
                   <button
                     key={genre}
                     onClick={() => setSelectedGenre(genre)}
-                    className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
-                      selectedGenre === genre 
-                        ? "bg-pink-500 text-white" 
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
+                    className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${selectedGenre === genre
+                      ? "bg-pink-500 text-white"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                      }`}
                   >
                     {genre}
                   </button>
@@ -305,11 +406,10 @@ const ArtistsPage = () => {
                 <span className="text-gray-400 text-sm whitespace-nowrap">Localisation:</span>
                 <button
                   onClick={() => setSelectedLocation("all")}
-                  className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
-                    selectedLocation === "all" 
-                      ? "bg-pink-500 text-white" 
-                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${selectedLocation === "all"
+                    ? "bg-pink-500 text-white"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                    }`}
                 >
                   Toutes
                 </button>
@@ -317,11 +417,10 @@ const ArtistsPage = () => {
                   <button
                     key={location}
                     onClick={() => setSelectedLocation(location)}
-                    className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
-                      selectedLocation === location 
-                        ? "bg-pink-500 text-white" 
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
+                    className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${selectedLocation === location
+                      ? "bg-pink-500 text-white"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                      }`}
                   >
                     {location}
                   </button>
@@ -333,22 +432,92 @@ const ArtistsPage = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-2 rounded transition-colors ${
-                  viewMode === "grid" ? "bg-gray-800 text-pink-500" : "text-gray-400 hover:text-white"
-                }`}
+                className={`p-2 rounded transition-colors ${viewMode === "grid" ? "bg-gray-800 text-pink-500" : "text-gray-400 hover:text-white"
+                  }`}
               >
                 <Grid3X3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-2 rounded transition-colors ${
-                  viewMode === "list" ? "bg-gray-800 text-pink-500" : "text-gray-400 hover:text-white"
-                }`}
+                className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-gray-800 text-pink-500" : "text-gray-400 hover:text-white"
+                  }`}
               >
                 <List className="w-4 h-4" />
               </button>
             </div>
           </div>
+
+          {/* Filtres avancés */}
+          {showAdvancedFilters && (
+            <div className="mt-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Filtre par note minimale */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Note minimale: {minRating}+
+                  </label>
+                  <select
+                    value={minRating}
+                    onChange={(e) => setMinRating(Number(e.target.value))}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  >
+                    <option value={0}>Toutes les notes</option>
+                    <option value={3}>3+ étoiles</option>
+                    <option value={4}>4+ étoiles</option>
+                    <option value={4.5}>4.5+ étoiles</option>
+                  </select>
+                </div>
+
+                {/* Filtre par fourchette de prix */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Fourchette de prix: {priceRange[0]}€ - {priceRange[1]}€
+                  </label>
+                  <div className="flex flex-col sm:flex-row items-center gap-4">
+                    <input
+                      type="range"
+                      min={0}
+                      max={5000}
+                      step={100}
+                      value={priceRange[0]}
+                      onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+                      className="flex-1 accent-pink-500"
+                    />
+
+                    <input
+                      type="range"
+                      min={0}
+                      max={5000}
+                      step={100}
+                      value={priceRange[1]}
+                      onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                      className="flex-1 accent-pink-500"
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <span>0€</span>
+                    <span>5000€</span>
+                  </div>
+                </div>
+
+                {/* Filtre par disponibilité */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Disponibilité
+                  </label>
+                  <select
+                    value={availabilityFilter}
+                    onChange={(e) => setAvailabilityFilter(e.target.value)}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-pink-500"
+                  >
+                    <option value="all">Tous</option>
+                    <option value="available">Disponibles</option>
+                    <option value="unavailable">Non disponibles</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -368,23 +537,33 @@ const ArtistsPage = () => {
               <div key={artist.id} className="bg-gray-900 rounded-lg overflow-hidden hover:scale-105 transition-transform duration-200 group">
                 <div className="relative aspect-[4/3]">
                   <img
-                    src={mockArtists.find(a => a.id === artist.id)?.socialMedia?.instagram 
-                      ? `https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500&h=300&fit=crop`
-                      : "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500&h=300&fit=crop"
-                    }
+                    src={getProfileImage(artist)}
                     alt={artist.displayName}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                  
+
+                  {/* Badge de disponibilité */}
+                  <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs ${artist.isAvailable
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-red-500/20 text-red-400"
+                    }`}>
+                    {artist.isAvailable ? "Disponible" : "Occupé"}
+                  </div>
+
                   {/* Badge de popularité */}
                   <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full bg-black/50 backdrop-blur-sm text-xs text-yellow-400">
                     <Star className="w-3 h-3 fill-current" />
                     <span>{artist.popularity}%</span>
                   </div>
-                  
+
                   <div className="absolute bottom-3 left-3 right-3">
                     <h3 className="text-white font-semibold text-sm line-clamp-1">{artist.displayName}</h3>
+                    {artist.user && (
+                      <p className="text-gray-300 text-xs line-clamp-1">
+                        {artist.user.firstName} {artist.user.lastName}
+                      </p>
+                    )}
                     <div className="flex items-center gap-1 text-gray-300 text-xs mt-1">
                       <Music className="w-3 h-3" />
                       <span className="line-clamp-1">{artist.genre}</span>
@@ -395,10 +574,17 @@ const ArtistsPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="p-4">
                   <p className="text-gray-400 text-sm line-clamp-2 mb-3">{artist.bio}</p>
-                  
+
+                  {/* Indication de disponibilité */}
+                  {!artist.isAvailable && (
+                    <div className="mb-3 p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-400">
+                      {artist.availabilityReason}
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between text-xs text-gray-400 mb-3">
                     <div className="flex items-center gap-1">
                       <Star className="w-3 h-3" />
@@ -442,7 +628,11 @@ const ArtistsPage = () => {
                     </button>
                     <button
                       onClick={() => handleOpenInvitation(artist)}
-                      className="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 px-3 rounded-full text-xs flex items-center justify-center gap-1 transition-colors"
+                      disabled={!artist.isAvailable}
+                      className={`flex-1 py-2 px-3 rounded-full text-xs flex items-center justify-center gap-1 transition-colors ${artist.isAvailable
+                        ? "bg-pink-500 hover:bg-pink-600 text-white"
+                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        }`}
                     >
                       <Mail className="w-3 h-3" />
                       Inviter
@@ -465,15 +655,21 @@ const ArtistsPage = () => {
             {filteredArtists.map(artist => (
               <div key={artist.id} className="bg-gray-900 rounded-lg p-4 hover:bg-gray-800 transition-colors">
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <img
-                    src={mockArtists.find(a => a.id === artist.id)?.socialMedia?.instagram 
-                      ? `https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=150&fit=crop`
-                      : "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=200&h=150&fit=crop"
-                    }
-                    alt={artist.displayName}
-                    className="w-full sm:w-48 h-32 object-cover rounded-lg flex-shrink-0"
-                  />
-                  
+                  <div className="relative">
+                    <img
+                      src={getProfileImage(artist)}
+                      alt={artist.displayName}
+                      className="w-full sm:w-48 h-32 object-cover rounded-lg flex-shrink-0"
+                    />
+                    {/* Badge de disponibilité */}
+                    <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs ${artist.isAvailable
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-red-500/20 text-red-400"
+                      }`}>
+                      {artist.isAvailable ? "Disponible" : "Occupé"}
+                    </div>
+                  </div>
+
                   <div className="flex-1">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                       <div>
@@ -484,8 +680,23 @@ const ArtistsPage = () => {
                             <span>{artist.popularity}%</span>
                           </div>
                         </div>
+                        {artist.user && (
+                          <p className="text-gray-300 text-sm">
+                            {artist.user.firstName} {artist.user.lastName}
+                            {artist.user.isVerified && (
+                              <span className="ml-2 text-blue-400 text-xs">✓ Vérifié</span>
+                            )}
+                          </p>
+                        )}
                         <p className="text-gray-400 text-sm mt-1 line-clamp-2">{artist.bio}</p>
-                        
+
+                        {/* Indication de disponibilité */}
+                        {!artist.isAvailable && (
+                          <div className="mt-2 p-2 bg-red-500/10 border border-red-500/20 rounded text-xs text-red-400">
+                            {artist.availabilityReason}
+                          </div>
+                        )}
+
                         <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                           <div className="flex items-center gap-1">
                             <Music className="w-3 h-3" />
@@ -501,7 +712,7 @@ const ArtistsPage = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleViewDetails(artist)}
@@ -512,8 +723,12 @@ const ArtistsPage = () => {
                         </button>
                         <button
                           onClick={() => handleOpenInvitation(artist)}
-                          className="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded transition-colors"
-                          title="Inviter"
+                          disabled={!artist.isAvailable}
+                          className={`p-2 rounded transition-colors ${artist.isAvailable
+                            ? "bg-pink-500 hover:bg-pink-600 text-white"
+                            : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                            }`}
+                          title={artist.isAvailable ? "Inviter" : "Artiste non disponible"}
                         >
                           <Mail className="w-4 h-4" />
                         </button>
@@ -526,7 +741,7 @@ const ArtistsPage = () => {
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1 mt-3">
                       {artist.tags.map(tag => (
@@ -538,7 +753,7 @@ const ArtistsPage = () => {
                         </span>
                       ))}
                     </div>
-                    
+
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 text-sm">
                       <div className="flex items-center gap-2">
                         <DollarSign className="w-4 h-4 text-gray-400" />
@@ -574,6 +789,14 @@ const ArtistsPage = () => {
                 <div>
                   <h2 className="text-xl font-bold">{selectedArtist.displayName}</h2>
                   <p className="text-gray-400">{selectedArtist.genre} • {selectedArtist.location}</p>
+                  {selectedArtist.user && (
+                    <p className="text-gray-300 text-sm">
+                      {selectedArtist.user.firstName} {selectedArtist.user.lastName}
+                      {selectedArtist.user.isVerified && (
+                        <span className="ml-2 text-blue-400">✓ Vérifié</span>
+                      )}
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={() => setIsDetailModalOpen(false)}
@@ -588,15 +811,27 @@ const ArtistsPage = () => {
                 <div className="lg:w-1/3">
                   <div className="relative aspect-square rounded-lg overflow-hidden">
                     <img
-                      src={mockArtists.find(a => a.id === selectedArtist.id)?.socialMedia?.instagram 
-                        ? `https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500&h=500&fit=crop`
-                        : "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500&h=500&fit=crop"
-                      }
+                      src={getProfileImage(selectedArtist)}
                       alt={selectedArtist.displayName}
                       className="w-full h-full object-cover"
                     />
+                    {/* Badge de disponibilité */}
+                    <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm ${selectedArtist.isAvailable
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-red-500/20 text-red-400"
+                      }`}>
+                      {selectedArtist.isAvailable ? "Disponible" : "Non disponible"}
+                    </div>
                   </div>
-                  
+
+                  {/* Indication de disponibilité détaillée */}
+                  {!selectedArtist.isAvailable && (
+                    <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded text-sm text-red-400">
+                      <strong>Raison d'indisponibilité:</strong><br />
+                      {selectedArtist.availabilityReason}
+                    </div>
+                  )}
+
                   <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                     <div className="bg-gray-800 rounded-lg p-3 text-center">
                       <div className="text-2xl font-bold text-pink-500">{selectedArtist.rating}</div>
@@ -619,7 +854,11 @@ const ArtistsPage = () => {
                   <div className="mt-4 flex gap-2">
                     <button
                       onClick={() => handleOpenInvitation(selectedArtist)}
-                      className="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-2 px-3 rounded-full text-sm flex items-center justify-center gap-1 transition-colors"
+                      disabled={!selectedArtist.isAvailable}
+                      className={`flex-1 py-2 px-3 rounded-full text-sm flex items-center justify-center gap-1 transition-colors ${selectedArtist.isAvailable
+                        ? "bg-pink-500 hover:bg-pink-600 text-white"
+                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                        }`}
                     >
                       <Mail className="w-4 h-4" />
                       Inviter
@@ -640,6 +879,51 @@ const ArtistsPage = () => {
                     <p className="text-gray-300 text-sm leading-relaxed">{selectedArtist.bio}</p>
                   </div>
 
+                  {/* Informations utilisateur */}
+                  {selectedArtist.user && (
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-gray-800 rounded-lg p-4">
+                        <h3 className="font-semibold mb-2">Informations de contact</h3>
+                        <div className="text-sm text-gray-300 space-y-2">
+                          <div>
+                            <strong>Email:</strong><br />
+                            {selectedArtist.user.email}
+                          </div>
+                          <div>
+                            <strong>Téléphone:</strong><br />
+                            {selectedArtist.user.phone}
+                          </div>
+                          <div>
+                            <strong>Ville:</strong><br />
+                            {selectedArtist.user.city}, {selectedArtist.user.country}
+                          </div>
+                          {selectedArtist.user.isVerified && (
+                            <div className="text-green-400">
+                              <strong>✓ Compte vérifié</strong>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="bg-gray-800 rounded-lg p-4">
+                        <h3 className="font-semibold mb-2">Statistiques</h3>
+                        <div className="text-sm text-gray-300 space-y-2">
+                          <div>
+                            <strong>Membre depuis:</strong><br />
+                            {formatDate(selectedArtist.user.createdAt)}
+                          </div>
+                          <div>
+                            <strong>Statut de vérification:</strong><br />
+                            <span className="capitalize">{selectedArtist.user.verificationStatus}</span>
+                          </div>
+                          <div>
+                            <strong>Solde portefeuille:</strong><br />
+                            {selectedArtist.user.walletBalance}€
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Tags */}
                   <div className="mt-4">
                     <h3 className="font-semibold mb-2">Spécialités</h3>
@@ -658,7 +942,7 @@ const ArtistsPage = () => {
                   {/* Contact & Réseaux sociaux */}
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-semibold mb-2">Contact</h3>
+                      <h3 className="font-semibold mb-2">Contact professionnel</h3>
                       <div className="text-sm text-gray-300 space-y-1">
                         <div>{selectedArtist.contact?.email}</div>
                         <div>{selectedArtist.contact?.phone}</div>
@@ -688,7 +972,6 @@ const ArtistsPage = () => {
                 </div>
               </div>
 
-              {/* Navigation par onglets */}
               <div className="border-b border-gray-700 mb-6">
                 <nav className="flex space-x-8 overflow-x-auto">
                   {[
@@ -703,11 +986,10 @@ const ArtistsPage = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id as any)}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                        activeTab === tab.id
-                          ? "border-pink-500 text-pink-500"
-                          : "border-transparent text-gray-500 hover:text-gray-300"
-                      }`}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === tab.id
+                        ? "border-pink-500 text-pink-500"
+                        : "border-transparent text-gray-500 hover:text-gray-300"
+                        }`}
                     >
                       {tab.label}
                       {tab.count > 0 && (
@@ -898,9 +1180,8 @@ const ArtistsPage = () => {
                             return (
                               <div key={message.id} className="bg-gray-800 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
-                                  <div className={`w-2 h-2 rounded-full mt-2 ${
-                                    message.senderType === "artist" ? "bg-purple-500" : "bg-blue-500"
-                                  }`} />
+                                  <div className={`w-2 h-2 rounded-full mt-2 ${message.senderType === "artist" ? "bg-purple-500" : "bg-blue-500"
+                                    }`} />
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                       <span className="font-medium text-sm">
@@ -941,8 +1222,8 @@ const ArtistsPage = () => {
                                 <div className="flex items-center justify-between mb-2">
                                   <h4 className="font-semibold text-sm">{milestone.title}</h4>
                                   <span className={`px-2 py-1 rounded-full text-xs ${getMilestoneStatusColor(milestone.status)}`}>
-                                    {milestone.status === "completed" ? "Terminé" : 
-                                     milestone.status === "in_progress" ? "En cours" : "En attente"}
+                                    {milestone.status === "completed" ? "Terminé" :
+                                      milestone.status === "in_progress" ? "En cours" : "En attente"}
                                   </span>
                                 </div>
                                 <p className="text-gray-400 text-sm mb-2">{milestone.description}</p>
@@ -991,11 +1272,10 @@ const ArtistsPage = () => {
                                     {[...Array(5)].map((_, i) => (
                                       <Star
                                         key={i}
-                                        className={`w-4 h-4 ${
-                                          i < fb.rating
-                                            ? "fill-yellow-400 text-yellow-400"
-                                            : "fill-gray-600 text-gray-600"
-                                        }`}
+                                        className={`w-4 h-4 ${i < fb.rating
+                                          ? "fill-yellow-400 text-yellow-400"
+                                          : "fill-gray-600 text-gray-600"
+                                          }`}
                                       />
                                     ))}
                                   </div>
@@ -1081,7 +1361,6 @@ const ArtistsPage = () => {
         </div>
       )}
 
-      {/* Modal d'invitation */}
       {isInvitationModalOpen && selectedArtist && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1250,5 +1529,3 @@ const ArtistsPage = () => {
 };
 
 export default ArtistsPage;
-
-// V2

@@ -9,11 +9,90 @@ import {
   insertPosHistorySchema, insertPaymentMethodSchema
 } from "@shared/schema";
 import { z } from "zod";
+import crypto from 'crypto';
+
+const iterations = 10000;
+const keylen = 64;
+const digest = 'sha256';
+
+function hashPassword(password: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, iterations, keylen, digest).toString('hex');
+  return `${salt}:${iterations}:${hash}`;
+}
+
+function verifyPassword(password: string, storedHash: string): boolean {
+  const [salt, iter, hash] = storedHash.split(':');
+  const hashToVerify = crypto.pbkdf2Sync(password, salt, parseInt(iter, 10), keylen, digest).toString('hex');
+  return hash === hashToVerify;
+}
 
 export function registerRoutes(app: Express) {
   // Routes existantes
   app.get("/api/hello", (req, res) => {
     res.send("hello world");
+  });
+
+  // Route d'inscription
+  app.post("/api/auth/register", async (req, res, next) => {
+    try {
+      const validatedData = insertUserSchema.parse(req.body);
+
+      // Vérifier si l'utilisateur existe déjà
+      const existingUser = await storage.getUserByUsername(validatedData.username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      // Hasher le mot de passe
+      const hashedPassword = hashPassword(validatedData.password);
+      const userData = {
+        ...validatedData,
+        password: hashedPassword
+      };
+
+      const user = await storage.createUser(userData);
+      const { password, ...userWithoutPassword } = user;
+
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  // Route de connexion
+  app.post("/api/auth/login", async (req, res, next) => {
+    try {
+      const { username, password } = req.body;
+
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+
+      // Trouver l'utilisateur
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Vérifier le mot de passe
+      const isPasswordValid = verifyPassword(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Retourner les informations utilisateur sans le mot de passe
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      next(error);
+    }
   });
 
   app.get("/api/protected", (req, res) => {
@@ -98,10 +177,37 @@ export function registerRoutes(app: Express) {
         return res.status(400).json({ message: "Invalid user ID" });
       }
 
-      const updateSchema = insertUserSchema.partial();
+      const updateSchema = insertUserSchema.partial().extend({
+        currentPassword: z.string().optional() // Ajouter le champ pour l'ancien mot de passe
+      });
       const validatedData = updateSchema.parse(req.body);
 
-      const user = await storage.updateUser(id, validatedData);
+      // Vérifier si l'utilisateur existe
+      const existingUser = await storage.getUser(id);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Si le mot de passe est modifié, vérifier l'ancien mot de passe
+      if (validatedData.password) {
+        if (!validatedData.currentPassword) {
+          return res.status(400).json({ message: "Current password is required to change password" });
+        }
+
+        // Vérifier l'ancien mot de passe
+        const isCurrentPasswordValid = verifyPassword(validatedData.currentPassword, existingUser.password);
+        if (!isCurrentPasswordValid) {
+          return res.status(401).json({ message: "Current password is incorrect" });
+        }
+
+        // Hasher le nouveau mot de passe
+        validatedData.password = hashPassword(validatedData.password);
+      }
+
+      // Supprimer currentPassword des données de mise à jour
+      const { currentPassword, ...updateData } = validatedData;
+
+      const user = await storage.updateUser(id, updateData);
       const { password, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error: any) {

@@ -1,13 +1,8 @@
-// MA MEMOIRE M2 - MASTER2
-
-Redige moi ma memoir de fin d'annees en master suivant le model de l'ancien etudiant mais mon theme sera 
-
-Conception et developpement d'un plateforme evenementielle appaler bebit et voici son schema de donnees (web et mobile)
-
 // D:\Projet\BeBit\bebit - new\shared\schema.ts
 import { pgTable, text, serial, integer, boolean, timestamp, decimal, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // ======================
 // Users table
@@ -116,16 +111,11 @@ export const clubTables = pgTable("club_tables", {
 });
 
 // ======================
-// Events table (MODIFIÉE)
+// Events table
 // ======================
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
-  // Organisation flexible (peut être club, artiste ou utilisateur)
-  organizerType: text("organizer_type", { enum: ["club", "artist", "user"] }).notNull(),
-  organizerId: integer("organizer_id").notNull(),
-  // Utilisateur qui crée l'événement
-  createdBy: integer("created_by").references(() => users.id).notNull(),
- 
+  clubId: integer("club_id").references(() => clubs.id).notNull(),
   title: text("title").notNull(),
   description: text("description"),
   date: timestamp("date").notNull(),
@@ -172,7 +162,7 @@ export const eventArtists = pgTable("event_artists", {
 export const eventParticipants = pgTable("event_participants", {
   eventId: integer("event_id").references(() => events.id).notNull(),
   userId: integer("user_id").references(() => users.id).notNull(),
-  status: text("status", { enum: ["pending", "confirmed", "cancel"] }).notNull().default("pending"),
+  status: text("status", { enum: ["pending", "confirmed"] }).notNull().default("pending"),
   joinedAt: timestamp("joined_at").defaultNow().notNull(),
 }, (t) => ({
   pk: primaryKey({ columns: [t.eventId, t.userId] }),
@@ -347,6 +337,7 @@ export const drinkTypes = pgTable("drink_types", {
 });
 
 export const customerTags = pgTable("customer_tags", {
+  id: serial("id").primaryKey(),
   customerId: integer("customer_id").references(() => customerProfiles.id).notNull(),
   tag: text("tag").notNull(),
 }, (t) => ({
@@ -389,103 +380,78 @@ export const invoices = pgTable("invoices", {
 });
 
 // ======================
-// POS tables (Employees, Devices, Tables, Orders) → structure S1 (reprise exacte)
+// POS/Employees tables
 // ======================
 export const employees = pgTable("employees", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  clubId: integer("club_id").references(() => clubs.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
   role: text("role").notNull(),
-  pin: text("pin").notNull(),
-  status: boolean("status").notNull(),
-  deviceId: integer("device_id").references(() => posDevices.id),
-  // clubId: integer("club_id").references(() => clubs.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const posDevices = pgTable("pos_devices", {
   id: serial("id").primaryKey(),
+  clubId: integer("club_id").references(() => clubs.id).notNull(),
   name: text("name").notNull(),
-  location: text("location"),
-  status: boolean("status").notNull(),
-  lastActive: text("last_active"),
-  sales: integer("sales"),
+  serialNumber: text("serial_number").unique().notNull(),
+  isActive: boolean("is_active").default(true),
 });
 
 export const productCategories = pgTable("product_categories", {
   id: serial("id").primaryKey(),
+  clubId: integer("club_id").references(() => clubs.id).notNull(),
   name: text("name").notNull(),
   description: text("description"),
-  isActive: boolean("is_active").notNull().default(true),
 });
 
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
+  categoryId: integer("category_id").references(() => productCategories.id).notNull(),
   name: text("name").notNull(),
-  description: text("description"),
-  price: integer("price").notNull(),
-  categoryId: integer("category_id").references(() => productCategories.id),
-  destinations: text("destinations").notNull(),
-  isAvailable: boolean("is_available").notNull().default(true),
-  imageUrl: text("image_url"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  stock: integer("stock").default(0),
+  image: text("image"),
 });
 
 export const posTables = pgTable("pos_tables", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  number: integer("number"),
-  area: text("area"),
-  capacity: integer("capacity"),
-  status: text("status").notNull(),
-  currentOrderId: integer("current_order_id"),
+  posDeviceId: integer("pos_device_id").references(() => posDevices.id).notNull(),
+  tableNumber: integer("table_number").notNull(),
+  capacity: integer("capacity").notNull(),
+  status: text("status", { enum: ["available", "occupied", "reserved"] }).default("available"),
 });
 
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(),
-  tableId: integer("table_id").references(() => posTables.id),
-  customerName: text("customer_name"),
-  status: text("status").notNull(),
-  total: integer("total").notNull(),
+  posTableId: integer("pos_table_id").references(() => posTables.id),
+  employeeId: integer("employee_id").references(() => employees.id),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  status: text("status", { enum: ["pending", "preparing", "ready", "served", "paid"] }).default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  paymentMethod: text("payment_method"),
-  priority: text("priority"),
-  estimatedCompletionTime: timestamp("estimated_completion_time"),
 });
 
 export const orderItems = pgTable("order_items", {
   id: serial("id").primaryKey(),
-  orderId: integer("order_id").references(() => orders.id),
-  productId: integer("product_id").references(() => products.id),
+  orderId: integer("order_id").references(() => orders.id).notNull(),
+  productId: integer("product_id").references(() => products.id).notNull(),
   quantity: integer("quantity").notNull(),
-  price: integer("price"),
-  notes: text("notes"),
-  subtotal: integer("subtotal").notNull(),
-  status: text("status"),
-  category: text("category"),
-  preparationTime: integer("preparation_time"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
 });
 
 export const posHistory = pgTable("pos_history", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(),
-  description: text("description"),
-  userId: integer("user_id").references(() => employees.id),
-  userName: text("user_name"),
-  userRole: text("user_role"),
+  posDeviceId: integer("pos_device_id").references(() => posDevices.id).notNull(),
+  action: text("action").notNull(),
+  details: jsonb("details"),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
-  amount: integer("amount"),
-  orderId: integer("order_id").references(() => orders.id),
-  tableId: integer("table_id").references(() => posTables.id),
-  tableName: text("table_name"),
-  details: text("details"),
-  status: text("status"),
 });
 
-// Méthodes de paiement POS → renommées en pos_payment_methods pour éviter le conflit avec payment_methods (user)
-// et pour qu'elles soient utilisables partout dans le POS sans toucher à la table user
-export const posPaymentMethods = pgTable("pos_payment_methods", {
+export const paymentMethodsPos = pgTable("payment_methods_pos", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  value: integer("value").notNull(),
+  clubId: integer("club_id").references(() => clubs.id).notNull(),
+  type: text("type", { enum: ["cash", "card", "mobile"] }).notNull(),
+  details: jsonb("details"),
 });
 
 // ======================
@@ -517,8 +483,7 @@ export const insertClubTableSchema = createInsertSchema(clubTables, {
 });
 
 export const insertEventSchema = createInsertSchema(events, {
-  // date: (schema) => schema.refine((val) => val > new Date(), "Date doit être future"),
-  date: z.coerce.date().refine((val) => val > new Date(), "Date doit être future"),
+  date: (schema) => schema.refine((val) => val > new Date(), "Date doit être future"),
   startTime: (schema) => schema.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Format heure invalide"),
   endTime: (schema) => schema.regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Format heure invalide"),
   price: (schema) => schema.min(0, "Prix non négatif"),
@@ -530,7 +495,7 @@ export const insertEventArtistSchema = createInsertSchema(eventArtists);
 export const insertEventReservedTableSchema = createInsertSchema(eventReservedTables);
 
 export const insertEventParticipantSchema = createInsertSchema(eventParticipants, {
-  status: (schema) => schema.refine((val) => ["pending", "confirmed", "cancel"].includes(val), "Status participant invalide"),
+  status: (schema) => schema.refine((val) => ["pending", "confirmed"].includes(val), "Status participant invalide"),
 });
 
 export const insertInvitationSchema = createInsertSchema(invitations, {
@@ -566,8 +531,6 @@ export const insertFeedbackCommentSchema = createInsertSchema(feedbackComments, 
 });
 
 export const insertCollaborationMilestoneSchema = createInsertSchema(collaborationMilestones, {
-  dueDate: z.coerce.date().optional(),  // Handles string ISO dates
-  completedAt: z.coerce.date().optional(),  // Handles string ISO dates if provided
   status: (schema) => schema.refine((val) => ["pending", "in_progress", "completed"].includes(val), "Statut milestone invalide"),
   assignedTo: (schema) => schema.refine((val) => ["artist", "club", "both"].includes(val), "Assigné invalide"),
   priority: (schema) => schema.refine((val) => ["low", "medium", "high"].includes(val), "Priorité invalide"),
@@ -588,8 +551,6 @@ export const insertDrinkTypeSchema = createInsertSchema(drinkTypes);
 export const insertCustomerTagSchema = createInsertSchema(customerTags);
 
 export const insertPromotionSchema = createInsertSchema(promotions, {
-  validFrom: z.coerce.date(),
-  validTo: z.coerce.date(),
   discountType: (schema) => schema.refine((val) => ["percentage", "fixed"].includes(val), "Type de discount invalide"),
   status: (schema) => schema.refine((val) => ["active", "inactive", "expired"].includes(val), "Statut invalide"),
   channels: (schema) => schema.refine((val) => Array.isArray(val), "Channels doit être un array"),
@@ -601,8 +562,6 @@ export const insertPaymentMethodSchema = createInsertSchema(paymentMethods, {
 });
 
 export const insertInvoiceSchema = createInsertSchema(invoices, {
-  dueDate: z.coerce.date().optional(),  // Handles string ISO dates
-  paidAt: z.coerce.date().optional(),   // Handles string ISO dates if provided
   status: (schema) => schema.refine((val) => ["paid", "pending", "overdue"].includes(val), "Statut de facture invalide"),
 });
 
@@ -621,7 +580,6 @@ export const insertPhotoCommentSchema = createInsertSchema(photoComments, {
   content: (schema) => schema.min(1, "Commentaire vide invalide").max(2000, "Commentaire trop long"),
 });
 
-// POS schemas → style S1 (sans refinements personnalisés)
 export const insertEmployeeSchema = createInsertSchema(employees);
 export const insertPosDeviceSchema = createInsertSchema(posDevices);
 export const insertProductCategorySchema = createInsertSchema(productCategories);
@@ -630,7 +588,7 @@ export const insertPosTableSchema = createInsertSchema(posTables);
 export const insertOrderSchema = createInsertSchema(orders);
 export const insertOrderItemSchema = createInsertSchema(orderItems);
 export const insertPosHistorySchema = createInsertSchema(posHistory);
-export const insertPosPaymentMethodSchema = createInsertSchema(posPaymentMethods);
+export const insertPaymentMethodPosSchema = createInsertSchema(paymentMethodsPos);
 
 // ======================
 // Export types
@@ -716,20 +674,10 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type PosHistory = typeof posHistory.$inferSelect;
 export type InsertPosHistory = z.infer<typeof insertPosHistorySchema>;
-export type PosPaymentMethod = typeof posPaymentMethods.$inferSelect;
-export type InsertPosPaymentMethod = z.infer<typeof insertPosPaymentMethodSchema>;
+export type PaymentMethodPos = typeof paymentMethodsPos.$inferSelect;
+export type InsertPaymentMethodPos = z.infer<typeof insertPaymentMethodPosSchema>;
 
 export type CollaborationMilestone = typeof collaborationMilestones.$inferSelect;
 export type InsertCollaborationMilestone = z.infer<typeof insertCollaborationMilestoneSchema>;
 export type CollaborationMessage = typeof collaborationMessages.$inferSelect;
 export type InsertCollaborationMessage = z.infer<typeof insertCollaborationMessageSchema>;
-
-Donc avant de rediger le memoir au complet tu doit analyse mon application et trouver ces fonctionnaliter etc.. tous ce qui pourrai le concernet.
-
-Note : Tu peux mettre vide le presentation de l'ENI et de hello Tana, car mon etablissement d'accuil est Hello Mada Technologie, et la presentation de l'ENI actuel n'est pas mise a jour
-
-Tu ne dois pas utiliser le meme phrase que dans l'autre memoir, mais tu doit plus ou moin garder le meme nombre de mot pour ne pas trop dire n'importe quoi
-
-Mon projet : [Web -> (React) Mobile -> (ReactNative)],  Express, Postgresql, UML, 2UTP (Y), Ordinateur, VSCode, Git
-
-Je compte sur toi

@@ -1,3 +1,4 @@
+//D:\Projet\BeBit\bebit - new\client\src\pages\club\bi-dashboard-page.tsx
 import React from 'react';
 import ResponsiveLayout from '../../layouts/ResponsiveLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

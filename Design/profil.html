@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Spotify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(180deg, #1e1e1e 0%, #121212 100%);
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        .spotify-green {
+            background-color: #1db954;
+        }
+        .spotify-green:hover {
+            background-color: #1ed760;
+        }
+        .card-bg {
+            background-color: #181818;
+        }
+        .card-bg:hover {
+            background-color: #282828;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex">
+        <!-- Barre latérale -->
+        <div class="w-64 h-screen bg-black p-6 fixed">
+            <div class="mb-8">
+                <svg class="w-32 text-white" viewBox="0 0 167.5 167.5">
+                    <path fill="currentColor" d="M83.7 0C37.5 0 0 37.5 0 83.7c0 46.3 37.5 83.7 83.7 83.7 46.3 0 83.7-37.5 83.7-83.7S130 0 83.7 0zM122 120.8c-1.4 2.5-4.6 3.2-7 1.7-19.8-12-44.5-14.7-73.7-8-2.8.5-5.6-1.2-6.2-4-.2-2.8 1.5-5.6 4-6.2 32-7.3 59.6-4.2 81.6 9.3 2.6 1.5 3.4 4.7 1.8 7.2zM130.5 98c-2 3-6 4-9 2.2-22.5-14-56.8-18-83.4-9.8-3.4 1-7-1-8-4.3s1-7 4.6-8c30.4-9 68.2-4.5 94 11 3 2 4 6 2 9zm1-23.8c-27-16-71.6-17.5-97.3-9.7-4 1.3-8.2-1-9.5-5s1-8.2 5-9.5c29.6-9 78.8-7.2 109.8 11.2 3.7 2.2 5 7 2.7 10.7-2 3.8-7 5-10.6 2.7z"/>
+                </svg>
+            </div>
+            
+            <ul class="space-y-4 mb-8">
+                <li>
+                    <a href="#" class="flex items-center text-white font-bold">
+                        <i class="fas fa-home mr-4 text-xl"></i>
+                        Accueil
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center text-gray-400 hover:text-white">
+                        <i class="fas fa-search mr-4 text-xl"></i>
+                        Rechercher
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center text-gray-400 hover:text-white">
+                        <i class="fas fa-book mr-4 text-xl"></i>
+                        Bibliothèque
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="mb-8">
+                <h3 class="text-gray-400 uppercase text-xs font-bold mb-4">Playlists</h3>
+                <button class="flex items-center text-gray-400 hover:text-white mb-4">
+                    <i class="fas fa-plus-circle mr-4 bg-gray-400 text-black rounded-sm p-1"></i>
+                    Créer une playlist
+                </button>
+                <button class="flex items-center text-gray-400 hover:text-white">
+                    <i class="fas fa-heart mr-4 bg-gradient-to-br from-purple-700 to-blue-300 rounded-sm p-1"></i>
+                    Titres likés
+                </button>
+            </div>
+            
+            <div class="h-px bg-gray-700 my-4"></div>
+            
+            <div class="h-40 overflow-y-auto">
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="#" class="hover:text-white">Ma playlist #1</a></li>
+                    <li><a href="#" class="hover:text-white">Ma playlist #2</a></li>
+                    <li><a href="#" class="hover:text-white">Découvertes de la semaine</a></li>
+                    <li><a href="#" class="hover:text-white">Chill</a></li>
+                    <li><a href="#" class="hover:text-white">Rock</a></li>
+                    <li><a href="#" class="hover:text-white">Été 2023</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Contenu principal -->
+        <div class="ml-64 flex-1 p-8">
+            <!-- En-tête -->
+            <header class="flex justify-between items-center mb-8">
+                <div class="flex space-x-4">
+                    <button class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="bg-black text-white py-1 px-4 rounded-full text-sm font-bold hover:scale-105 transition">
+                        Mettre à niveau
+                    </button>
+                    <div class="flex items-center bg-black rounded-full p-1 pr-2 cursor-pointer hover:bg-gray-900">
+                        <div class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center mr-2">
+                            <i class="fas fa-user text-xs"></i>
+                        </div>
+                        <span class="text-sm font-bold">Utilisateur</span>
+                        <i class="fas fa-chevron-down ml-2 text-xs"></i>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Section profil -->
+            <section class="mb-8">
+                <div class="flex items-end mb-6">
+                    <div class="w-48 h-48 bg-gradient-to-br from-purple-900 to-blue-500 shadow-2xl rounded-md mr-6 flex items-center justify-center">
+                        <i class="fas fa-user text-white text-7xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold mb-2">PROFIL PUBLIC</p>
+                        <h1 class="text-6xl font-bold mb-6">Nom d'utilisateur</h1>
+                        <p class="text-gray-400">1,234 abonnés • 56 playlists publiques</p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4 mb-8">
+                    <button class="spotify-green text-black font-bold py-2 px-8 rounded-full hover:scale-105 transition">
+                        Suivre
+                    </button>
+                    <button class="bg-transparent border border-gray-500 text-white font-bold py-2 px-4 rounded-full hover:border-white transition">
+                        ...
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Navigation des sections -->
+            <nav class="border-b border-gray-700 mb-6">
+                <ul class="flex space-x-8">
+                    <li>
+                        <a href="#" class="pb-2 font-bold border-b-2 border-white">Vue d'ensemble</a>
+                    </li>
+                    <li>
+                        <a href="#" class="pb-2 text-gray-400 hover:text-white">Playlists publiques</a>
+                    </li>
+                    <li>
+                        <a href="#" class="pb-2 text-gray-400 hover:text-white">Artistes</a>
+                    </li>
+                    <li>
+                        <a href="#" class="pb-2 text-gray-400 hover:text-white">Abonnés</a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Section des playlists -->
+            <section>
+                <h2 class="text-2xl font-bold mb-6">Playlists publiques</h2>
+                
+                <div class="grid grid-cols-5 gap-6">
+                    <!-- Playlist 1 -->
+                    <div class="card-bg p-4 rounded-md hover:bg-gray-800 transition duration-300 cursor-pointer group">
+                        <div class="relative mb-4">
+                            <img src="https://via.placeholder.com/160" alt="Playlist cover" class="w-full aspect-square object-cover rounded-md shadow-lg">
+                            <button class="absolute bottom-2 right-2 w-12 h-12 spotify-green rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg hover:scale-105">
+                                <i class="fas fa-play text-black"></i>
+                            </button>
+                        </div>
+                        <h3 class="font-bold text-white truncate">Ma Playlist #1</h3>
+                        <p class="text-gray-400 text-sm mt-1">Par Nom d'utilisateur • 12 titres</p>
+                    </div>
+                    
+                    <!-- Playlist 2 -->
+                    <div class="card-bg p-4 rounded-md hover:bg-gray-800 transition duration-300 cursor-pointer group">
+                        <div class="relative mb-4">
+                            <img src="https://via.placeholder.com/160" alt="Playlist cover" class="w-full aspect-square object-cover rounded-md shadow-lg">
+                            <button class="absolute bottom-2 right-2 w-12 h-12 spotify-green rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg hover:scale-105">
+                                <i class="fas fa-play text-black"></i>
+                            </button>
+                        </div>
+                        <h3 class="font-bold text-white truncate">Rock Classics</h3>
+                        <p class="text-gray-400 text-sm mt-1">Par Nom d'utilisateur • 24 titres</p>
+                    </div>
+                    
+                    <!-- Playlist 3 -->
+                    <div class="card-bg p-4 rounded-md hover:bg-gray-800 transition duration-300 cursor-pointer group">
+                        <div class="relative mb-4">
+                            <img src="https://via.placeholder.com/160" alt="Playlist cover" class="w-full aspect-square object-cover rounded-md shadow-lg">
+                            <button class="absolute bottom-2 right-2 w-12 h-12 spotify-green rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg hover:scale-105">
+                                <i class="fas fa-play text-black"></i>
+                            </button>
+                        </div>
+                        <h3 class="font-bold text-white truncate">Chill Vibes</h3>
+                        <p class="text-gray-400 text-sm mt-1">Par Nom d'utilisateur • 18 titres</p>
+                    </div>
+                    
+                    <!-- Playlist 4 -->
+                    <div class="card-bg p-4 rounded-md hover:bg-gray-800 transition duration-300 cursor-pointer group">
+                        <div class="relative mb-4">
+                            <img src="https://via.placeholder.com/160" alt="Playlist cover" class="w-full aspect-square object-cover rounded-md shadow-lg">
+                            <button class="absolute bottom-2 right-2 w-12 h-12 spotify-green rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg hover:scale-105">
+                                <i class="fas fa-play text-black"></i>
+                            </button>
+                        </div>
+                        <h3 class="font-bold text-white truncate">Été 2023</h3>
+                        <p class="text-gray-400 text-sm mt-1">Par Nom d'utilisateur • 30 titres</p>
+                    </div>
+                    
+                    <!-- Playlist 5 -->
+                    <div class="card-bg p-4 rounded-md hover:bg-gray-800 transition duration-300 cursor-pointer group">
+                        <div class="relative mb-4">
+                            <img src="https://via.placeholder.com/160" alt="Playlist cover" class="w-full aspect-square object-cover rounded-md shadow-lg">
+                            <button class="absolute bottom-2 right-2 w-12 h-12 spotify-green rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg hover:scale-105">
+                                <i class="fas fa-play text-black"></i>
+                            </button>
+                        </div>
+                        <h3 class="font-bold text-white truncate">Workout Mix</h3>
+                        <p class="text-gray-400 text-sm mt-1">Par Nom d'utilisateur • 15 titres</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    
+    <!-- Barre de lecture -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center w-1/4">
+                <img src="https://via.placeholder.com/56" alt="Current track" class="w-14 h-14 mr-3">
+                <div>
+                    <p class="text-white font-medium text-sm">Titre en cours</p>
+                    <p class="text-gray-400 text-xs">Artiste</p>
+                </div>
+                <button class="ml-4 text-gray-400 hover:text-white">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+            
+            <div class="flex flex-col items-center w-2/4">
+                <div class="flex items-center space-x-4 mb-2">
+                    <button class="text-gray-400 hover:text-white">
+                        <i class="fas fa-random"></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-white">
+                        <i class="fas fa-step-backward"></i>
+                    </button>
+                    <button class="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:scale-105">
+                        <i class="fas fa-play text-black"></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-white">
+                        <i class="fas fa-step-forward"></i>
+                    </button>
+                    <button class="text-gray-400 hover:text-white">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+                <div class="w-full flex items-center">
+                    <span class="text-xs text-gray-400 mr-2">0:00</span>
+                    <div class="flex-1 bg-gray-600 rounded-full h-1">
+                        <div class="bg-gray-300 h-1 rounded-full" style="width: 30%"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 ml-2">3:45</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-end w-1/4">
+                <button class="text-gray-400 hover:text-white mr-4">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="text-gray-400 hover:text-white mr-4">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <div class="w-24 bg-gray-600 rounded-full h-1">
+                    <div class="bg-gray-300 h-1 rounded-full" style="width: 70%"></div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

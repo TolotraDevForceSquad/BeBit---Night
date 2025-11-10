@@ -1,12 +1,24 @@
 import { type Express } from "express";
 import { storage } from "./storage";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import {
-  insertUserSchema, insertArtistSchema, insertClubSchema, insertEventSchema,
-  insertEventArtistSchema, insertInvitationSchema, insertTicketSchema,
-  insertFeedbackSchema, insertTransactionSchema, insertEmployeeSchema,
-  insertPosDeviceSchema, insertProductCategorySchema, insertProductSchema,
+  insertUserSchema, insertArtistSchema, insertArtistPortfolioSchema,
+  insertClubSchema, insertClubLocationSchema, insertClubTableSchema,
+  insertEventSchema, insertEventArtistSchema, insertEventReservedTableSchema,
+  insertEventParticipantSchema, insertInvitationSchema,
+  insertTicketSchema, insertTicketTypeSchema,
+  insertFeedbackSchema, insertFeedbackLikeSchema, insertFeedbackCommentSchema,
+  insertPhotoSchema, insertPhotoLikeSchema, insertPhotoCommentSchema,
+  insertCollaborationMilestoneSchema, insertCollaborationMessageSchema,
+  insertTransactionSchema, insertCustomerProfileSchema,
+  insertMusicGenreSchema, insertDrinkTypeSchema, insertCustomerTagSchema,
+  insertPromotionSchema, insertPaymentMethodSchema, insertInvoiceSchema,
+  insertEmployeeSchema, insertPosDeviceSchema,
+  insertProductCategorySchema, insertProductSchema,
   insertPosTableSchema, insertOrderSchema, insertOrderItemSchema,
-  insertPosHistorySchema, insertPaymentMethodSchema
+  insertPosHistorySchema, insertPosPaymentMethodSchema
 } from "@shared/schema";
 import { z } from "zod";
 import crypto from 'crypto';
@@ -27,8 +39,59 @@ function verifyPassword(password: string, storedHash: string): boolean {
   return hash === hashToVerify;
 }
 
+// Configuration du stockage Multer
+const storageConfig = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(process.cwd(), 'uploads');
+
+    // Créer le dossier s'il n'existe pas
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Générer un nom de fichier unique avec timestamp
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const fileExtension = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
+  }
+});
+
+// Filtrage des types de fichiers
+const fileFilter = (req: any, file: any, cb: any) => {
+  const allowedTypes = [
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'video/mp4',
+    'video/mpeg',
+    'video/quicktime',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Type de fichier non autorisé'), false);
+  }
+};
+
+const upload = multer({
+  storage: storageConfig,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB max
+  }
+});
+
 export function registerRoutes(app: Express) {
-  // Routes existantes
+  // Routes de test / auth
   app.get("/api/hello", (req, res) => {
     res.send("hello world");
   });
@@ -178,7 +241,7 @@ export function registerRoutes(app: Express) {
       }
 
       const updateSchema = insertUserSchema.partial().extend({
-        currentPassword: z.string().optional() // Ajouter le champ pour l'ancien mot de passe
+        currentPassword: z.string().optional()
       });
       const validatedData = updateSchema.parse(req.body);
 
@@ -194,17 +257,14 @@ export function registerRoutes(app: Express) {
           return res.status(400).json({ message: "Current password is required to change password" });
         }
 
-        // Vérifier l'ancien mot de passe
         const isCurrentPasswordValid = verifyPassword(validatedData.currentPassword, existingUser.password);
         if (!isCurrentPasswordValid) {
           return res.status(401).json({ message: "Current password is incorrect" });
         }
 
-        // Hasher le nouveau mot de passe
         validatedData.password = hashPassword(validatedData.password);
       }
 
-      // Supprimer currentPassword des données de mise à jour
       const { currentPassword, ...updateData } = validatedData;
 
       const user = await storage.updateUser(id, updateData);
@@ -286,7 +346,7 @@ export function registerRoutes(app: Express) {
 
       const artist = await storage.getArtistByUserId(userId);
       if (!artist) {
-        return res.status(404).json({ message: "Artist not found for this user" });
+        return res.status(404).json({ message: "Artist not found" });
       }
       res.json(artist);
     } catch (error) {
@@ -354,15 +414,121 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // CRUD Routes for Artist Portfolios
+  app.get("/api/artist-portfolios", async (req, res, next) => {
+    try {
+      const { artistId } = req.query;
+      const filters = {
+        artistId: artistId ? parseInt(artistId as string) : undefined
+      };
+
+      const portfolios = await storage.getAllArtistPortfolios(filters);
+      res.json(portfolios);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/artist-portfolios/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid portfolio ID" });
+      }
+
+      const portfolio = await storage.getArtistPortfolio(id);
+      res.json(portfolio);
+    } catch (error: any) {
+      if (error.message === "Artist portfolio not found") {
+        return res.status(404).json({ message: "Artist portfolio not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.get("/api/artist-portfolios/artist/:artistId", async (req, res, next) => {
+    try {
+      const artistId = parseInt(req.params.artistId);
+      if (isNaN(artistId)) {
+        return res.status(400).json({ message: "Invalid artist ID" });
+      }
+
+      const portfolios = await storage.getArtistPortfoliosByArtistId(artistId);
+      res.json(portfolios);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/artist-portfolios", async (req, res, next) => {
+    try {
+      const validatedData = insertArtistPortfolioSchema.parse(req.body);
+      const portfolio = await storage.createArtistPortfolio(validatedData);
+      res.status(201).json(portfolio);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/artist-portfolios/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid portfolio ID" });
+      }
+
+      const updateSchema = insertArtistPortfolioSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const portfolio = await storage.updateArtistPortfolio(id, validatedData);
+      res.json(portfolio);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Artist portfolio not found") {
+        return res.status(404).json({ message: "Artist portfolio not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/artist-portfolios/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid portfolio ID" });
+      }
+
+      const success = await storage.deleteArtistPortfolio(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Artist portfolio not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // CRUD Routes for Clubs
   app.get("/api/clubs", async (req, res, next) => {
     try {
-      const { city, country, minRating, minCapacity } = req.query;
+      const { city, country, category, featured } = req.query;
       const filters = {
         city: city as string,
         country: country as string,
-        minRating: minRating ? parseFloat(minRating as string) : undefined,
-        minCapacity: minCapacity ? parseInt(minCapacity as string) : undefined
+        category: category as string,
+        featured: featured ? featured === 'true' : undefined
       };
 
       const clubs = await storage.getAllClubs(filters);
@@ -398,7 +564,7 @@ export function registerRoutes(app: Express) {
 
       const club = await storage.getClubByUserId(userId);
       if (!club) {
-        return res.status(404).json({ message: "Club not found for this user" });
+        return res.status(404).json({ message: "Club not found" });
       }
       res.json(club);
     } catch (error) {
@@ -466,25 +632,230 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // CRUD Routes for Club Locations
+  app.get("/api/club-locations", async (req, res, next) => {
+    try {
+      const { clubId } = req.query;
+      const filters = {
+        clubId: clubId ? parseInt(clubId as string) : undefined
+      };
+
+      const locations = await storage.getAllClubLocations(filters);
+      res.json(locations);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/club-locations/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid location ID" });
+      }
+
+      const location = await storage.getClubLocation(id);
+      res.json(location);
+    } catch (error: any) {
+      if (error.message === "Club location not found") {
+        return res.status(404).json({ message: "Club location not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.get("/api/club-locations/club/:clubId", async (req, res, next) => {
+    try {
+      const clubId = parseInt(req.params.clubId);
+      if (isNaN(clubId)) {
+        return res.status(400).json({ message: "Invalid club ID" });
+      }
+
+      const locations = await storage.getClubLocationsByClubId(clubId);
+      res.json(locations);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/club-locations", async (req, res, next) => {
+    try {
+      const validatedData = insertClubLocationSchema.parse(req.body);
+      const location = await storage.createClubLocation(validatedData);
+      res.status(201).json(location);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/club-locations/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid location ID" });
+      }
+
+      const updateSchema = insertClubLocationSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const location = await storage.updateClubLocation(id, validatedData);
+      res.json(location);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Club location not found") {
+        return res.status(404).json({ message: "Club location not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/club-locations/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid location ID" });
+      }
+
+      const success = await storage.deleteClubLocation(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Club location not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Club Tables
+  app.get("/api/club-tables", async (req, res, next) => {
+    try {
+      const { clubId, available } = req.query;
+      const filters = {
+        clubId: clubId ? parseInt(clubId as string) : undefined,
+        available: available ? available === 'true' : undefined
+      };
+
+      const tables = await storage.getAllClubTables(filters);
+      res.json(tables);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/club-tables/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid table ID" });
+      }
+
+      const table = await storage.getClubTable(id);
+      res.json(table);
+    } catch (error: any) {
+      if (error.message === "Club table not found") {
+        return res.status(404).json({ message: "Club table not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.get("/api/club-tables/club/:clubId", async (req, res, next) => {
+    try {
+      const clubId = parseInt(req.params.clubId);
+      if (isNaN(clubId)) {
+        return res.status(400).json({ message: "Invalid club ID" });
+      }
+
+      const tables = await storage.getClubTablesByClubId(clubId);
+      res.json(tables);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/club-tables", async (req, res, next) => {
+    try {
+      const validatedData = insertClubTableSchema.parse(req.body);
+      const table = await storage.createClubTable(validatedData);
+      res.status(201).json(table);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/club-tables/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid table ID" });
+      }
+
+      const updateSchema = insertClubTableSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const table = await storage.updateClubTable(id, validatedData);
+      res.json(table);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Club table not found") {
+        return res.status(404).json({ message: "Club table not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/club-tables/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid table ID" });
+      }
+
+      const success = await storage.deleteClubTable(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Club table not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // CRUD Routes for Events
   app.get("/api/events", async (req, res, next) => {
     try {
-      const {
-        clubId, category, city, country, minDate, maxDate,
-        minPrice, maxPrice, isApproved, mood
-      } = req.query;
-
+      const { clubId, city, country, status, startDate, endDate } = req.query;
       const filters = {
         clubId: clubId ? parseInt(clubId as string) : undefined,
-        category: category as string,
         city: city as string,
         country: country as string,
-        minDate: minDate ? new Date(minDate as string) : undefined,
-        maxDate: maxDate ? new Date(maxDate as string) : undefined,
-        minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
-        maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
-        isApproved: isApproved ? isApproved === 'true' : undefined,
-        mood: mood as string
+        status: status as string,
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined
       };
 
       const events = await storage.getAllEvents(filters);
@@ -507,20 +878,6 @@ export function registerRoutes(app: Express) {
       if (error.message === "Event not found") {
         return res.status(404).json({ message: "Event not found" });
       }
-      next(error);
-    }
-  });
-
-  app.get("/api/events/club/:clubId", async (req, res, next) => {
-    try {
-      const clubId = parseInt(req.params.clubId);
-      if (isNaN(clubId)) {
-        return res.status(400).json({ message: "Invalid club ID" });
-      }
-
-      const events = await storage.getEventsByClubId(clubId);
-      res.json(events);
-    } catch (error) {
       next(error);
     }
   });
@@ -601,29 +958,19 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  app.get("/api/event-artists/event/:eventId", async (req, res, next) => {
+  app.get("/api/event-artists/:eventId/:artistId", async (req, res, next) => {
     try {
       const eventId = parseInt(req.params.eventId);
-      if (isNaN(eventId)) {
-        return res.status(400).json({ message: "Invalid event ID" });
-      }
-
-      const eventArtists = await storage.getEventArtistsByEventId(eventId);
-      res.json(eventArtists);
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  app.get("/api/event-artists/artist/:artistId", async (req, res, next) => {
-    try {
       const artistId = parseInt(req.params.artistId);
-      if (isNaN(artistId)) {
-        return res.status(400).json({ message: "Invalid artist ID" });
+      if (isNaN(eventId) || isNaN(artistId)) {
+        return res.status(400).json({ message: "Invalid event or artist ID" });
       }
 
-      const eventArtists = await storage.getEventArtistsByArtistId(artistId);
-      res.json(eventArtists);
+      const eventArtist = await storage.getEventArtist(eventId, artistId);
+      if (!eventArtist) {
+        return res.status(404).json({ message: "Event artist not found" });
+      }
+      res.json(eventArtist);
     } catch (error) {
       next(error);
     }
@@ -645,22 +992,42 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  app.delete("/api/event-artists", async (req, res, next) => {
+  app.put("/api/event-artists/:eventId/:artistId", async (req, res, next) => {
     try {
-      const { eventId, artistId } = req.query;
-
-      if (!eventId || !artistId) {
-        return res.status(400).json({ message: "Event ID and Artist ID are required" });
+      const eventId = parseInt(req.params.eventId);
+      const artistId = parseInt(req.params.artistId);
+      if (isNaN(eventId) || isNaN(artistId)) {
+        return res.status(400).json({ message: "Invalid event or artist ID" });
       }
 
-      const eventIdNum = parseInt(eventId as string);
-      const artistIdNum = parseInt(artistId as string);
+      const updateSchema = insertEventArtistSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
 
-      if (isNaN(eventIdNum) || isNaN(artistIdNum)) {
-        return res.status(400).json({ message: "Invalid event ID or artist ID" });
+      const eventArtist = await storage.updateEventArtist(eventId, artistId, validatedData);
+      res.json(eventArtist);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Event artist not found") {
+        return res.status(404).json({ message: "Event artist not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/event-artists/:eventId/:artistId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const artistId = parseInt(req.params.artistId);
+      if (isNaN(eventId) || isNaN(artistId)) {
+        return res.status(400).json({ message: "Invalid event or artist ID" });
       }
 
-      const success = await storage.deleteEventArtist(eventIdNum, artistIdNum);
+      const success = await storage.deleteEventArtist(eventId, artistId);
       if (success) {
         res.status(204).send();
       } else {
@@ -671,13 +1038,206 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // CRUD Routes for Event Reserved Tables
+  app.get("/api/event-reserved-tables", async (req, res, next) => {
+    try {
+      const { eventId, tableId } = req.query;
+      const filters = {
+        eventId: eventId ? parseInt(eventId as string) : undefined,
+        tableId: tableId ? parseInt(tableId as string) : undefined
+      };
+
+      const reservedTables = await storage.getAllEventReservedTables(filters);
+      res.json(reservedTables);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/event-reserved-tables/:eventId/:tableId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const tableId = parseInt(req.params.tableId);
+      if (isNaN(eventId) || isNaN(tableId)) {
+        return res.status(400).json({ message: "Invalid event or table ID" });
+      }
+
+      const reservedTable = await storage.getEventReservedTable(eventId, tableId);
+      if (!reservedTable) {
+        return res.status(404).json({ message: "Event reserved table not found" });
+      }
+      res.json(reservedTable);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/event-reserved-tables", async (req, res, next) => {
+    try {
+      const validatedData = insertEventReservedTableSchema.parse(req.body);
+      const reservedTable = await storage.createEventReservedTable(validatedData);
+      res.status(201).json(reservedTable);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/event-reserved-tables/:eventId/:tableId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const tableId = parseInt(req.params.tableId);
+      if (isNaN(eventId) || isNaN(tableId)) {
+        return res.status(400).json({ message: "Invalid event or table ID" });
+      }
+
+      const updateSchema = insertEventReservedTableSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const reservedTable = await storage.updateEventReservedTable(eventId, tableId, validatedData);
+      res.json(reservedTable);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Event reserved table not found") {
+        return res.status(404).json({ message: "Event reserved table not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/event-reserved-tables/:eventId/:tableId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const tableId = parseInt(req.params.tableId);
+      if (isNaN(eventId) || isNaN(tableId)) {
+        return res.status(400).json({ message: "Invalid event or table ID" });
+      }
+
+      const success = await storage.deleteEventReservedTable(eventId, tableId);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Event reserved table not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Event Participants
+  app.get("/api/event-participants", async (req, res, next) => {
+    try {
+      const { eventId, userId, status } = req.query;
+      const filters = {
+        eventId: eventId ? parseInt(eventId as string) : undefined,
+        userId: userId ? parseInt(userId as string) : undefined,
+        status: status as string
+      };
+
+      const participants = await storage.getAllEventParticipants(filters);
+      res.json(participants);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/event-participants/:eventId/:userId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(eventId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid event or user ID" });
+      }
+
+      const participant = await storage.getEventParticipant(eventId, userId);
+      if (!participant) {
+        return res.status(404).json({ message: "Event participant not found" });
+      }
+      res.json(participant);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/event-participants", async (req, res, next) => {
+    try {
+      const validatedData = insertEventParticipantSchema.parse(req.body);
+      const participant = await storage.createEventParticipant(validatedData);
+      res.status(201).json(participant);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/event-participants/:eventId/:userId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(eventId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid event or user ID" });
+      }
+
+      const updateSchema = insertEventParticipantSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const participant = await storage.updateEventParticipant(eventId, userId, validatedData);
+      res.json(participant);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Event participant not found") {
+        return res.status(404).json({ message: "Event participant not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/event-participants/:eventId/:userId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(eventId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid event or user ID" });
+      }
+
+      const success = await storage.deleteEventParticipant(eventId, userId);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Event participant not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // CRUD Routes for Invitations
   app.get("/api/invitations", async (req, res, next) => {
     try {
-      const { clubId, artistId, status } = req.query;
+      const { eventId, userId, status } = req.query;
       const filters = {
-        clubId: clubId ? parseInt(clubId as string) : undefined,
-        artistId: artistId ? parseInt(artistId as string) : undefined,
+        eventId: eventId ? parseInt(eventId as string) : undefined,
+        userId: userId ? parseInt(userId as string) : undefined,
         status: status as string
       };
 
@@ -701,34 +1261,6 @@ export function registerRoutes(app: Express) {
       if (error.message === "Invitation not found") {
         return res.status(404).json({ message: "Invitation not found" });
       }
-      next(error);
-    }
-  });
-
-  app.get("/api/invitations/club/:clubId", async (req, res, next) => {
-    try {
-      const clubId = parseInt(req.params.clubId);
-      if (isNaN(clubId)) {
-        return res.status(400).json({ message: "Invalid club ID" });
-      }
-
-      const invitations = await storage.getInvitationsByClubId(clubId);
-      res.json(invitations);
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  app.get("/api/invitations/artist/:artistId", async (req, res, next) => {
-    try {
-      const artistId = parseInt(req.params.artistId);
-      if (isNaN(artistId)) {
-        return res.status(400).json({ message: "Invalid artist ID" });
-      }
-
-      const invitations = await storage.getInvitationsByArtistId(artistId);
-      res.json(invitations);
-    } catch (error) {
       next(error);
     }
   });
@@ -796,11 +1328,11 @@ export function registerRoutes(app: Express) {
   // CRUD Routes for Tickets
   app.get("/api/tickets", async (req, res, next) => {
     try {
-      const { eventId, userId, isUsed } = req.query;
+      const { eventId, userId, status } = req.query;
       const filters = {
         eventId: eventId ? parseInt(eventId as string) : undefined,
         userId: userId ? parseInt(userId as string) : undefined,
-        isUsed: isUsed ? isUsed === 'true' : undefined
+        status: status as string
       };
 
       const tickets = await storage.getAllTickets(filters);
@@ -823,34 +1355,6 @@ export function registerRoutes(app: Express) {
       if (error.message === "Ticket not found") {
         return res.status(404).json({ message: "Ticket not found" });
       }
-      next(error);
-    }
-  });
-
-  app.get("/api/tickets/event/:eventId", async (req, res, next) => {
-    try {
-      const eventId = parseInt(req.params.eventId);
-      if (isNaN(eventId)) {
-        return res.status(400).json({ message: "Invalid event ID" });
-      }
-
-      const tickets = await storage.getTicketsByEventId(eventId);
-      res.json(tickets);
-    } catch (error) {
-      next(error);
-    }
-  });
-
-  app.get("/api/tickets/user/:userId", async (req, res, next) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
-
-      const tickets = await storage.getTicketsByUserId(userId);
-      res.json(tickets);
-    } catch (error) {
       next(error);
     }
   });
@@ -915,20 +1419,124 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // CRUD Routes for Ticket Types
+  app.get("/api/ticket-types", async (req, res, next) => {
+    try {
+      const { eventId } = req.query;
+      const filters = {
+        eventId: eventId ? parseInt(eventId as string) : undefined
+      };
+
+      const ticketTypes = await storage.getAllTicketTypes(filters);
+      res.json(ticketTypes);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/ticket-types/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ticket type ID" });
+      }
+
+      const ticketType = await storage.getTicketType(id);
+      res.json(ticketType);
+    } catch (error: any) {
+      if (error.message === "Ticket type not found") {
+        return res.status(404).json({ message: "Ticket type not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.get("/api/ticket-types/event/:eventId", async (req, res, next) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      const ticketTypes = await storage.getTicketTypesByEventId(eventId);
+      res.json(ticketTypes);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/ticket-types", async (req, res, next) => {
+    try {
+      const validatedData = insertTicketTypeSchema.parse(req.body);
+      const ticketType = await storage.createTicketType(validatedData);
+      res.status(201).json(ticketType);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/ticket-types/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ticket type ID" });
+      }
+
+      const updateSchema = insertTicketTypeSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const ticketType = await storage.updateTicketType(id, validatedData);
+      res.json(ticketType);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Ticket type not found") {
+        return res.status(404).json({ message: "Ticket type not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/ticket-types/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ticket type ID" });
+      }
+
+      const success = await storage.deleteTicketType(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Ticket type not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // CRUD Routes for Feedback
   app.get("/api/feedback", async (req, res, next) => {
     try {
-      const { eventId, artistId, clubId, userId, minRating } = req.query;
+      const { sourceType, sourceId, minRating } = req.query;
       const filters = {
-        eventId: eventId ? parseInt(eventId as string) : undefined,
-        artistId: artistId ? parseInt(artistId as string) : undefined,
-        clubId: clubId ? parseInt(clubId as string) : undefined,
-        userId: userId ? parseInt(userId as string) : undefined,
+        sourceType: sourceType as string,
+        sourceId: sourceId ? parseInt(sourceId as string) : undefined,
         minRating: minRating ? parseInt(minRating as string) : undefined
       };
 
-      const feedback = await storage.getAllFeedback(filters);
-      res.json(feedback);
+      const feedbackList = await storage.getAllFeedback(filters);
+      res.json(feedbackList);
     } catch (error) {
       next(error);
     }
@@ -1011,15 +1619,669 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // CRUD Routes for Feedback Likes
+  app.get("/api/feedback-likes", async (req, res, next) => {
+    try {
+      const { feedbackId, userId } = req.query;
+      const filters = {
+        feedbackId: feedbackId ? parseInt(feedbackId as string) : undefined,
+        userId: userId ? parseInt(userId as string) : undefined
+      };
+
+      const likes = await storage.getAllFeedbackLikes(filters);
+      res.json(likes);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/feedback-likes/:feedbackId/:userId", async (req, res, next) => {
+    try {
+      const feedbackId = parseInt(req.params.feedbackId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(feedbackId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid feedback or user ID" });
+      }
+
+      const like = await storage.getFeedbackLike(feedbackId, userId);
+      if (!like) {
+        return res.status(404).json({ message: "Feedback like not found" });
+      }
+      res.json(like);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/feedback-likes", async (req, res, next) => {
+    try {
+      const validatedData = insertFeedbackLikeSchema.parse(req.body);
+      const like = await storage.createFeedbackLike(validatedData);
+      res.status(201).json(like);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/feedback-likes/:feedbackId/:userId", async (req, res, next) => {
+    try {
+      const feedbackId = parseInt(req.params.feedbackId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(feedbackId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid feedback or user ID" });
+      }
+
+      const updateSchema = insertFeedbackLikeSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const like = await storage.updateFeedbackLike(feedbackId, userId, validatedData);
+      res.json(like);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Feedback like not found") {
+        return res.status(404).json({ message: "Feedback like not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/feedback-likes/:feedbackId/:userId", async (req, res, next) => {
+    try {
+      const feedbackId = parseInt(req.params.feedbackId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(feedbackId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid feedback or user ID" });
+      }
+
+      const success = await storage.deleteFeedbackLike(feedbackId, userId);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Feedback like not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Feedback Comments
+  app.get("/api/feedback-comments", async (req, res, next) => {
+    try {
+      const { feedbackId } = req.query;
+      const filters = {
+        feedbackId: feedbackId ? parseInt(feedbackId as string) : undefined
+      };
+
+      const comments = await storage.getAllFeedbackComments(filters);
+      res.json(comments);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/feedback-comments/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+
+      const comment = await storage.getFeedbackComment(id);
+      res.json(comment);
+    } catch (error: any) {
+      if (error.message === "Feedback comment not found") {
+        return res.status(404).json({ message: "Feedback comment not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/feedback-comments", async (req, res, next) => {
+    try {
+      const validatedData = insertFeedbackCommentSchema.parse(req.body);
+      const comment = await storage.createFeedbackComment(validatedData);
+      res.status(201).json(comment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/feedback-comments/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+
+      const updateSchema = insertFeedbackCommentSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const comment = await storage.updateFeedbackComment(id, validatedData);
+      res.json(comment);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Feedback comment not found") {
+        return res.status(404).json({ message: "Feedback comment not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/feedback-comments/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+
+      const success = await storage.deleteFeedbackComment(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Feedback comment not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Photos
+  app.get("/api/photos", async (req, res, next) => {
+    try {
+      const { userId, eventId } = req.query;
+      const filters = {
+        userId: userId ? parseInt(userId as string) : undefined,
+        eventId: eventId ? parseInt(eventId as string) : undefined
+      };
+
+      const photos = await storage.getAllPhotos(filters);
+      res.json(photos);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/photos/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid photo ID" });
+      }
+
+      const photo = await storage.getPhoto(id);
+      res.json(photo);
+    } catch (error: any) {
+      if (error.message === "Photo not found") {
+        return res.status(404).json({ message: "Photo not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/photos", async (req, res, next) => {
+    try {
+      const validatedData = insertPhotoSchema.parse(req.body);
+      const photo = await storage.createPhoto(validatedData);
+      res.status(201).json(photo);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/photos/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid photo ID" });
+      }
+
+      const updateSchema = insertPhotoSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const photo = await storage.updatePhoto(id, validatedData);
+      res.json(photo);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Photo not found") {
+        return res.status(404).json({ message: "Photo not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/photos/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid photo ID" });
+      }
+
+      const success = await storage.deletePhoto(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Photo not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Photo Likes
+  app.get("/api/photo-likes", async (req, res, next) => {
+    try {
+      const { photoId, userId } = req.query;
+      const filters = {
+        photoId: photoId ? parseInt(photoId as string) : undefined,
+        userId: userId ? parseInt(userId as string) : undefined
+      };
+
+      const likes = await storage.getAllPhotoLikes(filters);
+      res.json(likes);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/photo-likes/:photoId/:userId", async (req, res, next) => {
+    try {
+      const photoId = parseInt(req.params.photoId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(photoId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid photo or user ID" });
+      }
+
+      const like = await storage.getPhotoLike(photoId, userId);
+      if (!like) {
+        return res.status(404).json({ message: "Photo like not found" });
+      }
+      res.json(like);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/photo-likes", async (req, res, next) => {
+    try {
+      const validatedData = insertPhotoLikeSchema.parse(req.body);
+      const like = await storage.createPhotoLike(validatedData);
+      res.status(201).json(like);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/photo-likes/:photoId/:userId", async (req, res, next) => {
+    try {
+      const photoId = parseInt(req.params.photoId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(photoId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid photo or user ID" });
+      }
+
+      const updateSchema = insertPhotoLikeSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const like = await storage.updatePhotoLike(photoId, userId, validatedData);
+      res.json(like);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Photo like not found") {
+        return res.status(404).json({ message: "Photo like not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/photo-likes/:photoId/:userId", async (req, res, next) => {
+    try {
+      const photoId = parseInt(req.params.photoId);
+      const userId = parseInt(req.params.userId);
+      if (isNaN(photoId) || isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid photo or user ID" });
+      }
+
+      const success = await storage.deletePhotoLike(photoId, userId);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Photo like not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Photo Comments
+  app.get("/api/photo-comments", async (req, res, next) => {
+    try {
+      const { photoId } = req.query;
+      const filters = {
+        photoId: photoId ? parseInt(photoId as string) : undefined
+      };
+
+      const comments = await storage.getAllPhotoComments(filters);
+      res.json(comments);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/photo-comments/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+
+      const comment = await storage.getPhotoComment(id);
+      res.json(comment);
+    } catch (error: any) {
+      if (error.message === "Photo comment not found") {
+        return res.status(404).json({ message: "Photo comment not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/photo-comments", async (req, res, next) => {
+    try {
+      const validatedData = insertPhotoCommentSchema.parse(req.body);
+      const comment = await storage.createPhotoComment(validatedData);
+      res.status(201).json(comment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/photo-comments/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+
+      const updateSchema = insertPhotoCommentSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const comment = await storage.updatePhotoComment(id, validatedData);
+      res.json(comment);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Photo comment not found") {
+        return res.status(404).json({ message: "Photo comment not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/photo-comments/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid comment ID" });
+      }
+
+      const success = await storage.deletePhotoComment(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Photo comment not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Collaboration Milestones
+  app.get("/api/collaboration-milestones", async (req, res, next) => {
+    try {
+      const { invitationId, status } = req.query;
+      const filters = {
+        invitationId: invitationId ? parseInt(invitationId as string) : undefined,
+        status: status as string
+      };
+
+      const milestones = await storage.getAllCollaborationMilestones(filters);
+      res.json(milestones);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/collaboration-milestones/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid milestone ID" });
+      }
+
+      const milestone = await storage.getCollaborationMilestone(id);
+      res.json(milestone);
+    } catch (error: any) {
+      if (error.message === "Collaboration milestone not found") {
+        return res.status(404).json({ message: "Collaboration milestone not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/collaboration-milestones", async (req, res, next) => {
+    try {
+      const validatedData = insertCollaborationMilestoneSchema.parse(req.body);
+      const milestone = await storage.createCollaborationMilestone(validatedData);
+      res.status(201).json(milestone);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/collaboration-milestones/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid milestone ID" });
+      }
+
+      const updateSchema = insertCollaborationMilestoneSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const milestone = await storage.updateCollaborationMilestone(id, validatedData);
+      res.json(milestone);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Collaboration milestone not found") {
+        return res.status(404).json({ message: "Collaboration milestone not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/collaboration-milestones/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid milestone ID" });
+      }
+
+      const success = await storage.deleteCollaborationMilestone(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Collaboration milestone not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Collaboration Messages
+  app.get("/api/collaboration-messages", async (req, res, next) => {
+    try {
+      const { invitationId, senderType } = req.query;
+      const filters = {
+        invitationId: invitationId ? parseInt(invitationId as string) : undefined,
+        senderType: senderType as string
+      };
+
+      const messages = await storage.getAllCollaborationMessages(filters);
+      res.json(messages);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/collaboration-messages/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+
+      const message = await storage.getCollaborationMessage(id);
+      res.json(message);
+    } catch (error: any) {
+      if (error.message === "Collaboration message not found") {
+        return res.status(404).json({ message: "Collaboration message not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/collaboration-messages", async (req, res, next) => {
+    try {
+      const validatedData = insertCollaborationMessageSchema.parse(req.body);
+      const message = await storage.createCollaborationMessage(validatedData);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/collaboration-messages/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+
+      const updateSchema = insertCollaborationMessageSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const message = await storage.updateCollaborationMessage(id, validatedData);
+      res.json(message);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Collaboration message not found") {
+        return res.status(404).json({ message: "Collaboration message not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/collaboration-messages/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+
+      const success = await storage.deleteCollaborationMessage(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Collaboration message not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // CRUD Routes for Transactions
   app.get("/api/transactions", async (req, res, next) => {
     try {
-      const { userId, type, minAmount, maxAmount, startDate, endDate } = req.query;
+      const { userId, type, status, startDate, endDate } = req.query;
       const filters = {
         userId: userId ? parseInt(userId as string) : undefined,
         type: type as string,
-        minAmount: minAmount ? parseFloat(minAmount as string) : undefined,
-        maxAmount: maxAmount ? parseFloat(maxAmount as string) : undefined,
+        status: status as string,
         startDate: startDate ? new Date(startDate as string) : undefined,
         endDate: endDate ? new Date(endDate as string) : undefined
       };
@@ -1044,20 +2306,6 @@ export function registerRoutes(app: Express) {
       if (error.message === "Transaction not found") {
         return res.status(404).json({ message: "Transaction not found" });
       }
-      next(error);
-    }
-  });
-
-  app.get("/api/transactions/user/:userId", async (req, res, next) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      if (isNaN(userId)) {
-        return res.status(400).json({ message: "Invalid user ID" });
-      }
-
-      const transactions = await storage.getTransactionsByUserId(userId);
-      res.json(transactions);
-    } catch (error) {
       next(error);
     }
   });
@@ -1122,6 +2370,691 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // CRUD Routes for Customer Profiles
+  app.get("/api/customer-profiles", async (req, res, next) => {
+    try {
+      const { userId } = req.query;
+      const filters = {
+        userId: userId ? parseInt(userId as string) : undefined
+      };
+
+      const profiles = await storage.getAllCustomerProfiles(filters);
+      res.json(profiles);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/customer-profiles/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid profile ID" });
+      }
+
+      const profile = await storage.getCustomerProfile(id);
+      res.json(profile);
+    } catch (error: any) {
+      if (error.message === "Customer profile not found") {
+        return res.status(404).json({ message: "Customer profile not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.get("/api/customer-profiles/user/:userId", async (req, res, next) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const profile = await storage.getCustomerProfileByUserId(userId);
+      if (!profile) {
+        return res.status(404).json({ message: "Customer profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/customer-profiles", async (req, res, next) => {
+    try {
+      const validatedData = insertCustomerProfileSchema.parse(req.body);
+      const profile = await storage.createCustomerProfile(validatedData);
+      res.status(201).json(profile);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/customer-profiles/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid profile ID" });
+      }
+
+      const updateSchema = insertCustomerProfileSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const profile = await storage.updateCustomerProfile(id, validatedData);
+      res.json(profile);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Customer profile not found") {
+        return res.status(404).json({ message: "Customer profile not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/customer-profiles/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid profile ID" });
+      }
+
+      const success = await storage.deleteCustomerProfile(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Customer profile not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Music Genres
+  app.get("/api/music-genres", async (req, res, next) => {
+    try {
+      const genres = await storage.getAllMusicGenres();
+      res.json(genres);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/music-genres/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid genre ID" });
+      }
+
+      const genre = await storage.getMusicGenre(id);
+      res.json(genre);
+    } catch (error: any) {
+      if (error.message === "Music genre not found") {
+        return res.status(404).json({ message: "Music genre not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/music-genres", async (req, res, next) => {
+    try {
+      const validatedData = insertMusicGenreSchema.parse(req.body);
+      const genre = await storage.createMusicGenre(validatedData);
+      res.status(201).json(genre);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/music-genres/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid genre ID" });
+      }
+
+      const updateSchema = insertMusicGenreSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const genre = await storage.updateMusicGenre(id, validatedData);
+      res.json(genre);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Music genre not found") {
+        return res.status(404).json({ message: "Music genre not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/music-genres/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid genre ID" });
+      }
+
+      const success = await storage.deleteMusicGenre(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Music genre not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Drink Types
+  app.get("/api/drink-types", async (req, res, next) => {
+    try {
+      const { category } = req.query;
+      const filters = {
+        category: category as string
+      };
+
+      const drinkTypes = await storage.getAllDrinkTypes(filters);
+      res.json(drinkTypes);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/drink-types/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid drink type ID" });
+      }
+
+      const drinkType = await storage.getDrinkType(id);
+      res.json(drinkType);
+    } catch (error: any) {
+      if (error.message === "Drink type not found") {
+        return res.status(404).json({ message: "Drink type not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/drink-types", async (req, res, next) => {
+    try {
+      const validatedData = insertDrinkTypeSchema.parse(req.body);
+      const drinkType = await storage.createDrinkType(validatedData);
+      res.status(201).json(drinkType);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/drink-types/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid drink type ID" });
+      }
+
+      const updateSchema = insertDrinkTypeSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const drinkType = await storage.updateDrinkType(id, validatedData);
+      res.json(drinkType);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Drink type not found") {
+        return res.status(404).json({ message: "Drink type not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/drink-types/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid drink type ID" });
+      }
+
+      const success = await storage.deleteDrinkType(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Drink type not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Customer Tags
+  app.get("/api/customer-tags", async (req, res, next) => {
+    try {
+      const { customerId } = req.query;
+      const filters = {
+        customerId: customerId ? parseInt(customerId as string) : undefined
+      };
+
+      const tags = await storage.getAllCustomerTags(filters);
+      res.json(tags);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/customer-tags/:customerId/:tag", async (req, res, next) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      const tag = req.params.tag;
+      if (isNaN(customerId)) {
+        return res.status(400).json({ message: "Invalid customer ID" });
+      }
+
+      const customerTag = await storage.getCustomerTag(customerId, tag);
+      if (!customerTag) {
+        return res.status(404).json({ message: "Customer tag not found" });
+      }
+      res.json(customerTag);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/customer-tags", async (req, res, next) => {
+    try {
+      const validatedData = insertCustomerTagSchema.parse(req.body);
+      const tag = await storage.createCustomerTag(validatedData);
+      res.status(201).json(tag);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/customer-tags/:customerId/:tag", async (req, res, next) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      const tag = req.params.tag;
+      if (isNaN(customerId)) {
+        return res.status(400).json({ message: "Invalid customer ID" });
+      }
+
+      const updateSchema = insertCustomerTagSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const customerTag = await storage.updateCustomerTag(customerId, tag, validatedData);
+      res.json(customerTag);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Customer tag not found") {
+        return res.status(404).json({ message: "Customer tag not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/customer-tags/:customerId/:tag", async (req, res, next) => {
+    try {
+      const customerId = parseInt(req.params.customerId);
+      const tag = req.params.tag;
+      if (isNaN(customerId)) {
+        return res.status(400).json({ message: "Invalid customer ID" });
+      }
+
+      const success = await storage.deleteCustomerTag(customerId, tag);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Customer tag not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Promotions
+  app.get("/api/promotions", async (req, res, next) => {
+    try {
+      const { eventId, clubId, status, validFrom, validTo } = req.query;
+      const filters = {
+        eventId: eventId ? parseInt(eventId as string) : undefined,
+        clubId: clubId ? parseInt(clubId as string) : undefined,
+        status: status as string,
+        validFrom: validFrom ? new Date(validFrom as string) : undefined,
+        validTo: validTo ? new Date(validTo as string) : undefined
+      };
+
+      const promotions = await storage.getAllPromotions(filters);
+      res.json(promotions);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/promotions/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid promotion ID" });
+      }
+
+      const promotion = await storage.getPromotion(id);
+      res.json(promotion);
+    } catch (error: any) {
+      if (error.message === "Promotion not found") {
+        return res.status(404).json({ message: "Promotion not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/promotions", async (req, res, next) => {
+    try {
+      const validatedData = insertPromotionSchema.parse(req.body);
+      const promotion = await storage.createPromotion(validatedData);
+      res.status(201).json(promotion);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/promotions/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid promotion ID" });
+      }
+
+      const updateSchema = insertPromotionSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const promotion = await storage.updatePromotion(id, validatedData);
+      res.json(promotion);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Promotion not found") {
+        return res.status(404).json({ message: "Promotion not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/promotions/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid promotion ID" });
+      }
+
+      const success = await storage.deletePromotion(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Promotion not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Payment Methods (User)
+  app.get("/api/payment-methods", async (req, res, next) => {
+    try {
+      const { userId, type, isDefault } = req.query;
+      const filters = {
+        userId: userId ? parseInt(userId as string) : undefined,
+        type: type as string,
+        isDefault: isDefault ? isDefault === 'true' : undefined
+      };
+
+      const paymentMethods = await storage.getAllPaymentMethods(filters);
+      res.json(paymentMethods);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/payment-methods/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid payment method ID" });
+      }
+
+      const paymentMethod = await storage.getPaymentMethod(id);
+      res.json(paymentMethod);
+    } catch (error: any) {
+      if (error.message === "Payment method not found") {
+        return res.status(404).json({ message: "Payment method not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.get("/api/payment-methods/user/:userId", async (req, res, next) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const paymentMethods = await storage.getPaymentMethodsByUserId(userId);
+      res.json(paymentMethods);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/payment-methods", async (req, res, next) => {
+    try {
+      const validatedData = insertPaymentMethodSchema.parse(req.body);
+      const paymentMethod = await storage.createPaymentMethod(validatedData);
+      res.status(201).json(paymentMethod);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/payment-methods/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid payment method ID" });
+      }
+
+      const updateSchema = insertPaymentMethodSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const paymentMethod = await storage.updatePaymentMethod(id, validatedData);
+      res.json(paymentMethod);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Payment method not found") {
+        return res.status(404).json({ message: "Payment method not found" });
+      }
+      if (error.message === "No fields to update") {
+        return res.status(400).json({ message: "No fields to update" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/payment-methods/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid payment method ID" });
+      }
+
+      const success = await storage.deletePaymentMethod(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Payment method not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // CRUD Routes for Invoices
+  app.get("/api/invoices", async (req, res, next) => {
+    try {
+      const { userId, status, startDate, endDate } = req.query;
+      const filters = {
+        userId: userId ? parseInt(userId as string) : undefined,
+        status: status as string,
+        startDate: startDate ? new Date(startDate as string) : undefined,
+        endDate: endDate ? new Date(endDate as string) : undefined
+      };
+
+      const invoices = await storage.getAllInvoices(filters);
+      res.json(invoices);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/invoices/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid invoice ID" });
+      }
+
+      const invoice = await storage.getInvoice(id);
+      res.json(invoice);
+    } catch (error: any) {
+      if (error.message === "Invoice not found") {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.post("/api/invoices", async (req, res, next) => {
+    try {
+      const validatedData = insertInvoiceSchema.parse(req.body);
+      const invoice = await storage.createInvoice(validatedData);
+      res.status(201).json(invoice);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      next(error);
+    }
+  });
+
+  app.put("/api/invoices/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid invoice ID" });
+      }
+
+      const updateSchema = insertInvoiceSchema.partial();
+      const validatedData = updateSchema.parse(req.body);
+
+      const invoice = await storage.updateInvoice(id, validatedData);
+      res.json(invoice);
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      if (error.message === "Invoice not found") {
+        return res.status(404).json({ message: "Invoice not found" });
+      }
+      next(error);
+    }
+  });
+
+  app.delete("/api/invoices/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid invoice ID" });
+      }
+
+      const success = await storage.deleteInvoice(id);
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Invoice not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // CRUD Routes for Employees (POS)
   app.get("/api/employees", async (req, res, next) => {
     try {
@@ -1139,7 +3072,10 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/employees/:id", async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid employee ID" });
+      }
       const employee = await storage.getEmployee(id);
       res.json(employee);
     } catch (error: any) {
@@ -1181,7 +3117,10 @@ export function registerRoutes(app: Express) {
 
   app.put("/api/employees/:id", async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid employee ID" });
+      }
 
       const updateSchema = insertEmployeeSchema.partial();
       const validatedData = updateSchema.parse(req.body);
@@ -1204,7 +3143,10 @@ export function registerRoutes(app: Express) {
 
   app.delete("/api/employees/:id", async (req, res, next) => {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid employee ID" });
+      }
 
       const success = await storage.deleteEmployee(id);
       if (success) {
@@ -1603,7 +3545,7 @@ export function registerRoutes(app: Express) {
       const { tableId, employeeId, status, startDate, endDate } = req.query;
       const filters = {
         tableId: tableId ? parseInt(tableId as string) : undefined,
-        employeeId: employeeId as string,
+        employeeId: employeeId ? parseInt(employeeId as string) : undefined,
         status: status as string,
         startDate: startDate ? new Date(startDate as string) : undefined,
         endDate: endDate ? new Date(endDate as string) : undefined
@@ -1649,7 +3591,11 @@ export function registerRoutes(app: Express) {
 
   app.get("/api/orders/employee/:employeeId", async (req, res, next) => {
     try {
-      const { employeeId } = req.params;
+      const employeeId = parseInt(req.params.employeeId);
+      if (isNaN(employeeId)) {
+        return res.status(400).json({ message: "Invalid employee ID" });
+      }
+
       const orders = await storage.getOrdersByEmployeeId(employeeId);
       res.json(orders);
     } catch (error) {
@@ -1828,7 +3774,7 @@ export function registerRoutes(app: Express) {
     try {
       const { employeeId, deviceId, startDate, endDate } = req.query;
       const filters = {
-        employeeId: employeeId as string,
+        employeeId: employeeId ? parseInt(employeeId as string) : undefined,
         deviceId: deviceId ? parseInt(deviceId as string) : undefined,
         startDate: startDate ? new Date(startDate as string) : undefined,
         endDate: endDate ? new Date(endDate as string) : undefined
@@ -1918,37 +3864,37 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  // CRUD Routes for Payment Methods
-  app.get("/api/payment-methods", async (req, res, next) => {
+  // CRUD Routes for POS Payment Methods
+  app.get("/api/pos-payment-methods", async (req, res, next) => {
     try {
-      const paymentMethods = await storage.getAllPaymentMethods();
+      const paymentMethods = await storage.getAllPosPaymentMethods();
       res.json(paymentMethods);
     } catch (error) {
       next(error);
     }
   });
 
-  app.get("/api/payment-methods/:id", async (req, res, next) => {
+  app.get("/api/pos-payment-methods/:id", async (req, res, next) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid payment method ID" });
+        return res.status(400).json({ message: "Invalid POS payment method ID" });
       }
 
-      const paymentMethod = await storage.getPaymentMethod(id);
+      const paymentMethod = await storage.getPosPaymentMethod(id);
       res.json(paymentMethod);
     } catch (error: any) {
-      if (error.message === "Payment method not found") {
-        return res.status(404).json({ message: "Payment method not found" });
+      if (error.message === "POS payment method not found") {
+        return res.status(404).json({ message: "POS payment method not found" });
       }
       next(error);
     }
   });
 
-  app.post("/api/payment-methods", async (req, res, next) => {
+  app.post("/api/pos-payment-methods", async (req, res, next) => {
     try {
-      const validatedData = insertPaymentMethodSchema.parse(req.body);
-      const paymentMethod = await storage.createPaymentMethod(validatedData);
+      const validatedData = insertPosPaymentMethodSchema.parse(req.body);
+      const paymentMethod = await storage.createPosPaymentMethod(validatedData);
       res.status(201).json(paymentMethod);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1961,17 +3907,17 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  app.put("/api/payment-methods/:id", async (req, res, next) => {
+  app.put("/api/pos-payment-methods/:id", async (req, res, next) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid payment method ID" });
+        return res.status(400).json({ message: "Invalid POS payment method ID" });
       }
 
-      const updateSchema = insertPaymentMethodSchema.partial();
+      const updateSchema = insertPosPaymentMethodSchema.partial();
       const validatedData = updateSchema.parse(req.body);
 
-      const paymentMethod = await storage.updatePaymentMethod(id, validatedData);
+      const paymentMethod = await storage.updatePosPaymentMethod(id, validatedData);
       res.json(paymentMethod);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
@@ -1980,29 +3926,155 @@ export function registerRoutes(app: Express) {
           errors: error.errors
         });
       }
-      if (error.message === "Payment method not found") {
-        return res.status(404).json({ message: "Payment method not found" });
-      }
-      if (error.message === "No fields to update") {
-        return res.status(400).json({ message: "No fields to update" });
+      if (error.message === "POS payment method not found") {
+        return res.status(404).json({ message: "POS payment method not found" });
       }
       next(error);
     }
   });
 
-  app.delete("/api/payment-methods/:id", async (req, res, next) => {
+  app.delete("/api/pos-payment-methods/:id", async (req, res, next) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid payment method ID" });
+        return res.status(400).json({ message: "Invalid POS payment method ID" });
       }
 
-      const success = await storage.deletePaymentMethod(id);
+      const success = await storage.deletePosPaymentMethod(id);
       if (success) {
         res.status(204).send();
       } else {
-        res.status(404).json({ message: "Payment method not found" });
+        res.status(404).json({ message: "POS payment method not found" });
       }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Routes pour l'upload et la récupération de fichiers
+  app.post("/api/uploads", upload.single('file'), async (req: any, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Aucun fichier uploadé" });
+      }
+
+      // Retourner les informations du fichier uploadé
+      const fileInfo = {
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+        url: `/uploads/${req.file.filename}`,
+        uploadedAt: new Date().toISOString()
+      };
+
+      res.status(201).json({
+        message: "Fichier uploadé avec succès",
+        file: fileInfo
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Route pour upload multiple
+  app.post("/api/uploads/multiple", upload.array('files', 10), async (req: any, res, next) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ message: "Aucun fichier uploadé" });
+      }
+
+      const filesInfo = req.files.map((file: any) => ({
+        filename: file.filename,
+        originalName: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        url: `/uploads/${file.filename}`,
+        uploadedAt: new Date().toISOString()
+      }));
+
+      res.status(201).json({
+        message: `${req.files.length} fichier(s) uploadé(s) avec succès`,
+        files: filesInfo
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Route pour récupérer la liste des fichiers
+  app.get("/api/uploads", async (req, res, next) => {
+    try {
+      const uploadDir = path.join(process.cwd(), 'uploads');
+
+      if (!fs.existsSync(uploadDir)) {
+        return res.json([]);
+      }
+
+      const files = fs.readdirSync(uploadDir).map(filename => {
+        const filePath = path.join(uploadDir, filename);
+        const stats = fs.statSync(filePath);
+
+        return {
+          filename,
+          url: `/uploads/${filename}`,
+          size: stats.size,
+          uploadedAt: stats.birthtime,
+          modifiedAt: stats.mtime
+        };
+      });
+
+      res.json(files);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Route pour récupérer un fichier spécifique
+  app.get("/api/uploads/:filename", async (req, res, next) => {
+    try {
+      const { filename } = req.params;
+      const filePath = path.join(process.cwd(), 'uploads', filename);
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "Fichier non trouvé" });
+      }
+
+      // Détecter le type MIME
+      const mimeTypes: { [key: string]: string } = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.mp4': 'video/mp4',
+        '.pdf': 'application/pdf',
+        '.doc': 'application/msword',
+        '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      };
+
+      const ext = path.extname(filename).toLowerCase();
+      const mimeType = mimeTypes[ext] || 'application/octet-stream';
+
+      res.setHeader('Content-Type', mimeType);
+      res.sendFile(filePath);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Route pour supprimer un fichier
+  app.delete("/api/uploads/:filename", async (req, res, next) => {
+    try {
+      const { filename } = req.params;
+      const filePath = path.join(process.cwd(), 'uploads', filename);
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: "Fichier non trouvé" });
+      }
+
+      fs.unlinkSync(filePath);
+      res.json({ message: "Fichier supprimé avec succès" });
     } catch (error) {
       next(error);
     }
@@ -2010,6 +4082,11 @@ export function registerRoutes(app: Express) {
 
   // Error handling middleware
   app.use((error: any, req: any, res: any, next: any) => {
+    if (error instanceof multer.MulterError) {
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: "Fichier trop volumineux" });
+      }
+    }
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   });

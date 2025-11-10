@@ -1,3 +1,5 @@
+// D:\Projet\BeBit\bebit - new\client\src\pages\club\wallet-page.tsx
+
 import React, { useState } from "react";
 import { 
   Card, 

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Mobile - Système de Point de Vente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Données fictives complètes
+        const initialData = {
+            employees: [
+                { id: 1, name: "Alice Dupont", role: "Serveur", pin: "1234", status: true, deviceId: 1, imageUrl: "https://via.placeholder.com/150?text=Alice" },
+                { id: 2, name: "Bob Martin", role: "Cuisinier", pin: "5678", status: true, deviceId: 2, imageUrl: "https://via.placeholder.com/150?text=Bob" },
+                { id: 3, name: "Claire Lefevre", role: "Barman", pin: "9012", status: false, deviceId: 3, imageUrl: "https://via.placeholder.com/150?text=Claire" },
+                { id: 4, name: "David Roux", role: "Manager", pin: "3456", status: true, deviceId: null, imageUrl: "https://via.placeholder.com/150?text=David" },
+                { id: 5, name: "Eva Blanc", role: "Serveur", pin: "7890", status: true, deviceId: 1, imageUrl: "https://via.placeholder.com/150?text=Eva" },
+                { id: 6, name: "Franck Noir", role: "Cuisinier", pin: "2345", status: false, deviceId: 2, imageUrl: "https://via.placeholder.com/150?text=Franck" }
+            ],
+            posDevices: [
+                { id: 1, name: "Tablette Serveur 1", location: "Salle Principale", status: true, lastActive: "2025-11-06T10:00:00Z", sales: 1500, imageUrl: "https://via.placeholder.com/150?text=Device1" },
+                { id: 2, name: "Terminal Cuisine", location: "Cuisine", status: true, lastActive: "2025-11-06T09:45:00Z", sales: 800, imageUrl: "https://via.placeholder.com/150?text=Device2" },
+                { id: 3, name: "Bar Tablet", location: "Bar", status: false, lastActive: "2025-11-05T18:30:00Z", sales: 1200, imageUrl: "https://via.placeholder.com/150?text=Device3" },
+                { id: 4, name: "Manager Pad", location: "Bureau", status: true, lastActive: "2025-11-06T10:15:00Z", sales: 0, imageUrl: "https://via.placeholder.com/150?text=Device4" }
+            ],
+            productCategories: [
+                { id: 1, name: "Entrées", description: "Plats d'ouverture", isActive: true, imageUrl: "https://via.placeholder.com/150?text=Entrees" },
+                { id: 2, name: "Plats Principaux", description: "Repas complets", isActive: true, imageUrl: "https://via.placeholder.com/150?text=Principaux" },
+                { id: 3, name: "Desserts", description: "Sucrés", isActive: true, imageUrl: "https://via.placeholder.com/150?text=Desserts" },
+                { id: 4, name: "Boissons", description: "Alcool et non-alcool", isActive: false, imageUrl: "https://via.placeholder.com/150?text=Boissons" },
+                { id: 5, name: "Snacks", description: "Petits encas", isActive: true, imageUrl: "https://via.placeholder.com/150?text=Snacks" }
+            ],
+            products: [
+                { id: 1, name: "Salade César", description: "Salade avec poulet grillé", destinations: "cuisine", price: 1200, categoryId: 1, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Salade" },
+                { id: 2, name: "Steak Frites", description: "Steak saignant avec frites", destinations: "cuisine", price: 2500, categoryId: 2, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Steak" },
+                { id: 3, name: "Tiramisu", description: "Dessert italien", destinations: "cuisine", price: 800, categoryId: 3, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Tiramisu" },
+                { id: 4, name: "Cocktail Mojito", description: "Menthe et rhum", destinations: "bar", price: 1500, categoryId: 4, isAvailable: false, imageUrl: "https://via.placeholder.com/150?text=Mojito" },
+                { id: 5, name: "Burger Végé", description: "Burger végétarien", destinations: "cuisine", price: 1800, categoryId: 2, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Burger" },
+                { id: 6, name: "Bière Pression", description: "Verre de bière", destinations: "bar", price: 600, categoryId: 4, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Biere" },
+                { id: 7, name: "Soupe du Jour", description: "Soupe maison", destinations: "cuisine", price: 900, categoryId: 1, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Soupe" },
+                { id: 8, name: "Margarita", description: "Cocktail tequila", destinations: "bar", price: 1600, categoryId: 4, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Margarita" },
+                { id: 9, name: "Crème Brûlée", description: "Dessert caramélisé", destinations: "cuisine", price: 1000, categoryId: 3, isAvailable: false, imageUrl: "https://via.placeholder.com/150?text=Creme" },
+                { id: 10, name: "Eau Minérale", description: "Bouteille d'eau", destinations: "bar", price: 300, categoryId: 4, isAvailable: true, imageUrl: "https://via.placeholder.com/150?text=Eau" }
+            ],
+            posTables: [
+                { id: 1, name: "Table 1", number: 1, area: "Salle Principale", capacity: 4, status: "Libre", currentOrderId: null, imageUrl: "https://via.placeholder.com/150?text=Table1" },
+                { id: 2, name: "Table 2", number: 2, area: "Terrasse", capacity: 6, status: "Occupée", currentOrderId: 1, imageUrl: "https://via.placeholder.com/150?text=Table2" },
+                { id: 3, name: "Table 3", number: 3, area: "Salle VIP", capacity: 2, status: "Réservée", currentOrderId: null, imageUrl: "https://via.placeholder.com/150?text=Table3" },
+                { id: 4, name: "Table 4", number: 4, area: "Bar", capacity: 4, status: "Libre", currentOrderId: null, imageUrl: "https://via.placeholder.com/150?text=Table4" },
+                { id: 5, name: "Table 5", number: 5, area: "Salle Principale", capacity: 8, status: "Occupée", currentOrderId: 2, imageUrl: "https://via.placeholder.com/150?text=Table5" },
+                { id: 6, name: "Table 6", number: 6, area: "Terrasse", capacity: 4, status: "En Nettoyage", currentOrderId: null, imageUrl: "https://via.placeholder.com/150?text=Libre" }
+            ],
+            orders: [
+                { id: 1, tableId: 2, customerName: "Famille Martin", status: "En Préparation", total: 4500, createdAt: "2025-11-06T09:30:00Z", updatedAt: "2025-11-06T10:00:00Z", paymentMethod: "Carte", priority: "Normale", estimatedCompletionTime: "2025-11-06T10:15:00Z" },
+                { id: 2, tableId: 5, customerName: "Groupe Amis", status: "Prête", total: 3200, createdAt: "2025-11-06T09:00:00Z", updatedAt: "2025-11-06T09:45:00Z", paymentMethod: "Espèces", priority: "Haute", estimatedCompletionTime: "2025-11-06T09:50:00Z" },
+                { id: 3, tableId: 3, customerName: "M. Dupont", status: "Payée", total: 1800, createdAt: "2025-11-06T08:45:00Z", updatedAt: "2025-11-06T09:30:00Z", paymentMethod: "Carte", priority: "Basse", estimatedCompletionTime: "2025-11-06T09:20:00Z" },
+                { id: 4, tableId: 1, customerName: "Soleil Couple", status: "Nouvelle", total: 0, createdAt: "2025-11-06T10:20:00Z", updatedAt: "2025-11-06T10:20:00Z", paymentMethod: "", priority: "Normale", estimatedCompletionTime: null },
+                { id: 5, tableId: 4, customerName: "Bar Solo", status: "En Préparation", total: 2100, createdAt: "2025-11-06T10:10:00Z", updatedAt: "2025-11-06T10:12:00Z", paymentMethod: "Espèces", priority: "Normale", estimatedCompletionTime: "2025-11-06T10:25:00Z" }
+            ],
+            orderItems: [
+                { id: 1, orderId: 1, productId: 1, quantity: 2, price: 1200, notes: "Sans anchois", subtotal: 2400, status: "En Cours", category: "Entrées", preparationTime: 10 },
+                { id: 2, orderId: 1, productId: 2, quantity: 1, price: 2500, notes: "", subtotal: 2500, status: "En Cours", category: "Plats Principaux", preparationTime: 20 },
+                { id: 3, orderId: 2, productId: 4, quantity: 3, price: 1500, notes: "Extra menthe", subtotal: 4500, status: "Prête", category: "Boissons", preparationTime: 5 },
+                { id: 4, orderId: 2, productId: 6, quantity: 2, price: 600, notes: "", subtotal: 1200, status: "Prête", category: "Boissons", preparationTime: 2 },
+                { id: 5, orderId: 3, productId: 3, quantity: 1, price: 800, notes: "Glace à part", subtotal: 800, status: "Terminée", category: "Desserts", preparationTime: 8 },
+                { id: 6, orderId: 3, productId: 7, quantity: 1, price: 900, notes: "", subtotal: 900, status: "Terminée", category: "Entrées", preparationTime: 7 },
+                { id: 7, orderId: 4, productId: 5, quantity: 1, price: 1800, notes: "", subtotal: 1800, status: "Nouvelle", category: "Plats Principaux", preparationTime: 15 },
+                { id: 8, orderId: 5, productId: 8, quantity: 1, price: 1600, notes: "Sel", subtotal: 1600, status: "En Cours", category: "Boissons", preparationTime: 6 },
+                { id: 9, orderId: 5, productId: 10, quantity: 2, price: 300, notes: "", subtotal: 600, status: "En Cours", category: "Boissons", preparationTime: 1 },
+                { id: 10, orderId: 1, productId: 9, quantity: 1, price: 1000, notes: "", subtotal: 1000, status: "En Attente", category: "Desserts", preparationTime: 12 }
+            ],
+            posHistory: [
+                { id: 1, type: "Commande Créée", description: "Nouvelle commande pour table 2", userId: 1, userName: "Alice Dupont", userRole: "Serveur", timestamp: "2025-11-06T09:30:00Z", amount: 4500, orderId: 1, tableId: 2, tableName: "Table 2", details: "Ajout de salade et steak", status: "Succès" },
+                { id: 2, type: "Paiement Effectué", description: "Paiement carte pour commande 3", userId: 4, userName: "David Roux", userRole: "Manager", timestamp: "2025-11-06T09:30:00Z", amount: 1800, orderId: 3, tableId: 3, tableName: "Table 3", details: "Carte Visa", status: "Succès" },
+                { id: 3, type: "Article Mis à Jour", description: "Statut changé pour item 1", userId: 2, userName: "Bob Martin", userRole: "Cuisinier", timestamp: "2025-11-06T10:00:00Z", amount: 0, orderId: 1, tableId: 2, tableName: "Table 2", details: "En préparation", status: "Succès" },
+                { id: 4, type: "Table Libérée", description: "Fin de commande pour table 3", userId: 1, userName: "Alice Dupont", userRole: "Serveur", timestamp: "2025-11-06T09:45:00Z", amount: 0, orderId: 3, tableId: 3, tableName: "Table 3", details: "Nettoyage initié", status: "Succès" },
+                { id: 5, type: "Erreur Paiement", description: "Échec paiement pour commande 2", userId: 3, userName: "Claire Lefevre", userRole: "Barman", timestamp: "2025-11-06T09:40:00Z", amount: 3200, orderId: 2, tableId: 5, tableName: "Table 5", details: "Carte refusée", status: "Échec" },
+                { id: 6, type: "Produit Ajouté", description: "Nouveau produit burger ajouté", userId: 4, userName: "David Roux", userRole: "Manager", timestamp: "2025-11-06T08:00:00Z", amount: 0, orderId: null, tableId: null, tableName: "", details: "Catégorie plats principaux", status: "Succès" },
+                { id: 7, type: "Employé Connecté", description: "Connexion device 1", userId: 1, userName: "Alice Dupont", userRole: "Serveur", timestamp: "2025-11-06T09:00:00Z", amount: 0, orderId: null, tableId: null, tableName: "", details: "Salle principale", status: "Succès" },
+                { id: 8, type: "Commande Annulée", description: "Annulation partielle commande 4", userId: 2, userName: "Bob Martin", userRole: "Cuisinier", timestamp: "2025-11-06T10:15:00Z", amount: -1800, orderId: 4, tableId: 1, tableName: "Table 1", details: "Client changé d'avis", status: "Succès" }
+            ],
+            paymentMethods: [
+                { id: 1, name: "Carte Bancaire", value: 0 },
+                { id: 2, name: "Espèces", value: 0 },
+                { id: 3, name: "Chèque", value: 0 },
+                { id: 4, name: "Mobile Pay", value: 0 }
+            ]
+        };
+
+        // Composant Modal générique pour CRUD
+        const Modal = ({ isOpen, onClose, title, children, onSubmit }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-md max-h-[80vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">{title}</h2>
+                            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">&times;</button>
+                        </div>
+                        <form onSubmit={onSubmit} className="space-y-4">
+                            {children}
+                            <div className="flex space-x-2">
+                                <button type="submit" className="flex-1 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Sauvegarder</button>
+                                <button type="button" onClick={onClose} className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400">Annuler</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // Composant Liste avec CRUD
+        const CrudList = ({ title, items, columns, onAdd, onEdit, onDelete, renderItem }) => (
+            <div className="bg-white p-4 rounded-lg shadow">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <button onClick={onAdd} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Ajouter</button>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full table-auto">
+                        <thead>
+                            <tr className="bg-gray-200">
+                                {Object.keys(columns).map(key => <th key={key} className="px-4 py-2 text-left">{key.charAt(0).toUpperCase() + key.slice(1)}</th>)}
+                                <th className="px-4 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items.map(item => (
+                                <tr key={item.id} className="border-b">
+                                    {renderItem ? renderItem(item) : Object.keys(columns).map(key => {
+                                        let value = item[key];
+                                        if (columns[key] === "boolean") {
+                                            value = value ? 'Actif' : 'Inactif';
+                                        }
+                                        return <td key={key} className="px-4 py-2">{value}</td>;
+                                    })}
+                                    <td className="px-4 py-2 space-x-2">
+                                        <button onClick={() => onEdit(item)} className="bg-blue-500 text-white px-2 py-1 rounded text-sm">Éditer</button>
+                                        <button onClick={() => onDelete(item.id)} className="bg-red-500 text-white px-2 py-1 rounded text-sm">Supprimer</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+
+        // Composant Employés CRUD
+        const EmployeesSection = ({ employees, devices, onUpdate }) => {
+            const [editEmployee, setEditEmployee] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [formData, setFormData] = useState({});
+
+            const handleAdd = () => {
+                setFormData({ name: '', role: '', pin: '', status: true, deviceId: null });
+                setShowModal(true);
+            };
+
+            const handleEdit = (employee) => {
+                setEditEmployee(employee);
+                setFormData({ ...employee });
+                setShowModal(true);
+            };
+
+            const handleDelete = (id) => {
+                if (window.confirm('Confirmer suppression?')) {
+                    onUpdate({ employees: employees.filter(e => e.id !== id) });
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (editEmployee) {
+                    onUpdate({ employees: employees.map(e => e.id === editEmployee.id ? { ...formData, id: e.id } : e) });
+                } else {
+                    const newId = Math.max(...employees.map(e => e.id), 0) + 1;
+                    onUpdate({ employees: [...employees, { ...formData, id: newId }] });
+                }
+                setShowModal(false);
+                setEditEmployee(null);
+            };
+
+            return (
+                <div>
+                    <CrudList
+                        title="Gestion Employés"
+                        items={employees}
+                        columns={{ name: 'text', role: 'text', pin: 'text', status: 'boolean', deviceId: 'integer' }}
+                        onAdd={handleAdd}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        renderItem={(item) => (
+                            <>
+                                <td>{item.name}</td>
+                                <td>{item.role}</td>
+                                <td>{item.pin}</td>
+                                <td>{item.status ? 'Actif' : 'Inactif'}</td>
+                                <td>{item.deviceId || 'N/A'}</td>
+                            </>
+                        )}
+                    />
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editEmployee ? 'Éditer Employé' : 'Ajouter Employé'} onSubmit={handleSubmit}>
+                        <input type="text" placeholder="Nom" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded" required />
+                        <input type="text" placeholder="Rôle" value={formData.role || ''} onChange={e => setFormData({ ...formData, role: e.target.value })} className="w-full p-2 border rounded" required />
+                        <input type="password" placeholder="PIN" value={formData.pin || ''} onChange={e => setFormData({ ...formData, pin: e.target.value })} className="w-full p-2 border rounded" required />
+                        <select value={formData.status || false} onChange={e => setFormData({ ...formData, status: e.target.value === 'true' })} className="w-full p-2 border rounded">
+                            <option value={true}>Actif</option>
+                            <option value={false}>Inactif</option>
+                        </select>
+                        <select value={formData.deviceId || ''} onChange={e => setFormData({ ...formData, deviceId: parseInt(e.target.value) || null })} className="w-full p-2 border rounded">
+                            <option value="">Pas de Device</option>
+                            {devices.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                        </select>
+                    </Modal>
+                </div>
+            );
+        };
+
+        // Composant Devices CRUD
+        const DevicesSection = ({ devices, onUpdate }) => {
+            const [editDevice, setEditDevice] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [formData, setFormData] = useState({});
+
+            const handleAdd = () => {
+                setFormData({ name: '', location: '', status: true, lastActive: new Date().toISOString(), sales: 0 });
+                setShowModal(true);
+            };
+
+            const handleEdit = (device) => {
+                setEditDevice(device);
+                setFormData({ ...device });
+                setShowModal(true);
+            };
+
+            const handleDelete = (id) => {
+                if (window.confirm('Confirmer suppression?')) {
+                    onUpdate({ posDevices: devices.filter(d => d.id !== id) });
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (editDevice) {
+                    onUpdate({ posDevices: devices.map(d => d.id === editDevice.id ? { ...formData, id: d.id } : d) });
+                } else {
+                    const newId = Math.max(...devices.map(d => d.id), 0) + 1;
+                    onUpdate({ posDevices: [...devices, { ...formData, id: newId }] });
+                }
+                setShowModal(false);
+                setEditDevice(null);
+            };
+
+            return (
+                <div>
+                    <CrudList
+                        title="Gestion Devices"
+                        items={devices}
+                        columns={{ name: 'text', location: 'text', status: 'boolean', lastActive: 'text', sales: 'integer' }}
+                        onAdd={handleAdd}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        renderItem={(item) => (
+                            <>
+                                <td>{item.name}</td>
+                                <td>{item.location}</td>
+                                <td>{item.status ? 'Actif' : 'Inactif'}</td>
+                                <td>{new Date(item.lastActive).toLocaleString()}</td>
+                                <td>{item.sales} €</td>
+                            </>
+                        )}
+                    />
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editDevice ? 'Éditer Device' : 'Ajouter Device'} onSubmit={handleSubmit}>
+                        <input type="text" placeholder="Nom" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded" required />
+                        <input type="text" placeholder="Location" value={formData.location || ''} onChange={e => setFormData({ ...formData, location: e.target.value })} className="w-full p-2 border rounded" required />
+                        <select value={formData.status || false} onChange={e => setFormData({ ...formData, status: e.target.value === 'true' })} className="w-full p-2 border rounded">
+                            <option value={true}>Actif</option>
+                            <option value={false}>Inactif</option>
+                        </select>
+                        <input type="datetime-local" value={formData.lastActive ? new Date(formData.lastActive).toISOString().slice(0,16) : ''} onChange={e => setFormData({ ...formData, lastActive: e.target.value + ':00Z' })} className="w-full p-2 border rounded" />
+                        <input type="number" placeholder="Ventes" value={formData.sales || 0} onChange={e => setFormData({ ...formData, sales: parseInt(e.target.value) })} className="w-full p-2 border rounded" />
+                    </Modal>
+                </div>
+            );
+        };
+
+        // Composant History
+        const HistorySection = ({ history }) => (
+            <div className="bg-white p-4 rounded-lg shadow">
+                <h3 className="text-lg font-semibold mb-4">Historique</h3>
+                <div className="space-y-2">
+                    {history.map(h => (
+                        <div key={h.id} className="p-3 bg-gray-50 rounded border-l-4 border-blue-500">
+                            <div className="flex justify-between">
+                                <span className="font-medium">{h.type}</span>
+                                <span className="text-sm text-gray-500">{new Date(h.timestamp).toLocaleString()}</span>
+                            </div>
+                            <p className="text-sm">{h.description}</p>
+                            {h.amount && <p className="text-sm font-bold">Montant: {h.amount} €</p>}
+                            <p className="text-xs text-gray-600">Par: {h.userName} ({h.userRole})</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+
+        // Composant Stats (simples)
+        const StatsSection = ({ orders, products, tables }) => {
+            const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
+            const activeTables = tables.filter(t => t.status === 'Occupée').length;
+            const availableProducts = products.filter(p => p.isAvailable).length;
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-blue-500 text-white p-4 rounded-lg text-center">
+                        <h4 className="text-2xl font-bold">{totalSales} €</h4>
+                        <p>Ventes Totales</p>
+                    </div>
+                    <div className="bg-green-500 text-white p-4 rounded-lg text-center">
+                        <h4 className="text-2xl font-bold">{activeTables}</h4>
+                        <p>Tables Occupées</p>
+                    </div>
+                    <div className="bg-purple-500 text-white p-4 rounded-lg text-center">
+                        <h4 className="text-2xl font-bold">{availableProducts}</h4>
+                        <p>Produits Disponibles</p>
+                    </div>
+                </div>
+            );
+        };
+
+        // Dashboard Tab
+        const DashboardTab = ({ data, onUpdate }) => (
+            <div className="p-4 space-y-6">
+                <StatsSection orders={data.orders} products={data.products} tables={data.posTables} />
+                <EmployeesSection employees={data.employees} devices={data.posDevices} onUpdate={onUpdate} />
+                <DevicesSection devices={data.posDevices} onUpdate={onUpdate} />
+                <HistorySection history={data.posHistory} />
+            </div>
+        );
+
+        // Composant Catégories CRUD
+        const CategoriesSection = ({ categories, onUpdate }) => {
+            const [editCategory, setEditCategory] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [formData, setFormData] = useState({});
+
+            const handleAdd = () => {
+                setFormData({ name: '', description: '', isActive: true });
+                setShowModal(true);
+            };
+
+            const handleEdit = (cat) => {
+                setEditCategory(cat);
+                setFormData({ ...cat });
+                setShowModal(true);
+            };
+
+            const handleDelete = (id) => {
+                if (window.confirm('Confirmer suppression?')) {
+                    onUpdate({ productCategories: categories.filter(c => c.id !== id) });
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (editCategory) {
+                    onUpdate({ productCategories: categories.map(c => c.id === editCategory.id ? { ...formData, id: c.id } : c) });
+                } else {
+                    const newId = Math.max(...categories.map(c => c.id), 0) + 1;
+                    onUpdate({ productCategories: [...categories, { ...formData, id: newId }] });
+                }
+                setShowModal(false);
+                setEditCategory(null);
+            };
+
+            return (
+                <div>
+                    <CrudList
+                        title="Gestion Catégories"
+                        items={categories}
+                        columns={{ name: 'text', description: 'text', isActive: 'boolean' }}
+                        onAdd={handleAdd}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        renderItem={(item) => (
+                            <>
+                                <td>{item.name}</td>
+                                <td>{item.description}</td>
+                                <td>{item.isActive ? 'Actif' : 'Inactif'}</td>
+                            </>
+                        )}
+                    />
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editCategory ? 'Éditer Catégorie' : 'Ajouter Catégorie'} onSubmit={handleSubmit}>
+                        <input type="text" placeholder="Nom" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded" required />
+                        <textarea placeholder="Description" value={formData.description || ''} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full p-2 border rounded" />
+                        <select value={formData.isActive || false} onChange={e => setFormData({ ...formData, isActive: e.target.value === 'true' })} className="w-full p-2 border rounded">
+                            <option value={true}>Actif</option>
+                            <option value={false}>Inactif</option>
+                        </select>
+                    </Modal>
+                </div>
+            );
+        };
+
+        // Composant Produits CRUD
+        const ProductsSection = ({ products, categories, onUpdate }) => {
+            const [editProduct, setEditProduct] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [formData, setFormData] = useState({});
+
+            const handleAdd = () => {
+                setFormData({ name: '', description: '', destinations: 'cuisine', price: 0, categoryId: categories[0]?.id || 1, isAvailable: true });
+                setShowModal(true);
+            };
+
+            const handleEdit = (prod) => {
+                setEditProduct(prod);
+                setFormData({ ...prod });
+                setShowModal(true);
+            };
+
+            const handleDelete = (id) => {
+                if (window.confirm('Confirmer suppression?')) {
+                    onUpdate({ products: products.filter(p => p.id !== id) });
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (editProduct) {
+                    onUpdate({ products: products.map(p => p.id === editProduct.id ? { ...formData, id: p.id } : p) });
+                } else {
+                    const newId = Math.max(...products.map(p => p.id), 0) + 1;
+                    onUpdate({ products: [...products, { ...formData, id: newId }] });
+                }
+                setShowModal(false);
+                setEditProduct(null);
+            };
+
+            return (
+                <div>
+                    <CrudList
+                        title="Gestion Produits"
+                        items={products}
+                        columns={{ name: 'text', destinations: 'text', price: 'integer', categoryId: 'integer', isAvailable: 'boolean' }}
+                        onAdd={handleAdd}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        renderItem={(item) => (
+                            <>
+                                <td>{item.name}</td>
+                                <td>{item.destinations}</td>
+                                <td>{item.price} €</td>
+                                <td>{categories.find(c => c.id === item.categoryId)?.name || 'N/A'}</td>
+                                <td>{item.isAvailable ? 'Disponible' : 'Indisponible'}</td>
+                            </>
+                        )}
+                    />
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editProduct ? 'Éditer Produit' : 'Ajouter Produit'} onSubmit={handleSubmit}>
+                        <input type="text" placeholder="Nom" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded" required />
+                        <textarea placeholder="Description" value={formData.description || ''} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full p-2 border rounded" />
+                        <select value={formData.destinations || 'cuisine'} onChange={e => setFormData({ ...formData, destinations: e.target.value })} className="w-full p-2 border rounded">
+                            <option value="cuisine">Cuisine</option>
+                            <option value="bar">Bar</option>
+                        </select>
+                        <input type="number" placeholder="Prix" value={formData.price || 0} onChange={e => setFormData({ ...formData, price: parseInt(e.target.value) })} className="w-full p-2 border rounded" required />
+                        <select value={formData.categoryId || ''} onChange={e => setFormData({ ...formData, categoryId: parseInt(e.target.value) })} className="w-full p-2 border rounded">
+                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                        <select value={formData.isAvailable || false} onChange={e => setFormData({ ...formData, isAvailable: e.target.value === 'true' })} className="w-full p-2 border rounded">
+                            <option value={true}>Disponible</option>
+                            <option value={false}>Indisponible</option>
+                        </select>
+                    </Modal>
+                </div>
+            );
+        };
+
+        // Catégorie Tab
+        const CategorieTab = ({ data, onUpdate }) => (
+            <div className="p-4 space-y-6">
+                <CategoriesSection categories={data.productCategories} onUpdate={onUpdate} />
+                <ProductsSection products={data.products} categories={data.productCategories} onUpdate={onUpdate} />
+            </div>
+        );
+
+        // Composant Tables CRUD
+        const TablesSection = ({ tables, onUpdate }) => {
+            const [editTable, setEditTable] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [formData, setFormData] = useState({});
+
+            const handleAdd = () => {
+                setFormData({ name: '', number: 0, area: '', capacity: 0, status: 'Libre', currentOrderId: null });
+                setShowModal(true);
+            };
+
+            const handleEdit = (table) => {
+                setEditTable(table);
+                setFormData({ ...table });
+                setShowModal(true);
+            };
+
+            const handleDelete = (id) => {
+                if (window.confirm('Confirmer suppression?')) {
+                    onUpdate({ posTables: tables.filter(t => t.id !== id) });
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (editTable) {
+                    onUpdate({ posTables: tables.map(t => t.id === editTable.id ? { ...formData, id: t.id } : t) });
+                } else {
+                    const newId = Math.max(...tables.map(t => t.id), 0) + 1;
+                    onUpdate({ posTables: [...tables, { ...formData, id: newId }] });
+                }
+                setShowModal(false);
+                setEditTable(null);
+            };
+
+            return (
+                <div>
+                    <CrudList
+                        title="Gestion Tables"
+                        items={tables}
+                        columns={{ name: 'text', number: 'integer', area: 'text', capacity: 'integer', status: 'text' }}
+                        onAdd={handleAdd}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        renderItem={(item) => (
+                            <>
+                                <td>{item.name}</td>
+                                <td>{item.number}</td>
+                                <td>{item.area}</td>
+                                <td>{item.capacity}</td>
+                                <td>{item.status}</td>
+                            </>
+                        )}
+                    />
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editTable ? 'Éditer Table' : 'Ajouter Table'} onSubmit={handleSubmit}>
+                        <input type="text" placeholder="Nom" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded" required />
+                        <input type="number" placeholder="Numéro" value={formData.number || 0} onChange={e => setFormData({ ...formData, number: parseInt(e.target.value) })} className="w-full p-2 border rounded" required />
+                        <input type="text" placeholder="Zone" value={formData.area || ''} onChange={e => setFormData({ ...formData, area: e.target.value })} className="w-full p-2 border rounded" required />
+                        <input type="number" placeholder="Capacité" value={formData.capacity || 0} onChange={e => setFormData({ ...formData, capacity: parseInt(e.target.value) })} className="w-full p-2 border rounded" required />
+                        <select value={formData.status || 'Libre'} onChange={e => setFormData({ ...formData, status: e.target.value })} className="w-full p-2 border rounded">
+                            <option value="Libre">Libre</option>
+                            <option value="Occupée">Occupée</option>
+                            <option value="Réservée">Réservée</option>
+                            <option value="En Nettoyage">En Nettoyage</option>
+                        </select>
+                        <input type="number" placeholder="Order ID Actuel" value={formData.currentOrderId || ''} onChange={e => setFormData({ ...formData, currentOrderId: parseInt(e.target.value) || null })} className="w-full p-2 border rounded" />
+                    </Modal>
+                </div>
+            );
+        };
+
+        // Composant Orders CRUD
+        const OrdersSection = ({ orders, tables, onUpdate }) => {
+            const [editOrder, setEditOrder] = useState(null);
+            const [showModal, setShowModal] = useState(false);
+            const [formData, setFormData] = useState({});
+
+            const handleAdd = () => {
+                setFormData({ tableId: tables[0]?.id || 1, customerName: '', status: 'Nouvelle', total: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), paymentMethod: '', priority: 'Normale', estimatedCompletionTime: null });
+                setShowModal(true);
+            };
+
+            const handleEdit = (order) => {
+                setEditOrder(order);
+                setFormData({ ...order });
+                setShowModal(true);
+            };
+
+            const handleDelete = (id) => {
+                if (window.confirm('Confirmer suppression?')) {
+                    onUpdate({ orders: orders.filter(o => o.id !== id) });
+                }
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (editOrder) {
+                    onUpdate({ orders: orders.map(o => o.id === editOrder.id ? { ...formData, id: o.id } : o) });
+                } else {
+                    const newId = Math.max(...orders.map(o => o.id), 0) + 1;
+                    onUpdate({ orders: [...orders, { ...formData, id: newId }] });
+                }
+                setShowModal(false);
+                setEditOrder(null);
+            };
+
+            return (
+                <div>
+                    <CrudList
+                        title="Gestion Commandes"
+                        items={orders}
+                        columns={{ tableId: 'integer', customerName: 'text', status: 'text', total: 'integer', paymentMethod: 'text' }}
+                        onAdd={handleAdd}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        renderItem={(item) => (
+                            <>
+                                <td>{tables.find(t => t.id === item.tableId)?.name || 'N/A'}</td>
+                                <td>{item.customerName}</td>
+                                <td>{item.status}</td>
+                                <td>{item.total} €</td>
+                                <td>{item.paymentMethod}</td>
+                            </>
+                        )}
+                    />
+                    <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editOrder ? 'Éditer Commande' : 'Ajouter Commande'} onSubmit={handleSubmit}>
+                        <select value={formData.tableId || ''} onChange={e => setFormData({ ...formData, tableId: parseInt(e.target.value) })} className="w-full p-2 border rounded" required>
+                            {tables.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                        </select>
+                        <input type="text" placeholder="Nom Client" value={formData.customerName || ''} onChange={e => setFormData({ ...formData, customerName: e.target.value })} className="w-full p-2 border rounded" />
+                        <select value={formData.status || 'Nouvelle'} onChange={e => setFormData({ ...formData, status: e.target.value })} className="w-full p-2 border rounded">
+                            <option value="Nouvelle">Nouvelle</option>
+                            <option value="En Préparation">En Préparation</option>
+                            <option value="Prête">Prête</option>
+                            <option value="Payée">Payée</option>
+                        </select>
+                        <input type="number" placeholder="Total" value={formData.total || 0} onChange={e => setFormData({ ...formData, total: parseInt(e.target.value) })} className="w-full p-2 border rounded" />
+                        <select value={formData.paymentMethod || ''} onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })} className="w-full p-2 border rounded">
+                            <option value="">Non Payé</option>
+                            {initialData.paymentMethods.map(pm => <option key={pm.id} value={pm.name}>{pm.name}</option>)}
+                        </select>
+                        <select value={formData.priority || 'Normale'} onChange={e => setFormData({ ...formData, priority: e.target.value })} className="w-full p-2 border rounded">
+                            <option value="Basse">Basse</option>
+                            <option value="Normale">Normale</option>
+                            <option value="Haute">Haute</option>
+                        </select>
+                        <input type="datetime-local" value={formData.estimatedCompletionTime ? new Date(formData.estimatedCompletionTime).toISOString().slice(0,16) : ''} onChange={e => setFormData({ ...formData, estimatedCompletionTime: e.target.value ? e.target.value + ':00Z' : null })} className="w-full p-2 border rounded" />
+                    </Modal>
+                </div>
+            );
+        };
+
+        // Table Tab
+        const TableTab = ({ data, onUpdate }) => (
+            <div className="p-4 space-y-6">
+                <TablesSection tables={data.posTables} onUpdate={onUpdate} />
+                <OrdersSection orders={data.orders} tables={data.posTables} onUpdate={onUpdate} />
+            </div>
+        );
+
+        // Composant Order Items pour une commande
+        const OrderItemsList = ({ orderId, orderItems, products }) => {
+            const items = orderItems.filter(item => item.orderId === orderId);
+            return (
+                <div className="mt-4">
+                    <h4 className="font-semibold mb-2">Articles:</h4>
+                    {items.map(item => {
+                        const product = products.find(p => p.id === item.productId);
+                        return (
+                            <div key={item.id} className="flex justify-between p-2 bg-gray-50 rounded mb-1">
+                                <span>{product?.name} x{item.quantity} - Notes: {item.notes}</span>
+                                <span>{item.subtotal} € - Statut: {item.status}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        // Cuisine Tab
+        const CuisineTab = ({ data }) => {
+            const cuisineOrders = data.orders.filter(order => 
+                data.orderItems.some(item => item.orderId === order.id && data.products.find(p => p.id === item.productId)?.destinations === 'cuisine')
+            );
+            return (
+                <div className="p-4 space-y-4">
+                    <h2 className="text-xl font-bold">Commandes Cuisine</h2>
+                    {cuisineOrders.map(order => (
+                        <div key={order.id} className="bg-white p-4 rounded-lg shadow">
+                            <div className="flex justify-between">
+                                <span>Table: {data.posTables.find(t => t.id === order.tableId)?.name}</span>
+                                <span>Total: {order.total} €</span>
+                            </div>
+                            <p>Client: {order.customerName} - Statut: {order.status}</p>
+                            <OrderItemsList orderId={order.id} orderItems={data.orderItems} products={data.products} />
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // Bar Tab
+        const BarTab = ({ data }) => {
+            const barOrders = data.orders.filter(order => 
+                data.orderItems.some(item => item.orderId === order.id && data.products.find(p => p.id === item.productId)?.destinations === 'bar')
+            );
+            return (
+                <div className="p-4 space-y-4">
+                    <h2 className="text-xl font-bold">Commandes Bar</h2>
+                    {barOrders.map(order => (
+                        <div key={order.id} className="bg-white p-4 rounded-lg shadow">
+                            <div className="flex justify-between">
+                                <span>Table: {data.posTables.find(t => t.id === order.tableId)?.name}</span>
+                                <span>Total: {order.total} €</span>
+                            </div>
+                            <p>Client: {order.customerName} - Statut: {order.status}</p>
+                            <OrderItemsList orderId={order.id} orderItems={data.orderItems} products={data.products} />
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // Menu Tab - Affichage produits pour commande
+        const MenuTab = ({ products, categories }) => (
+            <div className="p-4 space-y-6">
+                <h2 className="text-xl font-bold">Menu</h2>
+                {categories.map(cat => (
+                    <div key={cat.id}>
+                        <h3 className="font-semibold mt-4 mb-2">{cat.name}</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            {products.filter(p => p.categoryId === cat.id && p.isAvailable).map(prod => (
+                                <div key={prod.id} className="bg-white p-3 rounded-lg shadow text-center">
+                                    <img src={prod.imageUrl} alt={prod.name} className="w-full h-24 object-cover rounded mb-2" />
+                                    <h4 className="font-medium">{prod.name}</h4>
+                                    <p className="text-sm text-gray-600">{prod.description}</p>
+                                    <p className="font-bold text-green-600">{prod.price} €</p>
+                                    <p className="text-xs">{prod.destinations}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+
+        // Composant principal App
+        const App = () => {
+            const [data, setData] = useState(initialData);
+            const [currentTab, setCurrentTab] = useState('dashboard');
+
+            const updateData = (newData) => {
+                setData(prev => ({ ...prev, ...newData }));
+            };
+
+            const renderTab = () => {
+                switch (currentTab) {
+                    case 'dashboard':
+                        return <DashboardTab data={data} onUpdate={updateData} />;
+                    case 'categorie':
+                        return <CategorieTab data={data} onUpdate={updateData} />;
+                    case 'table':
+                        return <TableTab data={data} onUpdate={updateData} />;
+                    case 'cuisine':
+                        return <CuisineTab data={data} />;
+                    case 'bar':
+                        return <BarTab data={data} />;
+                    case 'menu':
+                        return <MenuTab products={data.products} categories={data.productCategories} />;
+                    default:
+                        return <DashboardTab data={data} onUpdate={updateData} />;
+                }
+            };
+
+            return (
+                <div className="flex flex-col h-screen">
+                    <header className="bg-blue-600 text-white p-4">
+                        <h1 className="text-xl font-bold">POS Mobile</h1>
+                    </header>
+                    <main className="flex-1 overflow-y-auto">
+                        {renderTab()}
+                    </main>
+                    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2">
+                        {[
+                            { key: 'dashboard', label: 'Dashboard', icon: '📊' },
+                            { key: 'categorie', label: 'Catégories', icon: '📂' },
+                            { key: 'table', label: 'Tables', icon: '🪑' },
+                            { key: 'cuisine', label: 'Cuisine', icon: '🍳' },
+                            { key: 'bar', label: 'Bar', icon: '🍸' },
+                            { key: 'menu', label: 'Menu', icon: '🍽️' }
+                        ].map(tab => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setCurrentTab(tab.key)}
+                                className={`flex flex-col items-center p-2 ${currentTab === tab.key ? 'text-blue-600' : 'text-gray-500'}`}
+                            >
+                                <span className="text-lg">{tab.icon}</span>
+                                <span className="text-xs">{tab.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
