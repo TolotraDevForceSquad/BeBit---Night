@@ -848,7 +848,7 @@ export type CollaborationMessage = typeof collaborationMessages.$inferSelect;
 export type InsertCollaborationMessage = z.infer<typeof insertCollaborationMessageSchema>;
 
 
-NB : Pour m'aide tu doit me dire dire de rechercher ceci (bout de code <p>Lol</p>) dans le code et le mettre en bas ou au dessus ou le remplacer
+NB : Pour m'aide tu doit me dire dire de rechercher ceci (bout de code exacte que je peu copier <p>Lol</p>) dans le code et le mettre en bas ou au dessus ou le remplacer
 
 
 design :
@@ -883,3 +883,71 @@ text-gray-300 (#D1D5DB) : Textes neutres sur fonds gris.
 
 
 
+Design color :
+
+1. Couleurs Primaires (environ 80 pour cent de l’interface)
+
+Fond noir très profond (#000000)
+Utilisé pour couvrir presque tout l’écran. Sert de décor principal pour les pages, l’en-tête et les fenêtres modales.
+
+Texte blanc pur (#FFFFFF)
+Employé pour les titres visibles, les textes les plus importants et tout ce qui doit être lu sans effort.
+
+Gris clair atténué (#9CA3AF)
+Réservé aux petits détails comme les sous-titres, les zones d’écriture fantômes, les dates ou les descriptions secondaires.
+
+2. Couleurs Secondaires (environ 15 pour cent)
+
+Noir bleuté très sombre (#111827)
+Pour les cartes, les sections intérieures et les blocs qui doivent ressortir légèrement sans attirer trop d’attention.
+
+Gris nocturne uniforme (#1F2937)
+Utilisé pour les effets de survol neutres, les boutons inactifs ou les zones de formulaire.
+
+Deux tons de gris pour les bordures (#1F2937 et #374151)
+Servez-vous du premier pour les bords discrets et du second pour séparer des zones ou souligner le bas d’un en-tête.
+
+3. Couleur d’Accent Principale (environ 5 pour cent)
+
+Rose vif énergique (#EC4899)
+La couleur d’action par excellence. Elle habille les boutons importants comme “Créer” ou “Valider”, et montre les états actifs comme les filtres sélectionnés.
+
+Rose un peu plus profond (#DB2777)
+Apparaît lors du survol des boutons d’action pour signaler l’interaction.
+
+Rose vif utilisé pour le texte (#EC4899)
+Pour les icônes actives, les cases cochées ou l’effet de focus sur les champs.
+
+4. Couleurs d’Accent Secondaires (usage modéré)
+
+Violet clair lumineux (#A78BFA)
+Dédié aux éléments liés aux artistes, comme les étiquettes et les petites marques d’identité.
+
+Bleu clair doux (#60A5FA)
+Utilisé pour représenter les clubs dans les badges ou certaines sections.
+
+Vert tendre translucide (#4ADE80 avec transparence)
+Pour les statuts positifs comme “Succès” ou “À venir”.
+
+Bleu translucide (#60A5FA avec transparence)
+Pour les états “Planifié” ou “En cours”.
+
+Rouge translucide (#F87171 avec transparence)
+Pour signaler les erreurs, les actions dangereuses ou les suppressions.
+
+Jaune translucide (#FBBF24 avec transparence)
+Pour les avertissements tels que l’absence de connexion.
+
+Gris clair adouci (#D1D5DB)
+Pour les textes neutres posés sur des fonds gris foncé.
+
+
+SQL 
+
+SELECT table_name, (xpath('/row/c/text()', xml_count))[1]::text::bigint AS row_count FROM (SELECT table_name, query_to_xml(format('SELECT COUNT(*) AS c FROM %I.%I','public',table_name), false, true, '') AS xml_count FROM information_schema.tables WHERE table_schema='public') AS t;
+
+
+SELECT json_agg(invitations) AS users_json FROM users;
+
+
+DO $$DECLARE rec record; output jsonb := '[]'::jsonb; count bigint; data jsonb; BEGIN FOR rec IN SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' LOOP EXECUTE format('SELECT COUNT(*) FROM %I.%I', 'public', rec.table_name) INTO count; IF count > 0 THEN EXECUTE format('SELECT json_agg(row_to_json(t)) FROM %I.%I t', 'public', rec.table_name) INTO data; output := output || jsonb_build_object('table_name', rec.table_name, 'row_count', count, 'rows', data); END IF; END LOOP; RAISE NOTICE '%', jsonb_pretty(output); END $$;

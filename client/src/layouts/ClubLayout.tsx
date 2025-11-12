@@ -18,12 +18,13 @@ interface ClubLayoutProps {
   children: React.ReactNode;
 }
 
-const ClubLayouts = ({ children }: ClubLayoutProps) => {
+const ClubLayouts = ({ children }: sProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [location] = useLocation();
 
   // Récupérer l'utilisateur connecté depuis localStorage
-  const currentUser = JSON.parse(localStorage.getItem("auth_user") || "null");
+  const currentUser = typeof window !== "undefined" ? 
+    JSON.parse(localStorage.getItem("auth_user") || "null") : null;
 
   const navigation = [
     {
@@ -40,6 +41,10 @@ const ClubLayouts = ({ children }: ClubLayoutProps) => {
     }
   ];
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("auth_user");
     localStorage.removeItem("token");
@@ -49,16 +54,13 @@ const ClubLayouts = ({ children }: ClubLayoutProps) => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Sidebar pour desktop */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
         {/* Sidebar component */}
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 border-r border-gray-800">
           <div className="flex h-16 shrink-0 items-center">
             <div className="flex items-center gap-3">
               <Building className="h-8 w-8 text-pink-500" />
-              <div>
-                <h1 className="text-xl font-bold text-white">BeBit Club</h1>
-                <p className="text-xs text-gray-400">Espace gestion</p>
-              </div>
+              <span className="text-xl font-bold">BeBit Club</span>
             </div>
           </div>
           
@@ -85,32 +87,34 @@ const ClubLayouts = ({ children }: ClubLayoutProps) => {
                 </ul>
               </li>
               
-              {/* Section profil utilisateur */}
+              {/* Section utilisateur */}
               <li className="mt-auto">
                 <div className="flex items-center gap-x-4 px-2 py-3 text-sm font-semibold leading-6 text-white bg-gray-800 rounded-lg">
-                  <div className="flex items-center gap-3 flex-1">
+                  <div className="flex items-center gap-3">
                     <img
                       className="h-8 w-8 rounded-full bg-gray-800"
                       src={currentUser?.profileImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
-                      alt="Profile"
+                      alt={currentUser?.firstName}
                     />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-medium truncate">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-white">
                         {currentUser?.firstName} {currentUser?.lastName}
-                      </p>
-                      <p className="text-gray-400 text-xs truncate capitalize">
+                      </span>
+                      <span className="text-xs text-gray-400 capitalize">
                         {currentUser?.role === "club" ? "Club" : currentUser?.role}
-                      </p>
+                      </span>
                     </div>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="text-gray-400 hover:text-white transition-colors"
-                    title="Déconnexion"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </button>
                 </div>
+                
+                {/* Bouton déconnexion */}
+                <button
+                  onClick={handleLogout}
+                  className="mt-3 flex w-full items-center gap-x-3 px-2 py-2 text-sm font-semibold leading-6 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors"
+                >
+                  <LogOut className="h-5 w-5 shrink-0" />
+                  Déconnexion
+                </button>
               </li>
             </ul>
           </nav>
@@ -122,24 +126,24 @@ const ClubLayouts = ({ children }: ClubLayoutProps) => {
         <button
           type="button"
           className="-m-2.5 p-2.5 text-gray-400 lg:hidden"
-          onClick={() => setIsSidebarOpen(true)}
+          onClick={toggleSidebar}
         >
           <Menu className="h-6 w-6" />
         </button>
         
         <div className="flex-1 text-sm font-semibold leading-6 text-white">
           <div className="flex items-center gap-2">
-            <Building className="h-5 w-5 text-pink-500" />
+            <Building className="h-6 w-6 text-pink-500" />
             <span>BeBit Club</span>
           </div>
         </div>
         
-        {/* Profil mobile */}
-        <div className="flex items-center gap-2">
+        {/* Utilisateur mobile */}
+        <div className="flex items-center gap-3">
           <img
             className="h-8 w-8 rounded-full bg-gray-800"
             src={currentUser?.profileImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
-            alt="Profile"
+            alt={currentUser?.firstName}
           />
         </div>
       </div>
@@ -147,93 +151,79 @@ const ClubLayouts = ({ children }: ClubLayoutProps) => {
       {/* Sidebar mobile */}
       {isSidebarOpen && (
         <div className="lg:hidden">
-          <div className="fixed inset-0 z-50 bg-black/80" />
-          <div className="fixed inset-0 z-50 flex">
-            <div className="relative mr-16 flex w-full max-w-xs flex-1">
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 border-r border-gray-800">
-                <div className="flex h-16 shrink-0 items-center">
+          <div className="fixed inset-0 z-50 bg-black/80" onClick={toggleSidebar} />
+          <div className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 overflow-y-auto px-6 pb-4 border-r border-gray-800">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-3">
+                <Building className="h-8 w-8 text-pink-500" />
+                <span className="text-xl font-bold">BeBit Club</span>
+              </div>
+              <button
+                type="button"
+                className="-m-2.5 p-2.5 text-gray-400"
+                onClick={toggleSidebar}
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <nav className="mt-8">
+              <ul role="list" className="flex flex-col gap-y-4">
+                {navigation.map((item) => (
+                  <li key={item.name}>
+                    <Link href={item.href}>
+                      <a
+                        onClick={toggleSidebar}
+                        className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
+                          item.current
+                            ? 'bg-pink-500 text-white'
+                            : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                        }`}
+                      >
+                        <item.icon className="h-6 w-6 shrink-0" />
+                        {item.name}
+                      </a>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              
+              {/* Section utilisateur mobile */}
+              <div className="mt-8 pt-8 border-t border-gray-800">
+                <div className="flex items-center gap-x-4 px-2 py-3 text-sm font-semibold leading-6 text-white bg-gray-800 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <Building className="h-8 w-8 text-pink-500" />
-                    <div>
-                      <h1 className="text-xl font-bold text-white">BeBit Club</h1>
-                      <p className="text-xs text-gray-400">Espace gestion</p>
+                    <img
+                      className="h-8 w-8 rounded-full bg-gray-800"
+                      src={currentUser?.profileImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
+                      alt={currentUser?.firstName}
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-white">
+                        {currentUser?.firstName} {currentUser?.lastName}
+                      </span>
+                      <span className="text-xs text-gray-400 capitalize">
+                        {currentUser?.role === "club" ? "Club" : currentUser?.role}
+                      </span>
                     </div>
                   </div>
                 </div>
                 
-                <nav className="flex flex-1 flex-col">
-                  <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                    <li>
-                      <ul role="list" className="-mx-2 space-y-1">
-                        {navigation.map((item) => (
-                          <li key={item.name}>
-                            <Link href={item.href}>
-                              <a
-                                onClick={() => setIsSidebarOpen(false)}
-                                className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors ${
-                                  item.current
-                                    ? 'bg-pink-500 text-white'
-                                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                                }`}
-                              >
-                                <item.icon className="h-6 w-6 shrink-0" />
-                                {item.name}
-                              </a>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                    
-                    {/* Section profil utilisateur mobile */}
-                    <li className="mt-auto">
-                      <div className="flex items-center gap-x-4 px-2 py-3 text-sm font-semibold leading-6 text-white bg-gray-800 rounded-lg">
-                        <div className="flex items-center gap-3 flex-1">
-                          <img
-                            className="h-8 w-8 rounded-full bg-gray-800"
-                            src={currentUser?.profileImage || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop"}
-                            alt="Profile"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white text-sm font-medium truncate">
-                              {currentUser?.firstName} {currentUser?.lastName}
-                            </p>
-                            <p className="text-gray-400 text-xs truncate capitalize">
-                              {currentUser?.role === "club" ? "Club" : currentUser?.role}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={handleLogout}
-                          className="text-gray-400 hover:text-white transition-colors"
-                          title="Déconnexion"
-                        >
-                          <LogOut className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </li>
-                  </ul>
-                </nav>
+                <button
+                  onClick={handleLogout}
+                  className="mt-3 flex w-full items-center gap-x-3 px-2 py-2 text-sm font-semibold leading-6 text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition-colors"
+                >
+                  <LogOut className="h-5 w-5 shrink-0" />
+                  Déconnexion
+                </button>
               </div>
-            </div>
-            
-            <div className="w-16 flex-shrink-0">
-              <button
-                type="button"
-                className="flex h-16 w-16 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-white"
-                onClick={() => setIsSidebarOpen(false)}
-              >
-                <X className="h-6 w-6 text-white" />
-                <span className="sr-only">Close sidebar</span>
-              </button>
-            </div>
+            </nav>
           </div>
         </div>
       )}
 
-      {/* Main content */}
-      <main className="lg:pl-72">
-        <div className="min-h-screen">
+      {/* Contenu principal */}
+      <main className="lg:pl-64">
+        <div className="min-h-screen bg-black">
           {children}
         </div>
       </main>

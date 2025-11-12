@@ -2,151 +2,98 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Grid3X3, List, Edit, Trash2, MapPin, Calendar, Users, DollarSign, Clock, X, User, Upload, Link, Music, Building, UserCheck, Star, Mail, Lock, Check } from "lucide-react";
+import { Plus, Search, Filter, Grid3X3, List, Edit, Trash2, MapPin, Calendar, Users, DollarSign, Clock, X, User, Upload, Link, Music, Building, UserCheck, Star, Mail } from "lucide-react";
 import { Event, InsertEvent, User as UserType, Artist, Invitation, InsertInvitation } from "@shared/schema";
 import { useEvents, createEvent, updateEvent, deleteEvent, uploadFile, getFileUrl, useUsers, useArtists, createInvitation, updateInvitation, useInvitations } from "@/services/servapi";
 import AlertModal from "@/components/AlertModal";
 import ClubLayouts from "@/layouts/ClubLayout";
 
 const ClubEventsPage = () => {
-  // ==================================================
-  // MOYENS DE PAIEMENT — pour l'utilisateur 8
-  // ==================================================
-  const mockPaymentMethods = [
+  // Mock data pour les types de tickets de l'événement ID 9
+  const mockTicketTypes = [
+    // event 9
     {
       id: 1,
-      userId: 8,
-      type: "card",
-      details: {
-        brand: "Visa",
-        last4: "4242",
-        expiryMonth: "12",
-        expiryYear: "2026",
-        name: "JEAN DUPONT"
-      },
-      isDefault: true,
-      createdAt: new Date("2024-01-01T10:00:00Z")
+      eventId: 9,
+      name: "Standard",
+      price: "25.00",
+      capacity: 150,
+      description: "Accès général à l'événement"
     },
     {
       id: 2,
-      userId: 8,
-      type: "card",
-      details: {
-        brand: "MasterCard",
-        last4: "8888",
-        expiryMonth: "08",
-        expiryYear: "2025",
-        name: "JEAN DUPONT"
-      },
-      isDefault: false,
-      createdAt: new Date("2024-01-15T14:30:00Z")
+      eventId: 9,
+      name: "VIP",
+      price: "50.00",
+      capacity: 50,
+      description: "Accès VIP avec zone réservée et consommations offertes"
     },
     {
       id: 3,
-      userId: 8,
-      type: "paypal",
-      details: {
-        email: "jean.dupont@email.com",
-        accountType: "premier"
-      },
-      isDefault: false,
-      createdAt: new Date("2024-02-01T09:15:00Z")
+      eventId: 9,
+      name: "Early Bird",
+      price: "20.00",
+      capacity: 30,
+      description: "Billet early bird - quantité limitée"
     },
+
+    // Event 1
     {
       id: 4,
-      userId: 8,
-      type: "bank",
-      details: {
-        bankName: "BNP Paribas",
-        accountLast4: "7890",
-        iban: "FR76 3000 4000 0100 1234 5678 900"
-      },
-      isDefault: false,
-      createdAt: new Date("2024-02-10T16:45:00Z")
+      eventId: 1,
+      name: "Standard",
+      price: "25.00",
+      capacity: 150,
+      description: "Accès général à l'événement"
+    },
+    {
+      id: 5,
+      eventId: 1,
+      name: "VIP",
+      price: "50.00",
+      capacity: 50,
+      description: "Accès VIP avec zone réservée et consommations offertes"
+    },
+    {
+      id: 6,
+      eventId: 1,
+      name: "Early Bird",
+      price: "20.00",
+      capacity: 30,
+      description: "Billet early bird - quantité limitée"
     }
   ];
 
-  // ==================================================
-  // TYPES DE TICKETS (tu gardes les tiens, j’ajoute d’autres variations)
-  // ==================================================
-  const mockTicketTypes = [
-    // Événement 9
-    { id: 1, eventId: 9, name: "Standard", price: "25.00", capacity: 150, description: "Accès général à l'événement" },
-    { id: 2, eventId: 9, name: "VIP", price: "50.00", capacity: 50, description: "Accès VIP avec zone réservée et consommations offertes" },
-    { id: 3, eventId: 9, name: "Early Bird", price: "20.00", capacity: 30, description: "Billet early bird - quantité limitée" },
-    // Nouveaux types pour tests
-    { id: 7, eventId: 9, name: "Backstage", price: "80.00", capacity: 10, description: "Accès aux coulisses avec photo avec les artistes" },
-    { id: 8, eventId: 9, name: "Promo Étudiant", price: "15.00", capacity: 20, description: "Tarif réduit sur présentation de carte étudiant" },
-
-    // Événement 1
-    { id: 4, eventId: 1, name: "Standard", price: "25.00", capacity: 150, description: "Accès général à l'événement" },
-    { id: 5, eventId: 1, name: "VIP", price: "50.00", capacity: 50, description: "Accès VIP avec zone réservée et consommations offertes" },
-    { id: 6, eventId: 1, name: "Early Bird", price: "20.00", capacity: 30, description: "Billet early bird - quantité limitée" },
-  ];
-
-  // ==================================================
-  // TICKETS ACHETÉS (inclut tous les cas du workflow)
-  // ==================================================
-  // ==================================================
-  // TICKETS ACHETÉS (inclut tous les cas du workflow)
-  // ==================================================
+  // Mock data pour les tickets achetés
   const mockTickets = [
-    // ----------------- EVENT 9 -----------------
-    // 1. Achats normaux (status = purchased)
-    { id: 1, eventId: 9, userId: 1, ticketTypeId: 1, price: "25.00", purchasedAt: new Date("2024-01-15T10:30:00Z"), status: "purchased" },
-    { id: 2, eventId: 9, userId: 2, ticketTypeId: 2, price: "50.00", purchasedAt: new Date("2024-01-16T14:20:00Z"), status: "purchased" },
-    // 2. Ticket utilisé le jour de l'événement
-    { id: 3, eventId: 9, userId: 3, ticketTypeId: 3, price: "20.00", purchasedAt: new Date("2024-01-10T09:15:00Z"), status: "used" },
-    // 3. Ticket remboursé (status = refunded)
-    { id: 4, eventId: 9, userId: 4, ticketTypeId: 1, price: "25.00", purchasedAt: new Date("2024-01-17T11:00:00Z"), status: "refunded" },
-    // 4. Ticket backstage
-    { id: 5, eventId: 9, userId: 5, ticketTypeId: 7, price: "80.00", purchasedAt: new Date("2024-01-18T18:30:00Z"), status: "purchased" },
-    // 5. Ticket étudiant
-    { id: 6, eventId: 9, userId: 6, ticketTypeId: 8, price: "15.00", purchasedAt: new Date("2024-01-19T09:00:00Z"), status: "purchased" },
-
-    // ----------------- EVENT 1 -----------------
-    { id: 7, eventId: 1, userId: 1, ticketTypeId: 4, price: "25.00", purchasedAt: new Date("2024-01-15T10:30:00Z"), status: "purchased" },
-    { id: 8, eventId: 1, userId: 2, ticketTypeId: 5, price: "50.00", purchasedAt: new Date("2024-01-16T14:20:00Z"), status: "used" },
-    { id: 9, eventId: 1, userId: 3, ticketTypeId: 6, price: "20.00", purchasedAt: new Date("2024-01-10T09:15:00Z"), status: "refunded" },
+    {
+      id: 1,
+      eventId: 9,
+      userId: 1,
+      ticketTypeId: 1,
+      price: "25.00",
+      purchasedAt: new Date("2024-01-15T10:30:00Z"),
+      status: "purchased"
+    },
+    {
+      id: 2,
+      eventId: 9,
+      userId: 2,
+      ticketTypeId: 2,
+      price: "50.00",
+      purchasedAt: new Date("2024-01-16T14:20:00Z"),
+      status: "purchased"
+    },
+    {
+      id: 3,
+      eventId: 9,
+      userId: 3,
+      ticketTypeId: 3,
+      price: "20.00",
+      purchasedAt: new Date("2024-01-10T09:15:00Z"),
+      status: "used"
+    }
   ];
-
-  // ==================================================
-  // TRANSACTIONS — liées à chaque achat et remboursement
-  // ==================================================
-  const mockTransactions = [
-    // EVENT 9 - achats
-    { id: 1, userId: 1, amount: "25.00", type: "debit", status: "completed", description: "Achat ticket Standard - Event 9", reference: "TXN-0001", createdAt: new Date("2024-01-15T10:31:00Z") },
-    { id: 2, userId: 2, amount: "50.00", type: "debit", status: "completed", description: "Achat ticket VIP - Event 9", reference: "TXN-0002", createdAt: new Date("2024-01-16T14:21:00Z") },
-    { id: 3, userId: 3, amount: "20.00", type: "debit", status: "completed", description: "Achat ticket Early Bird - Event 9", reference: "TXN-0003", createdAt: new Date("2024-01-10T09:16:00Z") },
-    // Remboursement (transaction inverse)
-    { id: 4, userId: 4, amount: "25.00", type: "credit", status: "completed", description: "Remboursement ticket Standard - Event 9", reference: "TXN-0004", createdAt: new Date("2024-01-20T10:00:00Z") },
-    { id: 5, userId: 5, amount: "80.00", type: "debit", status: "completed", description: "Achat ticket Backstage - Event 9", reference: "TXN-0005", createdAt: new Date("2024-01-18T18:31:00Z") },
-    { id: 6, userId: 6, amount: "15.00", type: "debit", status: "completed", description: "Achat ticket Étudiant - Event 9", reference: "TXN-0006", createdAt: new Date("2024-01-19T09:01:00Z") },
-
-    // EVENT 1 - achats et remboursements
-    { id: 7, userId: 1, amount: "25.00", type: "debit", status: "completed", description: "Achat ticket Standard - Event 1", reference: "TXN-0007", createdAt: new Date("2024-01-15T10:31:00Z") },
-    { id: 8, userId: 2, amount: "50.00", type: "debit", status: "completed", description: "Achat ticket VIP - Event 1", reference: "TXN-0008", createdAt: new Date("2024-01-16T14:21:00Z") },
-    { id: 9, userId: 3, amount: "20.00", type: "credit", status: "completed", description: "Remboursement ticket Early Bird - Event 1", reference: "TXN-0009", createdAt: new Date("2024-01-20T11:00:00Z") },
-  ];
-
-  // ==================================================
-  // FACTURES — liées à chaque transaction
-  // ==================================================
-  const mockInvoices = [
-    // EVENT 9
-    { id: 1, userId: 1, transactionId: 1, amount: "25.00", status: "paid", paidAt: new Date("2024-01-15T10:32:00Z"), createdAt: new Date("2024-01-15T10:32:00Z") },
-    { id: 2, userId: 2, transactionId: 2, amount: "50.00", status: "paid", paidAt: new Date("2024-01-16T14:22:00Z"), createdAt: new Date("2024-01-16T14:22:00Z") },
-    { id: 3, userId: 3, transactionId: 3, amount: "20.00", status: "paid", paidAt: new Date("2024-01-10T09:17:00Z"), createdAt: new Date("2024-01-10T09:17:00Z") },
-    { id: 4, userId: 4, transactionId: 4, amount: "25.00", status: "paid", paidAt: new Date("2024-01-20T10:01:00Z"), createdAt: new Date("2024-01-20T10:01:00Z") },
-    { id: 5, userId: 5, transactionId: 5, amount: "80.00", status: "paid", paidAt: new Date("2024-01-18T18:32:00Z"), createdAt: new Date("2024-01-18T18:32:00Z") },
-    { id: 6, userId: 6, transactionId: 6, amount: "15.00", status: "paid", paidAt: new Date("2024-01-19T09:02:00Z"), createdAt: new Date("2024-01-19T09:02:00Z") },
-
-    // EVENT 1
-    { id: 7, userId: 1, transactionId: 7, amount: "25.00", status: "paid", paidAt: new Date("2024-01-15T10:32:00Z"), createdAt: new Date("2024-01-15T10:32:00Z") },
-    { id: 8, userId: 2, transactionId: 8, amount: "50.00", status: "paid", paidAt: new Date("2024-01-16T14:22:00Z"), createdAt: new Date("2024-01-16T14:22:00Z") },
-    { id: 9, userId: 3, transactionId: 9, amount: "20.00", status: "paid", paidAt: new Date("2024-01-20T11:01:00Z"), createdAt: new Date("2024-01-20T11:01:00Z") },
-  ];
-
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -230,19 +177,6 @@ const ClubEventsPage = () => {
     capacity: 0,
     description: ""
   });
-
-  // États pour le modal de transaction sécurisée
-  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [selectedTicketTypeForPurchase, setSelectedTicketTypeForPurchase] = useState<any>(null);
-  const [transactionStep, setTransactionStep] = useState<"details" | "payment" | "confirmation">("details");
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "paypal" | "bank">("card");
-  const [cardDetails, setCardDetails] = useState({
-    number: "",
-    expiry: "",
-    cvv: "",
-    name: ""
-  });
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const [selectedOrganizerType, setSelectedOrganizerType] = useState("all");
 
@@ -633,8 +567,8 @@ const ClubEventsPage = () => {
     }
   };
 
-  // Fonction pour ouvrir le modal de transaction sécurisée
-  const openTransactionModal = (ticketType: any) => {
+  // Fonction pour acheter un ticket
+  const purchaseTicket = async (ticketType: any) => {
     if (!currentUser) {
       showAlertModal(
         "Non connecté",
@@ -646,230 +580,27 @@ const ClubEventsPage = () => {
       return;
     }
 
-    // Vérifier la disponibilité
-    const ticketsSold = eventTickets.filter(t => t.ticketTypeId === ticketType.id && t.status !== "refunded").length;
-    const available = ticketType.capacity - ticketsSold;
-
-    if (available <= 0) {
-      showAlertModal(
-        "Plus de places disponibles",
-        `Désolé, il n'y a plus de places disponibles pour le ticket ${ticketType.name}.`,
-        () => setShowAlert(false),
-        "warning",
-        "OK"
-      );
-      return;
-    }
-
-    setSelectedTicketTypeForPurchase(ticketType);
-    setTransactionStep("details");
-    setPaymentMethod("card");
-    setCardDetails({ number: "", expiry: "", cvv: "", name: "" });
-    setIsTransactionModalOpen(true);
-  };
-
-  // Fonction pour générer une référence sécurisée unique
-  const generateSecureReference = () => {
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 8);
-    return `TXN-${timestamp}-${random}`.toUpperCase();
-  };
-
-  // Fonction pour vérifier si l'utilisateur a déjà acheté ce type de ticket
-  const hasUserAlreadyPurchased = (userId: number, ticketTypeId: number) => {
-    return eventTickets.some(ticket =>
-      ticket.userId === userId &&
-      ticket.ticketTypeId === ticketTypeId &&
-      ticket.status !== "refunded"
-    );
-  };
-
-  // Fonction pour obtenir le ticket acheté par l'utilisateur
-  const getUserPurchasedTicket = (userId: number, ticketTypeId: number) => {
-    return eventTickets.find(ticket =>
-      ticket.userId === userId &&
-      ticket.ticketTypeId === ticketTypeId &&
-      ticket.status !== "refunded"
-    );
-  };
-
-  // Fonction pour traiter le paiement
-  const processPayment = async () => {
-    if (!selectedTicketTypeForPurchase || !currentUser) return;
-
-    // Vérifier si l'utilisateur a déjà acheté ce ticket
-    if (hasUserAlreadyPurchased(currentUser.id, selectedTicketTypeForPurchase.id)) {
-      showAlertModal(
-        "Ticket déjà acheté",
-        `Vous avez déjà acheté un ticket ${selectedTicketTypeForPurchase.name}. Vous ne pouvez pas acheter le même ticket plusieurs fois.`,
-        () => setShowAlert(false),
-        "warning",
-        "OK"
-      );
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // Simulation du traitement de paiement
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Vérification de sécurité des données de carte (simulée)
-      if (paymentMethod === "card") {
-        if (cardDetails.number.replace(/\s/g, '').length !== 16) {
-          throw new Error("Numéro de carte invalide");
-        }
-        if (cardDetails.cvv.length !== 3) {
-          throw new Error("Code CVV invalide");
-        }
-        if (!cardDetails.name.trim()) {
-          throw new Error("Nom sur la carte requis");
-        }
-      }
-
-      // Paiement réussi - passer à l'étape de confirmation
-      setTransactionStep("confirmation");
-
-      // Créer les enregistrements dans la base de données
-      await completePurchase();
-
-    } catch (error) {
-      showAlertModal(
-        "Erreur de paiement",
-        error instanceof Error ? error.message : "Le paiement a échoué. Veuillez réessayer.",
-        () => setShowAlert(false),
-        "error",
-        "OK"
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Fonction pour finaliser l'achat
-  const completePurchase = async () => {
-    if (!selectedTicketTypeForPurchase || !currentUser || !selectedEventForTickets) return;
-
-    try {
-      // Générer une référence sécurisée unique
-      const secureReference = generateSecureReference();
-      const securityToken = `SEC-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
-
-      // 1. Créer le ticket
-      const newTicket = {
-        id: eventTickets.length + 1,
-        eventId: selectedEventForTickets.id,
-        userId: currentUser.id,
-        ticketTypeId: selectedTicketTypeForPurchase.id,
-        price: selectedTicketTypeForPurchase.price,
-        purchasedAt: new Date(),
-        status: "purchased" as const
-      };
-
-      // 2. Créer la transaction
-      const newTransaction = {
-        id: mockTransactions.length + 1,
-        userId: currentUser.id,
-        amount: selectedTicketTypeForPurchase.price,
-        type: "debit" as const,
-        status: "completed" as const,
-        description: `Achat ticket ${selectedTicketTypeForPurchase.name} - ${selectedEventForTickets.title}`,
-        reference: secureReference,
-        createdAt: new Date(),
-        paymentMethod: paymentMethod,
-        securityToken: securityToken
-      };
-
-      // 3. Créer la facture
-      const newInvoice = {
-        id: mockInvoices.length + 1,
-        userId: currentUser.id,
-        transactionId: newTransaction.id,
-        amount: selectedTicketTypeForPurchase.price,
-        status: "paid" as const,
-        paidAt: new Date(),
-        createdAt: new Date(),
-        items: [
-          {
-            description: `Ticket ${selectedTicketTypeForPurchase.name} - ${selectedEventForTickets.title}`,
-            quantity: 1,
-            price: selectedTicketTypeForPurchase.price,
-            event: selectedEventForTickets.title,
-            date: selectedEventForTickets.date,
-            venue: selectedEventForTickets.venueName
-          }
-        ],
-        billingDetails: {
-          name: `${currentUser.firstName} ${currentUser.lastName}`,
-          email: currentUser.email,
-          paymentMethod: paymentMethod,
-          reference: secureReference
-        }
-      };
-
-      // Mettre à jour les données mock
-      const updatedTickets = [...eventTickets, newTicket];
-      setEventTickets(updatedTickets);
-
-      // Ajouter aux transactions mock (pour la démo)
-      mockTransactions.push(newTransaction);
-      mockInvoices.push(newInvoice);
-
-      console.log("Achat terminé - Ticket créé:", newTicket);
-      console.log("Transaction créée:", newTransaction);
-      console.log("Facture créée:", newInvoice);
-
-      // Note: Dans une vraie app, vous enverriez ces données à votre API
-
-    } catch (error) {
-      throw new Error("Erreur lors de la finalisation de l'achat");
-    }
-  };
-
-  // Fonction pour finaliser la transaction
-  const finalizeTransaction = () => {
-    setIsTransactionModalOpen(false);
-    setSelectedTicketTypeForPurchase(null);
-    setTransactionStep("details");
-
     showAlertModal(
-      "Achat réussi !",
-      `Votre ticket ${selectedTicketTypeForPurchase?.name} a été acheté avec succès !\n\nUn email de confirmation vous a été envoyé.`,
-      () => setShowAlert(false),
-      "success",
-      "Voir mes tickets"
-    );
-  };
-
-  // Fonction pour valider un ticket à l'entrée (seulement pour le propriétaire)
-  const validateTicket = async (ticketId: number) => {
-    if (!canModifyEvent(selectedEventForTickets!)) {
-      showAlertModal(
-        "Action non autorisée",
-        "Seul l'organisateur peut valider les tickets.",
-        () => setShowAlert(false),
-        "warning",
-        "OK"
-      );
-      return;
-    }
-
-    showAlertModal(
-      "Valider le ticket",
-      "Voulez-vous valider ce ticket pour l'entrée ? Cette action est irréversible.",
+      "Acheter un ticket",
+      `Voulez-vous acheter un ticket ${ticketType.name} pour ${ticketType.price}€ ?`,
       async () => {
         try {
-          // Mettre à jour le statut du ticket
-          const updatedTickets = eventTickets.map(ticket =>
-            ticket.id === ticketId ? { ...ticket, status: "used" as const } : ticket
-          );
-          setEventTickets(updatedTickets);
+          const newTicket = {
+            id: eventTickets.length + 1,
+            eventId: selectedEventForTickets!.id,
+            userId: currentUser.id,
+            ticketTypeId: ticketType.id,
+            price: ticketType.price,
+            purchasedAt: new Date(),
+            status: "purchased"
+          };
 
+          setEventTickets([...eventTickets, newTicket]);
           setShowAlert(false);
+
           showAlertModal(
-            "Ticket validé",
-            "Le ticket a été validé avec succès pour l'entrée.",
+            "Ticket acheté",
+            `Votre ticket ${ticketType.name} a été acheté avec succès !`,
             () => setShowAlert(false),
             "success",
             "OK"
@@ -877,7 +608,7 @@ const ClubEventsPage = () => {
         } catch (error) {
           showAlertModal(
             "Erreur",
-            "Une erreur est survenue lors de la validation du ticket.",
+            "Une erreur est survenue lors de l'achat du ticket.",
             () => setShowAlert(false),
             "error",
             "OK"
@@ -885,154 +616,7 @@ const ClubEventsPage = () => {
         }
       },
       "info",
-      "Valider",
-      "Annuler"
-    );
-  };
-
-  // Fonction pour voir les détails d'un achat (facture)
-  const viewPurchaseDetails = (ticketId: number) => {
-    const ticket = eventTickets.find(t => t.id === ticketId);
-    if (!ticket) {
-      showAlertModal(
-        "Ticket non trouvé",
-        "Impossible de trouver les détails de ce ticket.",
-        () => setShowAlert(false),
-        "error",
-        "OK"
-      );
-      return;
-    }
-
-    const ticketType = ticketTypes.find(tt => tt.id === ticket.ticketTypeId);
-    const transaction = mockTransactions.find(t =>
-      t.userId === ticket.userId &&
-      t.description.includes(`ticket ${ticketType?.name}`)
-    );
-    const invoice = mockInvoices.find(inv =>
-      inv.userId === ticket.userId &&
-      inv.transactionId === transaction?.id
-    );
-
-    if (!transaction) {
-      showAlertModal(
-        "Transaction non trouvée",
-        "Les détails de transaction ne sont pas disponibles.",
-        () => setShowAlert(false),
-        "warning",
-        "OK"
-      );
-      return;
-    }
-
-    const purchaseDetails = [
-      { label: "Référence:", value: transaction.reference, className: "font-mono" },
-      { label: "Type de ticket:", value: ticketType?.name || "Non spécifié" },
-      { label: "Événement:", value: selectedEventForTickets?.title || "Événement inconnu" },
-      { label: "Date d'achat:", value: new Date(ticket.purchasedAt).toLocaleDateString('fr-FR') },
-      { label: "Prix:", value: `${ticket.price}€`, className: "text-green-400 font-semibold" },
-      { label: "Méthode de paiement:", value: (transaction.paymentMethod || 'carte').charAt(0).toUpperCase() + (transaction.paymentMethod || 'carte').slice(1) },
-      { label: "Statut du ticket:", value: ticket.status === 'purchased' ? 'Acheté' : ticket.status === 'used' ? 'Utilisé' : 'Remboursé', className: ticket.status === 'purchased' ? "text-green-400" : ticket.status === 'used' ? "text-blue-400" : "text-red-400" },
-    ];
-
-    // Ajouter les détails de la facture si disponible
-    if (invoice) {
-      purchaseDetails.push(
-        { label: "Statut du paiement:", value: invoice.status === 'paid' ? 'Payé' : invoice.status, className: "text-green-400" },
-        { label: "Date de paiement:", value: invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString('fr-FR') : "Non payé" }
-      );
-    }
-
-    // Ajouter le token de sécurité si disponible
-    if (transaction.securityToken) {
-      purchaseDetails.push(
-        { label: "Token de sécurité:", value: transaction.securityToken, className: "text-yellow-400 font-mono text-xs" }
-      );
-    }
-
-    const description = `Voici les détails de l'achat :\n\n${purchaseDetails.map(detail => `${detail.label} ${detail.value}`).join('\n')}`;
-
-    showAlertModal(
-      "Détails de l'achat",
-      description,
-      () => setShowAlert(false),
-      "info",
-      "Fermer"
-    );
-  };
-
-  // Fonction pour rembourser un ticket (seulement pour le propriétaire)
-  const refundTicket = async (ticketId: number) => {
-    if (!canModifyEvent(selectedEventForTickets!)) {
-      showAlertModal(
-        "Action non autorisée",
-        "Seul l'organisateur peut effectuer des remboursements.",
-        () => setShowAlert(false),
-        "warning",
-        "OK"
-      );
-      return;
-    }
-
-    const ticket = eventTickets.find(t => t.id === ticketId);
-    if (!ticket) return;
-
-    showAlertModal(
-      "Rembourser le ticket",
-      `Voulez-vous rembourser ce ticket de ${ticket.price}€ ?\n\nCette action créera une transaction de remboursement.`,
-      async () => {
-        try {
-          // 1. Mettre à jour le statut du ticket
-          const updatedTickets = eventTickets.map(t =>
-            t.id === ticketId ? { ...t, status: "refunded" as const } : t
-          );
-
-          // 2. Créer la transaction de remboursement (inverse)
-          const refundTransaction = {
-            id: mockTransactions.length + 1,
-            userId: ticket.userId,
-            amount: ticket.price,
-            type: "credit" as const,
-            status: "completed" as const,
-            description: `Remboursement ticket - ${selectedEventForTickets!.title}`,
-            reference: `REF-${String(mockTransactions.length + 1).padStart(4, '0')}`,
-            createdAt: new Date()
-          };
-
-          // 3. Créer la facture de remboursement
-          const refundInvoice = {
-            id: mockInvoices.length + 1,
-            userId: ticket.userId,
-            transactionId: refundTransaction.id,
-            amount: ticket.price,
-            status: "refunded" as const,
-            paidAt: new Date(),
-            createdAt: new Date()
-          };
-
-          setEventTickets(updatedTickets);
-          // Note: Dans une vraie app, vous enverriez ces données à votre API
-
-          setShowAlert(false);
-          showAlertModal(
-            "Ticket remboursé",
-            `Le ticket a été remboursé avec succès.\n\nMontant remboursé: ${ticket.price}€\nRéférence: ${refundTransaction.reference}`,
-            () => setShowAlert(false),
-            "success",
-            "OK"
-          );
-        } catch (error) {
-          showAlertModal(
-            "Erreur",
-            "Une erreur est survenue lors du remboursement.",
-            () => setShowAlert(false),
-            "error",
-            "OK"
-          );
-        }
-      },
-      "danger",
-      "Rembourser",
+      "Acheter",
       "Annuler"
     );
   };
@@ -1301,13 +885,6 @@ const ClubEventsPage = () => {
       "Annuler",
       "Fermer"
     );
-  };
-
-  // Fonction utilitaire pour créer un participant d'événement (mock)
-  const createEventParticipant = async (data: any) => {
-    // Dans une vraie application, cela appellerait votre API
-    console.log("Création du participant:", data);
-    return { id: Date.now(), ...data };
   };
 
   // Fonction pour restaurer une invitation annulée
@@ -3454,42 +3031,17 @@ const ClubEventsPage = () => {
                                     Disponibles: {available}
                                   </span>
                                 </div>
-                                {(() => {
-                                  const userTicket = currentUser ? getUserPurchasedTicket(currentUser.id, ticketType.id) : null;
-                                  const hasPurchased = !!userTicket;
-
-                                  if (hasPurchased) {
-                                    return (
-                                      <div className="w-full mt-3 space-y-2">
-                                        <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-2 text-center">
-                                          <Check className="w-4 h-4 text-green-400 mx-auto mb-1" />
-                                          <span className="text-green-400 text-xs font-semibold">Déjà acheté</span>
-                                        </div>
-                                        <button
-                                          onClick={() => viewPurchaseDetails(userTicket.id)}
-                                          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors font-semibold text-sm"
-                                        >
-                                          <DollarSign className="w-4 h-4" />
-                                          Voir mon ticket
-                                        </button>
-                                      </div>
-                                    );
-                                  }
-
-                                  return (
-                                    <button
-                                      onClick={() => openTransactionModal(ticketType)}
-                                      disabled={available <= 0}
-                                      className={`w-full mt-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors font-semibold text-sm ${available > 0
-                                        ? "bg-green-500 hover:bg-green-600 text-white"
-                                        : "bg-gray-600 text-gray-400 cursor-not-allowed"
-                                        }`}
-                                    >
-                                      <DollarSign className="w-4 h-4" />
-                                      Acheter
-                                    </button>
-                                  );
-                                })()}
+                                <button
+                                  onClick={() => purchaseTicket(ticketType)}
+                                  disabled={available <= 0 || !canModifyEvent(selectedEventForTickets)}
+                                  className={`w-full mt-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors font-semibold text-sm ${available > 0 && canModifyEvent(selectedEventForTickets)
+                                      ? "bg-green-500 hover:bg-green-600 text-white"
+                                      : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                                    }`}
+                                >
+                                  <DollarSign className="w-4 h-4" />
+                                  {canModifyEvent(selectedEventForTickets) ? "Acheter" : "Voir détails"}
+                                </button>
                               </div>
                             );
                           })}
@@ -3568,500 +3120,70 @@ const ClubEventsPage = () => {
                   {/* Section tickets vendus */}
                   <div>
                     <div className="bg-gray-800 rounded-lg p-4">
-                      <h3 className="text-lg font-semibold mb-4">
-                        {canModifyEvent(selectedEventForTickets) ? "Tickets vendus" : "Disponibilité des tickets"}
-                      </h3>
+                      <h3 className="text-lg font-semibold mb-4">Tickets vendus</h3>
 
-                      {canModifyEvent(selectedEventForTickets) ? (
-                        // Vue propriétaire - voir tous les détails avec actions
-                        <>
-                          {eventTickets.length === 0 ? (
-                            <div className="text-center py-8 text-gray-400">
-                              <DollarSign className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                              <p>Aucun ticket vendu pour le moment</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-3 max-h-96 overflow-y-auto">
-                              {eventTickets.map(ticket => {
-                                const ticketType = ticketTypes.find(tt => tt.id === ticket.ticketTypeId);
-                                const user = allUsers?.find(u => u.id === ticket.userId);
-                                const transaction = mockTransactions.find(t =>
-                                  t.userId === ticket.userId &&
-                                  t.description.includes(`ticket ${ticketType?.name}`)
-                                );
+                      {eventTickets.length === 0 ? (
+                        <div className="text-center py-8 text-gray-400">
+                          <DollarSign className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                          <p>Aucun ticket vendu pour le moment</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                          {eventTickets.map(ticket => {
+                            const ticketType = ticketTypes.find(tt => tt.id === ticket.ticketTypeId);
+                            const user = allUsers?.find(u => u.id === ticket.userId);
 
-                                return (
-                                  <div key={ticket.id} className={`border rounded-lg p-3 ${ticket.status === 'used' ? 'border-blue-500 bg-blue-500/10' :
-                                    ticket.status === 'refunded' ? 'border-red-500 bg-red-500/10' :
-                                      'border-gray-600 bg-gray-700/50'
-                                    }`}>
-                                    <div className="flex justify-between items-start mb-2">
-                                      <div className="flex-1">
-                                        {currentUser && ticket.userId === currentUser.id && (
-                                          <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                                            Votre ticket
-                                          </span>
-                                        )}
-                                        <p className="text-sm text-gray-300">
-                                          Acheté par: {user ? `${user.firstName} ${user.lastName}` : "Utilisateur"}
-                                        </p>
-                                        {transaction && (
-                                          <p className="text-xs text-gray-400">
-                                            Réf: {transaction.reference} • {new Date(transaction.createdAt).toLocaleDateString('fr-FR')}
-                                          </p>
-                                        )}
-                                      </div>
-                                      <div className="text-right">
-                                        <span className="text-green-400 font-bold block">{ticket.price}€</span>
-                                        <span className={`text-xs ${ticket.status === 'purchased' ? 'text-yellow-400' :
-                                          ticket.status === 'used' ? 'text-blue-400' :
-                                            'text-red-400'
-                                          }`}>
-                                          {ticket.status === 'purchased' ? 'Acheté' :
-                                            ticket.status === 'used' ? 'Utilisé' : 'Remboursé'}
-                                        </span>
-                                      </div>
-                                    </div>
-
-                                    {/* Actions pour le propriétaire */}
-                                    {ticket.status === 'purchased' && (
-                                      <div className="flex gap-2 mt-2">
-                                        <button
-                                          onClick={() => validateTicket(ticket.id)}
-                                          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1 px-2 rounded text-xs transition-colors"
-                                        >
-                                          Valider entrée
-                                        </button>
-                                        <button
-                                          onClick={() => refundTicket(ticket.id)}
-                                          className="flex-1 bg-red-500 hover:bg-red-600 text-white py-1 px-2 rounded text-xs transition-colors"
-                                        >
-                                          Rembourser
-                                        </button>
-                                      </div>
-                                    )}
-
-                                    {/* Bouton pour voir les détails de l'achat - visible pour tous les utilisateurs */}
-                                    <div className="mt-2">
-                                      <button
-                                        onClick={() => viewPurchaseDetails(ticket.id)}
-                                        className="w-full bg-gray-600 hover:bg-gray-700 text-white py-1 px-2 rounded text-xs transition-colors flex items-center justify-center gap-1"
-                                      >
-                                        <DollarSign className="w-3 h-3" />
-                                        Voir détails achat
-                                      </button>
-                                    </div>
-
-                                    {ticket.status === 'used' && (
-                                      <div className="text-xs text-blue-400 mt-2">
-                                        ✓ Validé à l'entrée
-                                      </div>
-                                    )}
-
-                                    {ticket.status === 'refunded' && (
-                                      <div className="text-xs text-red-400 mt-2">
-                                        ✗ Remboursé
-                                      </div>
-                                    )}
+                            return (
+                              <div key={ticket.id} className="border border-gray-600 rounded-lg p-3 bg-gray-700/50">
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h4 className="font-semibold text-white">
+                                      {ticketType?.name || "Ticket"}
+                                    </h4>
+                                    <p className="text-sm text-gray-300">
+                                      Acheté par: {user ? `${user.firstName} ${user.lastName}` : "Utilisateur"}
+                                    </p>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          {/* Statistiques pour propriétaire */}
-                          {eventTickets.length > 0 && (
-                            <div className="mt-4 p-3 bg-gray-700 rounded-lg">
-                              <h4 className="font-semibold text-white mb-2">Statistiques</h4>
-                              <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div className="text-gray-300">Total vendus:</div>
-                                <div className="text-green-400 font-semibold">
-                                  {eventTickets.filter(t => t.status !== 'refunded').length}
+                                  <span className="text-green-400 font-bold">{ticket.price}€</span>
                                 </div>
-
-                                <div className="text-gray-300">Revenue total:</div>
-                                <div className="text-green-400 font-semibold">
-                                  {eventTickets
-                                    .filter(t => t.status !== 'refunded')
-                                    .reduce((sum, ticket) => sum + parseFloat(ticket.price), 0)
-                                    .toFixed(2)}€
-                                </div>
-
-                                <div className="text-gray-300">Tickets utilisés:</div>
-                                <div className="text-blue-400 font-semibold">
-                                  {eventTickets.filter(t => t.status === 'used').length}
-                                </div>
-
-                                <div className="text-gray-300">Tickets remboursés:</div>
-                                <div className="text-red-400 font-semibold">
-                                  {eventTickets.filter(t => t.status === 'refunded').length}
-                                </div>
-
-                                <div className="text-gray-300">Montant remboursé:</div>
-                                <div className="text-red-400 font-semibold">
-                                  {eventTickets
-                                    .filter(t => t.status === 'refunded')
-                                    .reduce((sum, ticket) => sum + parseFloat(ticket.price), 0)
-                                    .toFixed(2)}€
+                                <div className="flex justify-between text-xs text-gray-400">
+                                  <span>Acheté le: {new Date(ticket.purchasedAt).toLocaleDateString('fr-FR')}</span>
+                                  <span className={`${ticket.status === 'purchased' ? 'text-green-400' :
+                                      ticket.status === 'used' ? 'text-blue-400' : 'text-red-400'
+                                    }`}>
+                                    {ticket.status === 'purchased' ? 'Acheté' :
+                                      ticket.status === 'used' ? 'Utilisé' : 'Remboursé'}
+                                  </span>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        // Vue non-propriétaire - voir seulement les statistiques générales
-                        <>
-                          {ticketTypes.length === 0 ? (
-                            <div className="text-center py-8 text-gray-400">
-                              <DollarSign className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                              <p>Aucun ticket disponible</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              {ticketTypes.map(ticketType => {
-                                const ticketsSold = eventTickets.filter(t =>
-                                  t.ticketTypeId === ticketType.id && t.status !== "refunded"
-                                ).length;
-                                const available = ticketType.capacity - ticketsSold;
+                            );
+                          })}
+                        </div>
+                      )}
 
-                                return (
-                                  <div key={ticketType.id} className="border border-gray-600 rounded-lg p-4 bg-gray-700/50">
-                                    <div className="flex justify-between items-start mb-2">
-                                      <h4 className="font-semibold text-white">{ticketType.name}</h4>
-                                      <span className="text-green-400 font-bold">{ticketType.price}€</span>
-                                    </div>
-                                    <p className="text-sm text-gray-300 mb-3">{ticketType.description}</p>
-                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                      <div className="text-gray-300">Capacité totale:</div>
-                                      <div className="text-gray-400">{ticketType.capacity}</div>
+                      {/* Statistiques */}
+                      {eventTickets.length > 0 && (
+                        <div className="mt-4 p-3 bg-gray-700 rounded-lg">
+                          <h4 className="font-semibold text-white mb-2">Statistiques</h4>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="text-gray-300">Total vendus:</div>
+                            <div className="text-green-400 font-semibold">{eventTickets.length}</div>
 
-                                      <div className="text-gray-300">Déjà vendus:</div>
-                                      <div className="text-yellow-400">{ticketsSold}</div>
-
-                                      <div className="text-gray-300">Disponibles:</div>
-                                      <div className={available > 0 ? "text-green-400 font-semibold" : "text-red-400 font-semibold"}>
-                                        {available}
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
+                            <div className="text-gray-300">Revenue total:</div>
+                            <div className="text-green-400 font-semibold">
+                              {eventTickets.reduce((sum, ticket) => sum + parseFloat(ticket.price), 0).toFixed(2)}€
                             </div>
-                          )}
-                        </>
+
+                            <div className="text-gray-300">Tickets utilisés:</div>
+                            <div className="text-blue-400 font-semibold">
+                              {eventTickets.filter(t => t.status === 'used').length}
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Modal de transaction sécurisée */}
-        {isTransactionModalOpen && selectedTicketTypeForPurchase && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-900 rounded-lg max-w-md w-full border-2 border-green-500/30">
-              <div className="p-6">
-                {/* En-tête sécurisée */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-green-500/20 p-2 rounded-lg">
-                      <DollarSign className="w-6 h-6 text-green-400" />
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-white">Paiement sécurisé</h2>
-                      <div className="flex items-center gap-2 text-xs text-green-400">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span>Connexion sécurisée • SSL encrypté</span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsTransactionModalOpen(false)}
-                    className="text-gray-400 hover:text-white transition-colors"
-                    disabled={isProcessing}
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
-                {/* Barre de progression */}
-                <div className="flex items-center justify-between mb-6 text-xs text-gray-400">
-                  <div className={`text-center ${transactionStep === "details" ? "text-green-400 font-semibold" : ""}`}>
-                    <div className="w-8 h-8 rounded-full border-2 border-green-400 flex items-center justify-center mx-auto mb-1">
-                      1
-                    </div>
-                    Détails
-                  </div>
-                  <div className={`text-center ${transactionStep === "payment" ? "text-green-400 font-semibold" : ""}`}>
-                    <div className="w-8 h-8 rounded-full border-2 border-green-400 flex items-center justify-center mx-auto mb-1">
-                      2
-                    </div>
-                    Paiement
-                  </div>
-                  <div className={`text-center ${transactionStep === "confirmation" ? "text-green-400 font-semibold" : ""}`}>
-                    <div className="w-8 h-8 rounded-full border-2 border-green-400 flex items-center justify-center mx-auto mb-1">
-                      3
-                    </div>
-                    Confirmation
-                  </div>
-                </div>
-
-                {/* Étape 1: Détails de la commande */}
-                {transactionStep === "details" && (
-                  <div className="space-y-4">
-                    <div className="bg-gray-800 rounded-lg p-4">
-                      <h3 className="font-semibold text-white mb-3">Récapitulatif de commande</h3>
-
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Événement:</span>
-                          <span className="text-white font-semibold">{selectedEventForTickets?.title}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Type de ticket:</span>
-                          <span className="text-white">{selectedTicketTypeForPurchase.name}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Prix:</span>
-                          <span className="text-green-400 font-bold text-lg">{selectedTicketTypeForPurchase.price}€</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-300">Frais de service:</span>
-                          <span className="text-gray-400">0.00€</span>
-                        </div>
-                        <div className="border-t border-gray-600 pt-2">
-                          <div className="flex justify-between items-center font-semibold">
-                            <span className="text-white">Total:</span>
-                            <span className="text-green-400 text-xl">{selectedTicketTypeForPurchase.price}€</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => setTransactionStep("payment")}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-                    >
-                      Continuer vers le paiement
-                      <DollarSign className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Étape 2: Paiement */}
-                {transactionStep === "payment" && (
-                  <div className="space-y-4">
-                    <div className="bg-gray-800 rounded-lg p-4">
-                      <h3 className="font-semibold text-white mb-3">Méthode de paiement</h3>
-
-                      <div className="grid grid-cols-3 gap-2 mb-4">
-                        <button
-                          onClick={() => setPaymentMethod("card")}
-                          className={`p-3 rounded-lg border-2 transition-colors ${paymentMethod === "card"
-                            ? "border-green-500 bg-green-500/10"
-                            : "border-gray-600 bg-gray-700 hover:border-gray-500"
-                            }`}
-                        >
-                          <div className="text-center">
-                            <div className="text-white font-semibold text-sm">Carte</div>
-                          </div>
-                        </button>
-                        <button
-                          onClick={() => setPaymentMethod("paypal")}
-                          className={`p-3 rounded-lg border-2 transition-colors ${paymentMethod === "paypal"
-                            ? "border-blue-500 bg-blue-500/10"
-                            : "border-gray-600 bg-gray-700 hover:border-gray-500"
-                            }`}
-                        >
-                          <div className="text-center">
-                            <div className="text-white font-semibold text-sm">PayPal</div>
-                          </div>
-                        </button>
-                        <button
-                          onClick={() => setPaymentMethod("bank")}
-                          className={`p-3 rounded-lg border-2 transition-colors ${paymentMethod === "bank"
-                            ? "border-purple-500 bg-purple-500/10"
-                            : "border-gray-600 bg-gray-700 hover:border-gray-500"
-                            }`}
-                        >
-                          <div className="text-center">
-                            <div className="text-white font-semibold text-sm">Virement</div>
-                          </div>
-                        </button>
-                      </div>
-
-                      {paymentMethod === "card" && (
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">
-                              Numéro de carte
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="1234 5678 9012 3456"
-                              value={cardDetails.number}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, '').slice(0, 16);
-                                const formatted = value.replace(/(.{4})/g, '$1 ').trim();
-                                setCardDetails({ ...cardDetails, number: formatted });
-                              }}
-                              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-green-500"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-1">
-                                Date d'expiration
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="MM/AA"
-                                value={cardDetails.expiry}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                                  const formatted = value.replace(/(.{2})/, '$1/');
-                                  setCardDetails({ ...cardDetails, expiry: formatted });
-                                }}
-                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-green-500"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-300 mb-1">
-                                CVV
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="123"
-                                value={cardDetails.cvv}
-                                onChange={(e) => {
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 3);
-                                  setCardDetails({ ...cardDetails, cvv: value });
-                                }}
-                                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-green-500"
-                              />
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">
-                              Nom sur la carte
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="JOHN DOE"
-                              value={cardDetails.name}
-                              onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value.toUpperCase() })}
-                              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-green-500"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {paymentMethod === "paypal" && (
-                        <div className="text-center py-4">
-                          <div className="bg-blue-500/20 p-4 rounded-lg">
-                            <div className="text-blue-400 font-semibold">Redirection vers PayPal</div>
-                            <p className="text-gray-400 text-sm mt-2">
-                              Vous serez redirigé vers PayPal pour finaliser le paiement.
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {paymentMethod === "bank" && (
-                        <div className="text-center py-4">
-                          <div className="bg-purple-500/20 p-4 rounded-lg">
-                            <div className="text-purple-400 font-semibold">Virement bancaire</div>
-                            <p className="text-gray-400 text-sm mt-2">
-                              Les détails de virement vous seront envoyés par email.
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setTransactionStep("details")}
-                        className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-lg font-semibold transition-colors"
-                        disabled={isProcessing}
-                      >
-                        Retour
-                      </button>
-                      <button
-                        onClick={processPayment}
-                        disabled={isProcessing || (paymentMethod === "card" && (!cardDetails.number || !cardDetails.expiry || !cardDetails.cvv || !cardDetails.name))}
-                        className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                      >
-                        {isProcessing ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Traitement...
-                          </>
-                        ) : (
-                          <>
-                            Payer {selectedTicketTypeForPurchase.price}€
-                            <Lock className="w-4 h-4" />
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    <div className="text-center text-xs text-gray-400">
-                      <div className="flex items-center justify-center gap-2">
-                        <Lock className="w-3 h-3" />
-                        Paiement 100% sécurisé - Vos données sont cryptées
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Étape 3: Confirmation */}
-                {transactionStep === "confirmation" && (
-                  <div className="text-center space-y-4">
-                    <div className="bg-green-500/20 p-4 rounded-lg">
-                      <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Check className="w-8 h-8 text-white" />
-                      </div>
-                      <h3 className="text-xl font-bold text-green-400 mb-2">Paiement réussi !</h3>
-                      <p className="text-gray-300">
-                        Votre ticket <strong>{selectedTicketTypeForPurchase.name}</strong> a été acheté avec succès.
-                      </p>
-                    </div>
-
-                    <div className="bg-gray-800 rounded-lg p-4 text-left">
-                      <h4 className="font-semibold text-white mb-2">Détails de la transaction</h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Référence:</span>
-                          <span className="text-white font-mono">{generateSecureReference()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Montant:</span>
-                          <span className="text-green-400 font-semibold">{selectedTicketTypeForPurchase.price}€</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Date:</span>
-                          <span className="text-white">{new Date().toLocaleDateString('fr-FR')}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Méthode:</span>
-                          <span className="text-white capitalize">{paymentMethod}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={finalizeTransaction}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-semibold transition-colors"
-                    >
-                      Terminer
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
