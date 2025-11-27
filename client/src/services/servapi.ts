@@ -695,6 +695,35 @@ export async function deleteFeedbackLike(feedbackId: number, userId: number): Pr
   await apiRequest<null>(`${API_BASE}/feedback-likes/${feedbackId}/${userId}`, { method: 'DELETE' });
 }
 
+
+export async function getAllFeedbackLikes(filters?: { feedbackId?: number; userId?: number }): Promise<FeedbackLike[]> {
+  const params = buildQueryParams(filters ?? {});
+  const url = params ? `${API_BASE}/feedback-likes?${params}` : `${API_BASE}/feedback-likes`;
+  return apiRequest<FeedbackLike[]>(url, { method: 'GET' });
+}
+
+export async function getFeedbackLike(feedbackId: number, userId: number): Promise<FeedbackLike> {
+  return apiRequest<FeedbackLike>(`${API_BASE}/feedback-likes/${feedbackId}/${userId}`, { method: 'GET' });
+}
+
+export async function updateFeedbackLike(feedbackId: number, userId: number, data: Partial<InsertFeedbackLike>): Promise<FeedbackLike> {
+  return apiRequest<FeedbackLike>(`${API_BASE}/feedback-likes/${feedbackId}/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  });
+}
+
+// ================================
+// HOOK : FEEDBACK LIKES
+// ================================
+export function useFeedbackLikes(filters?: { feedbackId?: number; userId?: number }) {
+  return useApiData(
+    () => getAllFeedbackLikes(filters),
+    [JSON.stringify(filters)]
+  );
+}
+
+
 // ================================
 // FEEDBACK COMMENTS
 // ================================
@@ -724,6 +753,11 @@ export async function deleteFeedbackComment(id: number): Promise<void> {
   if (isNaN(id)) throw new Error('Invalid comment ID');
   await apiRequest<null>(`${API_BASE}/feedback-comments/${id}`, { method: 'DELETE' });
 }
+
+export async function getFeedbackComment(id: number): Promise<FeedbackComment> {
+  return apiRequest<FeedbackComment>(`${API_BASE}/feedback-comments/${id}`, { method: 'GET' });
+}
+
 
 // Hook
 export function useFeedbackComments(feedbackId?: number) {

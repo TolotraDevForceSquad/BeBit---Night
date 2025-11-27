@@ -55,6 +55,7 @@ import ArtistSettingsPage from "./pages/artist/settings-page";
 // import ClubTickets from "./pages/club/club-tickets";
 import ClubProfil from "./pages/club/club-profile-page";
 import MessengerModal from "./pages/club/modal/MessageModal";
+import EventDetail from "./pages/user/events";
 // import ClubScanTicketsPage from "./pages/club/club-scan-tickets";
 
 // Helper pour vérifier la session POS
@@ -124,6 +125,10 @@ function App() {
               <UserLayout>
                 <ExplorerPage />
               </UserLayout>
+            </Route>
+
+            <Route path="/event/:id" component={EventDetail}>
+              <EventDetail />
             </Route>
             
             <Route path="/user/events">

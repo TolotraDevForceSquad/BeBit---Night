@@ -374,6 +374,7 @@ export const promotions = pgTable("promotions", {
   clubId: integer("club_id").references(() => clubs.id),
   title: text("title").notNull(),
   description: text("description"),
+  code: text("code").unique(),
   discountType: text("discount_type", { enum: ["percentage", "fixed"] }).notNull(),
   discountValue: decimal("discount_value", { precision: 5, scale: 2 }).notNull(),
   status: text("status", { enum: ["active", "inactive", "expired"] }).notNull().default("active"),
