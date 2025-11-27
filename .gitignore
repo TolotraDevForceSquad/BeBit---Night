@@ -4,3 +4,12 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+*copy.ts
+*copy.tsx
+*copy.js
+
+node_modules.7z
+
+*.md
+!README.md
