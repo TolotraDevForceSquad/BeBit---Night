@@ -13,3 +13,5 @@ node_modules.7z
 
 *.md
 !README.md
+
+uploads/
