@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Suggestions d’images sans API ni clé</title>
+<style>
+  body { font-family: Arial; padding: 20px; }
+  input { padding: 8px; width: 300px; }
+  #images { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  #images img {
+    width: 120px; height: 120px;
+    object-fit: cover; border-radius: 8px;
+    cursor: pointer; transition: transform 0.2s;
+  }
+  #images img:hover { transform: scale(1.08); }
+</style>
+</head>
+<body>
+  <h2>Recherche d’image (aucune clé)</h2>
+  <input type="text" id="query" placeholder="Ex : pizza, coca cola, burger...">
+  <div id="images"></div>
+
+  <script>
+  const input = document.getElementById('query');
+  const container = document.getElementById('images');
+
+  input.addEventListener('input', async () => {
+    const q = input.value.trim();
+    if (q.length < 2) { container.innerHTML = ''; return; }
+
+    const api = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(q)}&langpair=en|fr`; 
+    // Petit appel anodin pour contourner CORS (sert à forcer cache propre)
+
+    // Utilisons un moteur d’images JSON accessible
+    const url = `https://corsproxy.io/?https://www.bing.com/images/search?q=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    const html = await res.text();
+
+    // Extraire les URL d’images depuis le HTML
+    const matches = [...html.matchAll(/<img[^>]+src="(https[^"]+)"/g)];
+    const urls = matches.map(m => m[1]).filter(u => !u.includes('r.msn.com')).slice(0, 8);
+
+    container.innerHTML = urls.map(src => `<img src="${src}" alt="${q}">`).join('');
+  });
+  </script>
+</body>
+</html>

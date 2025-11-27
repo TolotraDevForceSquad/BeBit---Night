@@ -1,0 +1,162 @@
+🧩 STRUCTURE GLOBALE DE L’APPLICATION
+
+L'application est divisée en 4 profils principaux :
+
+    Administrateur
+
+    Artiste
+
+    Club
+
+    Utilisateur normal
+
+Chaque profil possède son propre tableau de bord et des interfaces spécifiques accessibles après authentification.
+🎨 MAQUETTE VISUELLE (UX/UI)
+
+Je vous propose une disposition modulaire (responsive Web et mobile) :
+1. Page d'accueil (commune)
+
+    Logo + Slogan
+
+    Boutons : Connexion, Inscription
+
+    Défilement : Événements populaires, artistes en tendance
+
+    Footer : Contact, Mentions légales, Version de l’app
+
+2. Tableau de bord - ADMINISTRATEUR
+
+    Menu latéral :
+
+        📊 Dashboard
+
+        🎤 Artistes
+
+        🏢 Clubs
+
+        👥 Utilisateurs
+
+        📅 Tous les Événements
+
+        🚫 Modération des comptes
+
+        ⚙️ Paramètres
+
+    Zone centrale :
+
+        Graphiques de CA, top clubs, top artistes
+
+        Liste de contrôle des événements en attente / à modérer
+
+        Nombre d’utilisateurs / croissance / feedbacks
+
+3. Tableau de bord - ARTISTE
+
+    Menu :
+
+        📅 Mes événements (filtrables)
+
+        🧾 Invitations des clubs
+
+        💬 Feedbacks reçus
+
+        💸 Portefeuille & dons
+
+        ⚙️ Mon profil
+
+    Interface centrale :
+
+        Liste des shows programmés
+
+        Notifications (invitation, paiement, feedback)
+
+        QR code de participation
+
+4. Tableau de bord - CLUB
+
+    Menu :
+
+        📅 Événements organisés
+
+        🎤 Appels à artistes
+
+        👥 Participants & billetterie
+
+        📊 Statistiques club
+
+        💸 Portefeuille
+
+        ⚙️ Mon club
+
+    Interface centrale :
+
+        Scan QR codes (participants/artistes)
+
+        Inviter un artiste avec tarif proposé
+
+        Feedbacks clients / statistiques
+
+5. Tableau de bord - UTILISATEUR
+
+    Menu :
+
+        🔎 Explorer les événements
+
+        📬 Invitations reçues
+
+        📷 Galerie événements passés
+
+        💸 Mon portefeuille
+
+        ⭐ Mes avis / notations
+
+        ⚙️ Mon profil
+
+    Page centrale :
+
+        Création d’événement (formulaire détaillé)
+
+        Consultation des événements à venir, passés, et des retours
+
+        Paiement par monnaie virtuelle + génération QR code
+
+🏗️ ARCHITECTURE TECHNIQUE
+🌐 Front-end
+
+    Web : Angular 15+
+
+    Mobile : Ionic Framework (avec Angular)
+
+    Responsive Design : Bootstrap ou TailwindCSS
+
+🚀 Back-end
+
+    Framework : Spring Boot (Java)
+
+    Sécurité : Spring Security + JWT Authentification
+
+    Services :
+
+        Gestion des utilisateurs & rôles
+
+        Événements / Réservations / Paiements
+
+        Notifications (e-mail / push)
+
+🗃️ Base de données
+
+    PostgreSQL :
+
+        Tables : Utilisateurs, Événements, Clubs, Artistes, Transactions, Tickets, Feedbacks, Tags, Notifications
+
+☁️ Fonctionnalités techniques avancées
+
+    QR code : généré en Java côté back-end (lib ZXing)
+
+    Paiement virtuel : crédit/débit simulé via base de données
+
+    Notifications :
+
+        Par e-mail (SMTP) ou push (Firebase Cloud Messaging)
+
+    API REST entre Angular/Ionic et Spring Boot

@@ -1,0 +1,23 @@
+### Vérifie si le serveur fonctionne
+GET http://localhost:5000/health
+
+### Liste tous les utilisateurs
+GET http://localhost:5000/users
+
+### Crée un nouvel utilisateur
+POST http://localhost:5000/users
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "password": "mypassword"
+}
+
+### Connexion de l'utilisateur
+POST http://localhost:5000/auth/login
+Content-Type: application/json
+
+{
+  "username": "newuser",
+  "password": "mypassword"
+}
