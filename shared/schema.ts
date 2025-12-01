@@ -218,27 +218,64 @@ export const ticketTypes = pgTable("ticketTypes", {
 // Feedback table
 // ======================
 export const feedback = pgTable("feedback", {
+  // Identifiant unique du feedback
   id: serial("id").primaryKey(),
-  reviewerId: integer("reviewer_id").references(() => users.id).notNull(),
+
+  // ID de l'utilisateur qui laisse le feedback (peut être user, artist ou club)
+  reviewerId: integer("reviewer_id")
+    .references(() => users.id)
+    .notNull(),
+
+  // Type du reviewer → permet d’identifier s'il s’agit d’un utilisateur normal, artiste ou club
+  // Valeurs possibles: "user", "artist", "club"
   reviewerType: text("reviewer_type", {
     enum: ["user", "artist", "club"]
   }).notNull(),
-  sourceType: text("source_type", { enum: ["user", "club", "artist", "event"] }).notNull(),
+
+  // Type de l'entité qu’on est en train d’évaluer (la cible du feedback)
+  // Valeurs possibles: "user", "club", "artist", "event"
+  sourceType: text("source_type", {
+    enum: ["user", "club", "artist", "event"]
+  }).notNull(),
+
+  // ID de la source (ex: id du club, id de l’artiste, id de l’événement)
   sourceId: integer("source_id").notNull(),
+
+  // Contexte du feedback (ex: le feedback vient d'un événement ou d’un autre contexte)
+  // Valeurs possibles: "event", "other"
   contextType: text("context_type", {
     enum: ["event", "other"]
   }),
+
+  // ID du contexte (ex: id de l’événement si le contexte est "event")
   contextId: integer("context_id"),
 
+  // Petit titre du feedback (ex: "Super soirée", "Très bon artiste")
   title: text("title").notNull(),
+
+  // Note sur 1 à 5 (ou autre échelle selon ton app)
   rating: integer("rating").notNull(),
+
+  // Commentaire écrit par le reviewer
   comment: text("comment").notNull(),
+
+  // Réponse du propriétaire du feedback (ex: le club répond à un avis)
   reply: text("reply"),
+
+  // Nom affichable de la source (ex: nom du club, nom de l’artiste, nom de l’event)
+  // Sert à éviter une requête supplémentaire pour récupérer le nom
   sourceName: text("source_name").notNull(),
+
+  // Nombre de likes que ce feedback a reçu
   likesCount: integer("likes_count").default(0),
+
+  // Nombre de commentaires (sub-comments)
   commentsCount: integer("comments_count").default(0),
+
+  // Date de création
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
 
 export const feedbackLikes = pgTable("feedback_likes", {
   feedbackId: integer("feedback_id").references(() => feedback.id).notNull(),

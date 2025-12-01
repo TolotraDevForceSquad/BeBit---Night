@@ -559,28 +559,39 @@ export default function UserExplorerPage() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cet avis ? Cette action supprimera également tous les commentaires et likes associés.")) return;
 
     try {
-      // Sauvegarder l'état actuel pour rollback en cas d'erreur
+      // Sauvegarder l'état actuel
       const originalFeedbacks = [...enrichedFeedbacks];
 
       // Mise à jour OPTIMISTE immédiate
       setEnrichedFeedbacks(prev => prev.filter(feedback => feedback.id !== feedbackId));
 
-      // Récupérer tous les commentaires associés à ce feedback
-      const allComments = await getAllFeedbackComments();
-      const commentsToDelete = allComments.filter(comment => comment.feedbackId === feedbackId);
+      // Récupérer les commentaires et likes à supprimer depuis les données locales
+      const feedbackToDelete = originalFeedbacks.find(f => f.id === feedbackId);
 
-      // Récupérer tous les likes associés à ce feedback
-      const allLikes = await getAllFeedbackLikes();
-      const likesToDelete = allLikes.filter(like => like.feedbackId === feedbackId);
+      if (feedbackToDelete) {
+        // Supprimer tous les commentaires associés (s'ils existent)
+        if (feedbackToDelete.comments && feedbackToDelete.comments.length > 0) {
+          for (const comment of feedbackToDelete.comments) {
+            try {
+              await deleteFeedbackComment(comment.id);
+            } catch (commentError) {
+              console.warn("Erreur lors de la suppression d'un commentaire:", commentError);
+            }
+          }
+        }
 
-      // Supprimer d'abord tous les commentaires associés
-      for (const comment of commentsToDelete) {
-        await deleteFeedbackComment(comment.id);
-      }
-
-      // Supprimer ensuite tous les likes associés
-      for (const like of likesToDelete) {
-        await deleteFeedbackLike(feedbackId, like.userId);
+        // Supprimer tous les likes associés
+        // Note: Nous devons obtenir les likes depuis allFeedbackLikes
+        if (allFeedbackLikes) {
+          const likesToDelete = allFeedbackLikes.filter(like => like.feedbackId === feedbackId);
+          for (const like of likesToDelete) {
+            try {
+              await deleteFeedbackLike(feedbackId, like.userId);
+            } catch (likeError) {
+              console.warn("Erreur lors de la suppression d'un like:", likeError);
+            }
+          }
+        }
       }
 
       // Enfin supprimer le feedback
@@ -592,9 +603,12 @@ export default function UserExplorerPage() {
         duration: 3000,
       });
 
-      // Recharger les données
-      refetchFeedbacks();
-      refetchFeedbackComments();
+      // Recharger toutes les données
+      setTimeout(() => {
+        refetchFeedbacks();
+        refetchFeedbackComments();
+        refetchUserLikes();
+      }, 500); // Petit délai pour laisser le temps à la suppression
 
     } catch (error) {
       console.error("Erreur lors de la suppression:", error);
